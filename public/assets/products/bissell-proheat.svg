@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f8fbff"/><stop offset="1" stop-color="#fff5f0"/></linearGradient><filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#14213d" flood-opacity="0.13"/></filter></defs>
+  <rect width="640" height="480" rx="48" fill="url(#bg)"/>
+  <circle cx="130" cy="360" r="120" fill="#f35f36" opacity=".08"/>
+  <g filter="url(#shadow)">
+    <rect x="202" y="196" width="206" height="155" rx="34" fill="#f9fafb" stroke="#1f2937" stroke-width="14"/>
+    <rect x="238" y="155" width="94" height="58" rx="18" fill="#1f2937"/>
+    <path d="M331 184h90c32 0 53 19 58 49l16 94" stroke="#1f2937" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path d="M492 326h65" stroke="#f35f36" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="247" cy="352" r="20" fill="#1f2937"/><circle cx="363" cy="352" r="20" fill="#1f2937"/>
+    <rect x="232" y="235" width="145" height="57" rx="18" fill="#f35f36" opacity=".9"/>
+    <circle cx="266" cy="264" r="14" fill="white" opacity=".9"/><rect x="295" y="255" width="58" height="17" rx="8" fill="white" opacity=".9"/>
+  </g>
+  <text x="55" y="70" fill="#17202a" font-family="Arial, sans-serif" font-size="25" font-weight="800">Bissell ProHeat</text>
+  <text x="55" y="105" fill="#667085" font-family="Arial, sans-serif" font-size="16">Kiralama ürünü</text>
+</svg>

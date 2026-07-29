@@ -1,0 +1,475 @@
+// Prisma schema for Castapos Next.js rebuild — MongoDB (Atlas)
+// See /Users/gozdenurakca/.claude/plans/shimmering-scribbling-steele.md for the design rationale.
+//
+// MongoDB has no foreign keys / CHECK constraints: cross-collection references below
+// (fields typed String @db.ObjectId that aren't part of a Prisma @relation) are plain
+// ids enforced only at the application layer. Data that's always read/written as one
+// unit (product images/options, order line items/totals, cart items, customer addresses)
+// is embedded as a composite type instead of split into join collections.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum SaleMode {
+  BUY
+  RENT
+  BOTH
+}
+
+enum PriceModifierType {
+  FIXED
+  PERCENT
+}
+
+enum ProductOptionType {
+  SELECT
+  RADIO
+  CHECKBOX
+  TEXT
+}
+
+enum StockStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  PREORDER
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PROCESSING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentRecordKind {
+  ORDER
+  INSTALLMENT
+  MEMBERSHIP
+  PAYLINK
+}
+
+enum DeliveryStatus {
+  PENDING
+  DELIVERED
+  RETURNED
+}
+
+enum AgreementPaymentStatus {
+  CURRENT
+  LATE
+  COMPLETED
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  SUPPORT
+  SELLER
+}
+
+// ---------- Composite types (embedded documents) ----------
+
+type ProductImage {
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+}
+
+/// Replaces the option_id==5 hack in catalog/model/catalog/product.php:
+/// each rental duration is now a first-class tier with its own price/discount,
+/// instead of being smuggled through generic product option values.
+type RentalTier {
+  label          String
+  durationMonths Int
+  price          Float
+  originalPrice  Float?
+  sortOrder      Int     @default(0)
+}
+
+type ProductOptionValue {
+  label             String
+  priceModifier     Float             @default(0)
+  priceModifierType PriceModifierType @default(FIXED)
+  colorHex          String?
+  imageUrl          String?
+  sortOrder         Int               @default(0)
+}
+
+type ProductOption {
+  name      String
+  type      ProductOptionType @default(SELECT)
+  required  Boolean           @default(false)
+  sortOrder Int               @default(0)
+  values    ProductOptionValue[]
+}
+
+type Address {
+  firstName    String
+  lastName     String
+  company      String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  postcode     String
+  province     String?
+  country      String  @default("Türkiye")
+  isDefault    Boolean @default(false)
+}
+
+type LineItemOption {
+  optionName    String
+  valueLabel    String
+  priceModifier Float  @default(0)
+}
+
+type CartItem {
+  productId       String           @db.ObjectId
+  saleMode        SaleMode
+  rentalTierLabel String?
+  quantity        Int              @default(1)
+  unitPrice       Float
+  options         LineItemOption[]
+}
+
+type OrderItem {
+  productId       String           @db.ObjectId
+  name            String
+  sku             String?
+  saleMode        SaleMode
+  rentalTierLabel String?
+  quantity        Int
+  unitPrice       Float
+  lineTotal       Float
+  options         LineItemOption[]
+}
+
+/// Replaces oc_order_total (code/title/value/sort_order breakdown rows).
+type OrderTotalLine {
+  code      String
+  title     String
+  value     Float
+  sortOrder Int    @default(0)
+}
+
+// ---------- Catalog ----------
+
+model Category {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  slug        String    @unique
+  name        String
+  description String?
+  parentId    String?   @db.ObjectId
+  sortOrder   Int       @default(0)
+  imageUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  sku           String        @unique
+  slug          String        @unique
+  name          String
+  description   String?
+  images        ProductImage[]
+
+  saleMode        SaleMode
+  buyPrice        Float?
+  buySpecialPrice Float?
+  rentalTiers     RentalTier[]
+  options         ProductOption[]
+
+  categoryIds String[]    @db.ObjectId
+  storeId     String?     @db.ObjectId
+  quantity    Int         @default(0)
+  stockStatus StockStatus @default(IN_STOCK)
+  status      Boolean     @default(true)
+
+  dateAvailable DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryIds])
+  @@index([storeId])
+}
+
+// ---------- Users & Profiles ----------
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  role         UserRole @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  customerProfile CustomerProfile?
+  storeProfile    StoreProfile?
+  supportTickets  SupportTicket[]
+}
+
+model CustomerProfile {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @unique @db.ObjectId
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsletterOptIn    Boolean   @default(false)
+  addresses          Address[]
+  wishlistProductIds String[]  @db.ObjectId
+  isPremiumMember    Boolean   @default(false)
+  premiumSince       DateTime?
+  premiumExpiresAt   DateTime?
+}
+
+model StoreProfile {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  balance     Float    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SupportTicket {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  description String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  messages    TicketMessage[]
+
+  @@index([userId])
+}
+
+type TicketMessage {
+  senderId   String   @db.ObjectId
+  senderName String
+  message    String
+  createdAt  DateTime @default(now())
+}
+
+model Cart {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?    @db.ObjectId
+  guestToken String?    @unique
+  items      CartItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([userId])
+}
+
+// ---------- Orders (cart checkout) ----------
+
+model Order {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber String      @unique
+  userId      String?     @db.ObjectId
+  status      OrderStatus @default(PENDING_PAYMENT)
+  currency    String      @default("TRY")
+
+  subtotal      Float
+  shippingTotal Float @default(0)
+  taxTotal      Float @default(0)
+  total         Float
+
+  // Denormalized address snapshots (NOT a reference to Customer.addresses) —
+  // preserves what was actually shipped/billed even if the address book entry
+  // is later edited or deleted. See catalog/model/checkout/order.php.
+  billingFirstName    String
+  billingLastName     String
+  billingCompany      String?
+  billingAddressLine1 String
+  billingAddressLine2 String?
+  billingCity         String
+  billingPostcode     String
+  billingCountry      String  @default("Türkiye")
+
+  shippingFirstName    String
+  shippingLastName     String
+  shippingCompany      String?
+  shippingAddressLine1 String
+  shippingAddressLine2 String?
+  shippingCity         String
+  shippingPostcode     String
+  shippingCountry      String  @default("Türkiye")
+
+  email String
+  phone String?
+
+  items      OrderItem[]
+  totalLines OrderTotalLine[]
+
+  paymentMethod String?
+  paymentStatus PaymentStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model RewardTransaction {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  orderId     String?  @db.ObjectId
+  points      Int
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------- Installment ("Ödeme Takip") system ----------
+
+/// Replaces takip_kaydi (admin/crm/modules/takip.php).
+model RentalAgreement {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String? @db.ObjectId
+
+  paymentDueDay    Int?
+  category         String?
+  orderReferenceNo String?
+  assetSku         String?
+  assetName        String
+  tenantName       String
+
+  deliveryStatus DeliveryStatus          @default(PENDING)
+  paymentStatus  AgreementPaymentStatus  @default(CURRENT)
+  paymentNote    String?
+  notes          String?
+  serialNumber   String?
+
+  /// TC / tax id — the OTP login key for the customer self-service portal.
+  taxOrNationalId String
+  phone           String
+  email           String?
+  address         String?
+  city            String?
+
+  rentalTermMonths Int?
+  monthlyAmount    Float
+
+  invoiceAmount Float?
+  invoiceDate   DateTime?
+  invoiceNo     String?
+
+  rentalStart DateTime?
+  rentalEnd   DateTime?
+
+  boughtOut    Boolean @default(false)
+  buyoutAmount Float?
+  earlyReturn  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([taxOrNationalId])
+  @@index([phone])
+}
+
+/// Replaces odeme_takvimi. Kept as its own collection (not embedded in
+/// RentalAgreement) so a reminder job can query installments due soon
+/// across every agreement without loading each agreement document.
+model Installment {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  rentalAgreementId String   @db.ObjectId
+  dueDate           DateTime
+  amount            Float
+  paid              Boolean  @default(false)
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([rentalAgreementId])
+  @@index([dueDate])
+}
+
+/// Replaces iyzico_odeme_kayitlari. Shared by BOTH payment flows (cart Order
+/// checkout and installment payment, and now premium-membership purchase)
+/// since all three go through the identical iyzico Checkout-Form-Initialize
+/// -> Retrieve lifecycle — one callback handler, one reconciliation view.
+/// Exactly one of orderId/installmentId/userId must be set (matching
+/// kind); MongoDB has no CHECK constraint, so this invariant is enforced in
+/// application code (the Server Action / Route Handler that creates the
+/// record), not the database.
+model PaymentRecord {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+  kind          PaymentRecordKind
+  orderId       String?           @db.ObjectId
+  installmentId String?           @db.ObjectId
+  userId        String?           @db.ObjectId
+  paymentLinkId String?           @db.ObjectId
+
+  payerName  String
+  payerEmail String?
+  payerPhone String?
+  amount     Float
+  description String?
+
+  iyzicoToken     String?
+  iyzicoPaymentId String?
+  status          PaymentStatus @default(PENDING)
+  errorMessage    String?
+  smsSent         Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([installmentId])
+  @@index([paymentLinkId])
+}
+
+/// Server-side OTP storage for the installment portal's TC/tax-id + SMS
+/// login (replaces musteri.php's session-held code). Never trust a code
+/// the client sends without checking it against this collection + expiresAt.
+model OtpCode {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  code       String
+  expiresAt  DateTime
+  consumed   Boolean  @default(false)
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([identifier])
+}
+
+model PaymentLink {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  token       String   @unique
+  payerName   String
+  payerEmail  String
+  payerPhone  String?
+  amount      Float
+  description String
+  paid        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
