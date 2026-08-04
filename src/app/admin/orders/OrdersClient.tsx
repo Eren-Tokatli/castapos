@@ -47,7 +47,7 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
 
   // Status mapping
   const statuses: { value: OrderStatus; label: string; class: string }[] = [
-    { value: "PENDING_PAYMENT", label: "Ödeme Bekliyor", class: "bg-yellow-50 text-yellow-700 border-yellow-200" },
+    { value: "PENDING_PAYMENT", label: "Ödeme Bekliyor", class: "bg-orange-50 text-orange-700 border-orange-200" },
     { value: "PROCESSING", label: "Hazırlanıyor", class: "bg-blue-50 text-blue-700 border-blue-200" },
     { value: "PAID", label: "Ödendi / Hazır", class: "bg-emerald-50 text-emerald-700 border-emerald-200" },
     { value: "CANCELLED", label: "İptal Edildi", class: "bg-rose-50 text-rose-700 border-rose-200" },

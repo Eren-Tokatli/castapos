@@ -36,6 +36,9 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Castapos",
   description: "Satın al veya kirala.",
+  verification: {
+    google: "PuLzYlrAA28DEYmp6inmyVjNQmD_7zuUY6b3ketthZA",
+  },
 };
 
 export default function RootLayout({

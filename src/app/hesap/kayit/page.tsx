@@ -56,7 +56,7 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    const res = await sendEmailOtp(email);
+    const res = await sendEmailOtp(email, firstName, lastName);
     setLoading(false);
 
     if (!res.success) {

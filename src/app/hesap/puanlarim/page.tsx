@@ -66,7 +66,7 @@ export default async function RewardPointsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-[#fffaf0] border-b border-[#ece2c8] text-[#8a7a52] font-bold uppercase tracking-wide">
+                    <tr className="bg-[#fff1ec] border-b border-[#ffd6c8] text-[#475467] font-bold uppercase tracking-wide">
                       <th className="p-3">İşlem Türü</th>
                       <th className="p-3">Açıklama</th>
                       <th className="p-3">Tarih</th>
@@ -77,7 +77,7 @@ export default async function RewardPointsPage() {
                     {transactions.map((tx) => {
                       const isPositive = tx.points >= 0;
                       return (
-                        <tr key={tx.id} className="hover:bg-[#fffaf0]/60 transition-colors">
+                        <tr key={tx.id} className="hover:bg-[#fff1ec]/60 transition-colors">
                           <td className="p-3">
                             <span className={`status-pill inline-flex items-center gap-1 font-bold ${isPositive ? "text-emerald-600" : "text-rose-600"}`}>
                               {isPositive ? (

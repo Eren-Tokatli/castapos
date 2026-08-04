@@ -2,23 +2,8 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-
-const DISPOSABLE_DOMAINS = [
-  "yopmail.com", "tempmail.com", "dispostable.com", "disposable.com", "mailinator.com",
-  "getairmail.com", "guerrillamail.com", "sharklasers.com", "10minutemail.com",
-  "trashmail.com", "fakeinbox.com", "generator.email", "temp-mail.org", "moakt.com",
-  "fakemailgenerator.com", "crazymailing.com", "tempmailaddress.com", "tempmail.net",
-  "guerrillamailblock.com", "guerrillamail.net", "guerrillamail.org", "guerrillamail.biz",
-  "pokemail.net", "grr.la", "block.com", "disposablemail.com", "mailnesia.com",
-  "dismail.de", "mailcatch.com", "maildrop.cc", "getnada.com", "tempmailo.com"
-];
-
-function isDisposableEmail(email: string): boolean {
-  const parts = email.toLowerCase().trim().split("@");
-  if (parts.length !== 2) return true;
-  const domain = parts[1];
-  return DISPOSABLE_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
-}
+import { validateCustomerIdentity } from "@/lib/account-security";
+import { buildOtpEmail, sendTransactionalEmail } from "@/lib/email";
 
 function isStrongPassword(password: string): boolean {
   return (
@@ -30,17 +15,16 @@ function isStrongPassword(password: string): boolean {
   );
 }
 
-export async function sendEmailOtp(email: string) {
+export async function sendEmailOtp(email: string, firstName?: string, lastName?: string) {
   const cleanEmail = email.toLowerCase().trim();
 
-  // Basic format validation
-  if (!cleanEmail || !cleanEmail.includes("@")) {
-    return { success: false, error: "Geçersiz e-posta adresi." };
-  }
-
-  // Disposable block list check
-  if (isDisposableEmail(cleanEmail)) {
-    return { success: false, error: "Tek kullanımlık veya geçici e-posta adresleriyle kayıt olunamaz." };
+  const identityError = validateCustomerIdentity({
+    email: cleanEmail,
+    firstName,
+    lastName,
+  });
+  if (identityError) {
+    return { success: false, error: identityError };
   }
 
   // Existing user check
@@ -62,11 +46,19 @@ export async function sendEmailOtp(email: string) {
     },
   });
 
-  // Log code to console for development verification
-  console.log(`[EMAIL OTP SEED] Registration code generated for ${cleanEmail} ➔ ${code}`);
+  const otpEmail = buildOtpEmail(code, "register");
+  const emailResult = await sendTransactionalEmail({
+    to: cleanEmail,
+    ...otpEmail,
+  });
+
+  if (!emailResult.sent) {
+    return { success: false, error: "Doğrulama kodu e-postası gönderilemedi. Lütfen biraz sonra tekrar dene." };
+  }
 
   return {
     success: true,
+    deliveryChannel: emailResult.provider === "resend" ? "email" : "console",
     // Debug for development:
     ...(process.env.NODE_ENV !== "production" ? { debugCode: code } : {}),
   };
@@ -88,15 +80,20 @@ export async function registerCustomer(form: {
   if (!email) {
     return { success: false, error: "E-posta gereklidir." };
   }
-  if (isDisposableEmail(email)) {
-    return { success: false, error: "Geçici e-posta adresleriyle kayıt olunamaz." };
+  const identityError = validateCustomerIdentity({
+    email,
+    firstName: form.firstName,
+    lastName: form.lastName,
+  });
+  if (identityError) {
+    return { success: false, error: identityError };
   }
   if (!isStrongPassword(form.password)) {
     return { success: false, error: "Şifreniz belirlenen tüm güvenlik kriterlerini karşılamalıdır." };
   }
 
   // Enforce phone validation
-  let cleanPhone = form.phone ? form.phone.replace(/[^0-9]/g, "") : "";
+  const cleanPhone = form.phone ? form.phone.replace(/[^0-9]/g, "") : "";
   if (form.phone && cleanPhone.length !== 10) {
     return { success: false, error: "Telefon numarası 10 hane olmalıdır (Örn: 5051234567)." };
   }

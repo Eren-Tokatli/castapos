@@ -34,7 +34,7 @@ const MODE_STYLES: Record<string, { label: string; dot: string; className: strin
 const STOCK_STYLES: Record<string, { label: string; dot: string; className: string }> = {
   IN_STOCK: { label: "Stokta Var", dot: "bg-emerald-500", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   OUT_OF_STOCK: { label: "Tükendi", dot: "bg-red-500", className: "bg-red-50 text-red-700 border-red-200" },
-  PREORDER: { label: "Ön Sipariş", dot: "bg-amber-500", className: "bg-amber-50 text-amber-700 border-amber-200" },
+  PREORDER: { label: "Ön Sipariş", dot: "bg-orange-500", className: "bg-orange-50 text-orange-700 border-orange-200" },
 };
 
 export function ProductsClient({ products }: ProductsClientProps) {

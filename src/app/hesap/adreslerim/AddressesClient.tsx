@@ -119,7 +119,7 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
               <div
                 key={idx}
                 className={`bg-white border rounded-2xl p-5 flex flex-col justify-between min-h-[190px] transition ${
-                  addr.isDefault ? "border-[var(--gold)] shadow-[0_0_0_3px_rgba(201,162,75,0.12)]" : "border-slate-200 shadow-xs"
+                  addr.isDefault ? "border-[var(--brand)] shadow-[0_0_0_3px_rgba(243,95,54,0.12)]" : "border-slate-200 shadow-xs"
                 }`}
               >
                 <div>
@@ -128,7 +128,7 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
                       <Home size={14} className="text-slate-400" /> Teslimat Adresi
                     </span>
                     {addr.isDefault && (
-                      <span className="text-[10px] font-bold text-[var(--gold-dark)] bg-[#fffaf0] px-2 py-0.5 rounded-full border border-[#ecdcae] flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-[var(--brand-dark)] bg-[#fff1ec] px-2 py-0.5 rounded-full border border-[#ffd6c8] flex items-center gap-1">
                         <Check size={10} /> Varsayılan
                       </span>
                     )}

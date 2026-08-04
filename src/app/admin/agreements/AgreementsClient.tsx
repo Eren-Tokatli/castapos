@@ -247,7 +247,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                   };
 
                   const deliveryColors: Record<string, string> = {
-                    PENDING: "bg-yellow-50 text-yellow-700 border-yellow-200",
+                    PENDING: "bg-orange-50 text-orange-700 border-orange-200",
                     DELIVERED: "bg-green-50 text-green-700 border-green-200",
                     RETURNED: "bg-gray-100 text-gray-600 border-gray-300",
                   };

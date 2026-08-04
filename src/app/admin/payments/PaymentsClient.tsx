@@ -251,7 +251,7 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                               ? "bg-green-50 text-green-700 border-green-200"
                               : p.status === "FAILED"
                               ? "bg-red-50 text-red-700 border-red-200"
-                              : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                              : "bg-orange-50 text-orange-700 border-orange-200"
                           }`}
                         >
                           {p.status === "SUCCESS" ? "Başarılı" : p.status === "FAILED" ? "Başarısız" : "Beklemede"}
@@ -321,7 +321,7 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                             className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                               link.paid
                                 ? "bg-green-50 text-green-700 border-green-200"
-                                : "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                : "bg-orange-50 text-orange-700 border-orange-200"
                             }`}
                           >
                             {link.paid ? "Ödendi" : "Beklemede"}

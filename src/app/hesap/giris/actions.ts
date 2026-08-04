@@ -2,6 +2,8 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { validateCustomerIdentity } from "@/lib/account-security";
+import { buildOtpEmail, sendTransactionalEmail } from "@/lib/email";
 
 export async function requestMfaCode(email: string, password: string) {
   const cleanEmail = email.toLowerCase().trim();
@@ -13,6 +15,15 @@ export async function requestMfaCode(email: string, password: string) {
 
   if (!user) {
     return { success: false, error: "E-posta veya şifre hatalı." };
+  }
+
+  const identityError = validateCustomerIdentity({
+    email: cleanEmail,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  });
+  if (identityError) {
+    return { success: false, error: "Bu hesap güvenlik nedeniyle girişe kapatılmıştır." };
   }
 
   // Compare password
@@ -34,9 +45,18 @@ export async function requestMfaCode(email: string, password: string) {
     },
   });
 
-  // NetGSM Send SMS
+  const otpEmail = buildOtpEmail(code, "login");
+  const emailResult = await sendTransactionalEmail({
+    to: cleanEmail,
+    ...otpEmail,
+  });
+
+  if (!emailResult.sent) {
+    return { success: false, error: "Doğrulama kodu e-postası gönderilemedi. Lütfen biraz sonra tekrar dene." };
+  }
+
+  // Optional NetGSM Send SMS fallback/extra channel
   const phone = user.phone;
-  let smsSent = false;
 
   if (phone) {
     const netgsmUser = process.env.CASTA_NETGSM_USER;
@@ -70,14 +90,13 @@ export async function requestMfaCode(email: string, password: string) {
         });
         const responseText = await response.text();
         if (responseText.startsWith("00") || responseText.startsWith("01")) {
-          smsSent = true;
+          console.log(`[SMS SENT] MFA code sent to ${phone}`);
         }
       } catch (error) {
         console.error("MFA SMS NetGSM Hatası:", error);
       }
     } else {
       console.log(`[SMS MOCK] NetGSM Config Eksik. MFA Kod: ${code} -> Tel: ${phone}`);
-      smsSent = true;
     }
   } else {
     console.log(`[MFA BYPASS/EMAIL] User has no phone number. MFA Kod: ${code} for email: ${cleanEmail}`);
@@ -87,6 +106,7 @@ export async function requestMfaCode(email: string, password: string) {
     success: true,
     mfaRequired: true,
     maskedPhone: phone ? phone.substring(0, 3) + "****" + phone.substring(phone.length - 4) : null,
+    deliveryChannel: emailResult.provider === "resend" ? "email" : "console",
     // Debug for development:
     ...(process.env.NODE_ENV !== "production" ? { debugCode: code } : {}),
   };

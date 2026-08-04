@@ -22,6 +22,7 @@ function KategoriPageContent() {
   const searchParams = useSearchParams();
   const urlCat = searchParams.get("cat") || "";
   const urlQuery = searchParams.get("q") || "";
+  const urlSort = searchParams.get("sort") || "featured";
 
   const activeCategory = urlCat;
   const searchQuery = urlQuery;
@@ -33,7 +34,9 @@ function KategoriPageContent() {
     buyoutOption: false,
     fastDelivery: false,
   });
-  const [sortBy, setSortBy] = useState("featured");
+  const [sortBy, setSortBy] = useState(
+    sortOptions.some((option) => option.value === urlSort) ? urlSort : "featured"
+  );
 
   // Handle Brand checkbox change (only one selected at a time, like static js)
   const handleBrandChange = (brand: string) => {
@@ -133,11 +136,21 @@ function KategoriPageContent() {
     filteredProducts.sort((a, b) => ratingCount(b) - ratingCount(a));
   }
 
-  const categoryLabel = activeCategory || "Tüm Ürünler";
+  const isNewListing = sortBy === "new" && !activeCategory && !searchQuery;
+  const categoryLabel = isNewListing ? "Yeni Gelenler" : activeCategory || "Tüm Ürünler";
+  const listingTitle = isNewListing
+    ? "Yeni gelen kiralama ürünleri"
+    : activeCategory
+      ? activeCategory + " Kiralama Ürünleri"
+      : "Tüm Kiralama Ürünleri";
   const brands = uniqueBrands();
 
   return (
-    <div className={`kategori-shell ${activeCategory === "Spor Aletleri" ? "sports-category-page" : ""}`}>
+    <div
+      className={`kategori-shell premium-category-page ${activeCategory === "Spor Aletleri" ? "sports-category-page" : ""} ${
+        isNewListing ? "new-category-page" : ""
+      }`}
+    >
       <section className="listing-head slim-listing-head">
         <div className="container listing-head-inner slim">
           <nav className="breadcrumb">
@@ -145,7 +158,7 @@ function KategoriPageContent() {
           </nav>
           <div className={`listing-line ${activeCategory === "Spor Aletleri" ? "count-only" : ""}`}>
             {activeCategory !== "Spor Aletleri" && (
-              <strong>{activeCategory ? activeCategory + " Kiralama Ürünleri" : "Tüm Kiralama Ürünleri"}</strong>
+              <strong>{listingTitle}</strong>
             )}
             <span>{filteredProducts.length} ürün</span>
           </div>

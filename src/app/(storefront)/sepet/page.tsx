@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { getProduct, monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/products-data";
 import { createStorefrontOrder } from "./actions";
 import { IyzicoCheckoutFrame } from "@/components/IyzicoCheckoutFrame";
+
+const VAT_RATE = 0.20;
 
 const cityList = [
   "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir",
@@ -57,6 +59,11 @@ export default function SepetPage() {
     orderNote: ""
   });
 
+  useEffect(() => {
+    document.body.classList.add("page-sepet");
+    return () => document.body.classList.remove("page-sepet");
+  }, []);
+
   const hasSportsItems = cart.some((item) => {
     const p = getProduct(item.id);
     return (
@@ -69,6 +76,7 @@ export default function SepetPage() {
   const discountRate = coupon ? 0.10 : 0;
   const discountAmount = Math.round(monthlyTotal * discountRate);
   const discountedMonthly = monthlyTotal - discountAmount;
+  const vatIncludedAmount = Math.round(discountedMonthly * VAT_RATE / (1 + VAT_RATE));
 
   const showToast = (message: string) => {
     let t = document.querySelector(".site-toast");
@@ -150,6 +158,10 @@ export default function SepetPage() {
         <div>
           <span>Teslimat</span>
           <strong>Ücretsiz</strong>
+        </div>
+        <div className="summary-tax-line">
+          <span>KDV dahil (%20)</span>
+          <strong>{formatPrice(vatIncludedAmount)}</strong>
         </div>
         <div>
           <span>Aylık ödenecek tutar</span>
@@ -366,6 +378,11 @@ export default function SepetPage() {
               <div>
                 <span>Teslimat</span>
                 <b>Ücretsiz</b>
+              </div>
+
+              <div className="summary-tax-line">
+                <span>KDV dahil (%20)</span>
+                <b>{formatPrice(vatIncludedAmount)}</b>
               </div>
               
               <div className="first-payment">

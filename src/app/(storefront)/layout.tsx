@@ -8,6 +8,10 @@ import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LayoutDashboard, Pa
 import { useStore } from "@/context/StoreContext";
 import { useTheme } from "@/context/ThemeContext";
 import { NAV_CATEGORIES, PRODUCTS, getProduct, formatPrice, defaultPeriod, monthlyPrice } from "@/lib/products-data";
+import { CookieConsent } from "@/components/CookieConsent";
+import { CookieScripts } from "@/components/CookieScripts";
+import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
+import { LiveSupportWidget } from "@/components/LiveSupportWidget";
 
 export default function StorefrontLayout({
   children,
@@ -268,6 +272,7 @@ export default function StorefrontLayout({
       <main>{children}</main>
 
       {/* FOOTER */}
+      <div className="footer-transition" aria-hidden="true" />
       <footer className="footer official-footer">
         <div className="container official-footer-grid">
           <section className="footer-contact-column">
@@ -307,7 +312,7 @@ export default function StorefrontLayout({
             </div>
           </section>
           
-          <section>
+          <section className="footer-link-chip-list">
             <h4>Bilgiler</h4>
             <Link href="/bilgi/hakkimizda">Hakkımızda</Link>
             <Link href="/bilgi/sikca-sorulan-sorular">Sıkça Sorulan Sorular</Link>
@@ -317,12 +322,16 @@ export default function StorefrontLayout({
             <Link href="/bilgi/musteri-urun-bilgilendirme">Müşteri Ürün Bilgilendirme</Link>
           </section>
           
-          <section>
+          <section className="footer-link-chip-list">
             <h4>Sözleşmeler</h4>
             <Link href="/sozlesmeler/gizlilik-politikasi">Gizlilik ve Güvenlik Politikası</Link>
             <Link href="/sozlesmeler/mesafeli-sozlesme">Mesafeli Sözleşme</Link>
             <Link href="/sozlesmeler/on-bilgilendirme-formu">Ön Bilgilendirme Formu</Link>
             <Link href="/sozlesmeler/aydinlatma-metni">Aydınlatma Metni</Link>
+            <Link href="/sozlesmeler/cerez-politikasi">Çerez Politikası</Link>
+            <CookiePreferencesButton className="footer-cookie-preferences">
+              Çerezleri Yönet
+            </CookiePreferencesButton>
             <Link href="/sozlesmeler/uyelik-sozlesmesi">Üyelik Sözleşmesi</Link>
             <Link href="/sozlesmeler/tacir-satis-sozlesmesi">Tacir Satış Sözleşmesi</Link>
             <Link href="/sozlesmeler/kullanim-sartlari">Kullanım Şartları</Link>
@@ -553,6 +562,10 @@ export default function StorefrontLayout({
           </div>
         </aside>
       </div>
+
+      <LiveSupportWidget />
+      <CookieConsent />
+      <CookieScripts />
     </div>
   );
 }

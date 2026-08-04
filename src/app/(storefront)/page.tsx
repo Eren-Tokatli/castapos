@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { BadgeCheck, CalendarDays, Clock3, MousePointerClick, Package, Repeat, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { CalendarDays, MousePointerClick, Package, Repeat, Sparkles } from "lucide-react";
 import { PRODUCTS, getProduct } from "@/lib/products-data";
 import { ProductCard } from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
@@ -72,13 +72,6 @@ const EASY_STEPS = [
     label: "Esnek kapanış",
     note: "Satın almadan önce gerçek kullanım deneyimi.",
   }
-];
-
-const HOME_TRUST_POINTS = [
-  { icon: ShieldCheck, label: "Güvenli ödeme", text: "3D Secure korumalı işlem" },
-  { icon: Truck, label: "Planlı teslimat", text: "Adresine uygun randevu" },
-  { icon: Clock3, label: "Esnek süreler", text: "1, 3, 6 ve 9 ay seçenekleri" },
-  { icon: BadgeCheck, label: "Seçilmiş ürünler", text: "Popüler modeller tek yerde" },
 ];
 
 export default function HomePage() {
@@ -164,20 +157,6 @@ export default function HomePage() {
               </>
             )}
           </div>
-        </div>
-      </section>
-
-      <section className="home-trust-section" aria-label="Castapos avantajları">
-        <div className="container home-trust-grid">
-          {HOME_TRUST_POINTS.map((item) => (
-            <article key={item.label} className="home-trust-card">
-              <span><item.icon size={18} /></span>
-              <div>
-                <b>{item.label}</b>
-                <small>{item.text}</small>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
 
@@ -366,7 +345,7 @@ export default function HomePage() {
                   <img src={p.image} alt={p.name} />
                   <div>
                     <h3>{p.name}</h3>
-                    <div className="gold-stars small" style={{ color: "#f4b740" }}>
+                    <div className="gold-stars small">
                       <StarRating rating={item.rating} size={13} />
                     </div>
                   </div>

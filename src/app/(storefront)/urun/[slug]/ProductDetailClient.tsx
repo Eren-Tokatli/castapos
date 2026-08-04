@@ -474,7 +474,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                         <strong>{String(REVIEW_DATA_DEFAULT.average).replace(".", ",")}</strong>
                         <span>{reviewCount} kullanıcı değerlendirmesi</span>
                       </div>
-                      <div className="gold-stars" style={{ color: "#f4b740" }}>
+                      <div className="gold-stars">
                         <StarRating rating={Math.round(REVIEW_DATA_DEFAULT.average)} />
                       </div>
                     </div>
@@ -539,7 +539,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                         <article key={idx}>
                           <div className="review-head">
                             <b>{r.name}</b>
-                            <span className="gold-stars small" style={{ color: "#f4b740" }}>
+                            <span className="gold-stars small">
                               <StarRating rating={r.rating} size={13} />
                             </span>
                           </div>

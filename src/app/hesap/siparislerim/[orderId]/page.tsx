@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 function getStatusLabel(status: string) {
   switch (status) {
     case "PENDING_PAYMENT":
-      return { text: "Ödeme Bekliyor", class: "bg-yellow-50 text-yellow-700 border-yellow-200" };
+      return { text: "Ödeme Bekliyor", class: "bg-orange-50 text-orange-700 border-orange-200" };
     case "PROCESSING":
       return { text: "Hazırlanıyor", class: "bg-blue-50 text-blue-700 border-blue-200" };
     case "PAID":

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { validateCustomerIdentity } from "@/lib/account-security";
 import authConfig from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -25,6 +26,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           include: { customerProfile: true }
         });
         if (!user) return null;
+
+        const identityError = validateCustomerIdentity({
+          email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        });
+        if (identityError) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;

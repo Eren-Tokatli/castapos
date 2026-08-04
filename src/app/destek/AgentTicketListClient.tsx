@@ -170,7 +170,7 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
                     <span
                       className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full ${
                         t.status === "OPEN"
-                          ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                          ? "bg-orange-50 text-orange-700 border border-orange-200"
                           : t.status === "IN_PROGRESS"
                           ? "bg-blue-50 text-blue-700 border border-blue-200"
                           : "bg-emerald-50 text-emerald-700 border border-emerald-200"

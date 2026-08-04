@@ -125,7 +125,7 @@ export function TicketListClient({ initialTickets }: { initialTickets: Ticket[] 
                 key={t.id}
                 onClick={() => setSelectedTicketId(t.id)}
                 className={`w-full text-left p-3 rounded-xl transition flex justify-between items-start gap-2 ${
-                  selectedTicketId === t.id ? "bg-[#fffaf0] border border-[#ecdcae]" : "hover:bg-slate-50"
+                  selectedTicketId === t.id ? "bg-[#fff1ec] border border-[#ffd6c8]" : "hover:bg-slate-50"
                 }`}
               >
                 <div className="min-w-0">
@@ -137,7 +137,7 @@ export function TicketListClient({ initialTickets }: { initialTickets: Ticket[] 
                 <span
                   className={`status-pill text-[9px] font-bold px-2 py-0.5 rounded-full ${
                     t.status === "OPEN"
-                      ? "bg-[#fffaf0] text-[var(--gold-dark)] border border-[#ecdcae]"
+                      ? "bg-[#fff1ec] text-[var(--brand-dark)] border border-[#ffd6c8]"
                       : t.status === "IN_PROGRESS"
                       ? "bg-blue-50 text-blue-700 border border-blue-200"
                       : "bg-emerald-50 text-emerald-700 border border-emerald-200"
@@ -215,7 +215,7 @@ export function TicketListClient({ initialTickets }: { initialTickets: Ticket[] 
           /* Active Chat Thread */
           <div className="premium-surface flex flex-col min-h-[500px]">
             {/* Thread Header */}
-            <div className="p-5 border-b border-[#ece2c8] flex justify-between items-center bg-[#fffaf0] rounded-t-2xl">
+            <div className="p-5 border-b border-[#ffd6c8] flex justify-between items-center bg-[#fff7f4] rounded-t-2xl">
               <div>
                 <h3 className="font-bold text-slate-800 text-base">{selectedTicket.subject}</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -228,7 +228,7 @@ export function TicketListClient({ initialTickets }: { initialTickets: Ticket[] 
                     <CheckCircle2 size={13} /> Çözüldü
                   </span>
                 ) : (
-                  <span className="status-pill flex items-center gap-1 text-xs font-bold text-[var(--gold-dark)] bg-[#fffaf0] px-2.5 py-1 rounded-full border border-[#ecdcae]">
+                  <span className="status-pill flex items-center gap-1 text-xs font-bold text-[var(--brand-dark)] bg-[#fff1ec] px-2.5 py-1 rounded-full border border-[#ffd6c8]">
                     <Clock size={13} /> Yanıt Bekleniyor
                   </span>
                 )}

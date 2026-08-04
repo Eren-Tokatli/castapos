@@ -220,7 +220,7 @@ export default async function AdminDashboard() {
                           ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                           : p.status === "FAILED"
                           ? "bg-red-50 text-red-700 border-red-100"
-                          : "bg-yellow-50 text-yellow-700 border-yellow-100"
+                          : "bg-orange-50 text-orange-700 border-orange-100"
                       }`}
                     >
                       {p.status === "SUCCESS" ? "Başarılı" : p.status === "FAILED" ? "Başarısız" : "Beklemede"}

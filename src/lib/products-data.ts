@@ -537,12 +537,12 @@ export const NAV_CATEGORIES: NavCategory[] = [
     name: "Spor Aletleri",
     href: "/kategori?cat=Spor%20Aletleri",
     groups: [
-      ["Spor Aleti Türleri", [
+      ["Ürün Türleri", [
         { label: "Koşu Bantları", href: "/kategori?cat=Koşu%20Bantları" },
         { label: "Yürüyüş Bantları", href: "/kategori?cat=Yürüyüş%20Bantları" },
         { label: "Kondisyon Bisikletleri", href: "/kategori?cat=Bisiklet&q=Kondisyon%20Bisikletleri" },
         { label: "Eliptik Bisikletler", href: "/kategori?cat=Fitness&q=Eliptik%20Bisikletler" },
-        { label: "Stepper", href: "/kategori?cat=Fitness&q=Stepper" },
+        { label: "Fitness Ekipmanları", href: "/kategori?cat=Fitness" },
         { label: "Tümünü Gör", href: "/kategori?cat=Spor%20Aletleri", all: true }
       ]]
     ]
@@ -552,9 +552,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Koşu%20Bantları",
     groups: [
       ["Ürün Türleri", [
-        { label: "Katlanabilir Koşu Bantları", href: "/kategori?cat=Koşu%20Bantları&q=Katlanabilir" },
-        { label: "Ev Tipi Koşu Bantları", href: "/kategori?cat=Koşu%20Bantları&q=Ev%20Tipi" },
-        { label: "Yüksek Motor Güçlü Modeller", href: "/kategori?cat=Koşu%20Bantları&q=Motor" },
+        { label: "Katlanabilir Modeller", href: "/kategori?cat=Koşu%20Bantları&q=Katlanabilir" },
+        { label: "Ev Tipi Modeller", href: "/kategori?cat=Koşu%20Bantları&q=Ev%20Tipi" },
+        { label: "Performans Modelleri", href: "/kategori?cat=Koşu%20Bantları&q=Motor" },
         { label: "Tümünü Gör", href: "/kategori?cat=Koşu%20Bantları", all: true }
       ]]
     ]
@@ -564,9 +564,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Yürüyüş%20Bantları",
     groups: [
       ["Ürün Türleri", [
-        { label: "Katlanabilir Yürüyüş Bantları", href: "/kategori?cat=Yürüyüş%20Bantları&q=Katlanabilir" },
+        { label: "Katlanabilir Modeller", href: "/kategori?cat=Yürüyüş%20Bantları&q=Katlanabilir" },
         { label: "WalkingPad Modelleri", href: "/kategori?cat=Yürüyüş%20Bantları&q=WalkingPad" },
-        { label: "Portatif Yürüyüş Bantları", href: "/kategori?cat=Yürüyüş%20Bantları&q=Portatif" },
+        { label: "Portatif Modeller", href: "/kategori?cat=Yürüyüş%20Bantları&q=Portatif" },
         { label: "Tümünü Gör", href: "/kategori?cat=Yürüyüş%20Bantları", all: true }
       ]]
     ]
@@ -576,9 +576,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Bisiklet",
     groups: [
       ["Ürün Türleri", [
-        { label: "Kondisyon Bisikletleri", href: "/kategori?cat=Bisiklet&q=Kondisyon" },
-        { label: "Dikey Bisikletler", href: "/kategori?cat=Bisiklet&q=Dikey" },
+        { label: "Elektrikli Bisikletler", href: "/kategori?cat=Bisiklet&q=Elektrikli" },
         { label: "Katlanır Bisikletler", href: "/kategori?cat=Bisiklet&q=Katlanır" },
+        { label: "Kondisyon Bisikletleri", href: "/kategori?cat=Bisiklet&q=Kondisyon" },
+        { label: "Şehir Bisikletleri", href: "/kategori?cat=Bisiklet&q=Şehir" },
         { label: "Tümünü Gör", href: "/kategori?cat=Bisiklet", all: true }
       ]]
     ]
@@ -589,8 +590,8 @@ export const NAV_CATEGORIES: NavCategory[] = [
     groups: [
       ["Ürün Türleri", [
         { label: "Eliptik Bisikletler", href: "/kategori?cat=Fitness&q=Eliptik" },
-        { label: "Stepper", href: "/kategori?cat=Fitness&q=Stepper" },
-        { label: "Akıllı Kondisyon Bisikletleri", href: "/kategori?cat=Fitness&q=Akıllı" },
+        { label: "Stepper Ürünleri", href: "/kategori?cat=Fitness&q=Stepper" },
+        { label: "Akıllı Spor Ekipmanları", href: "/kategori?cat=Fitness&q=Akıllı" },
         { label: "Tümünü Gör", href: "/kategori?cat=Fitness", all: true }
       ]]
     ]
@@ -600,9 +601,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Ev%20Aletleri",
     groups: [[
       "Ürün Türleri", [
-        { label: "Halı ve Koltuk Yıkama", href: "/kategori?cat=Ev%20Aletleri&q=Halı" },
-        { label: "Leke Çıkarma", href: "/kategori?cat=Ev%20Aletleri&q=Leke" },
+        { label: "Halı & Koltuk Yıkama", href: "/kategori?cat=Ev%20Aletleri&q=Halı" },
         { label: "Buharlı Temizlik", href: "/kategori?cat=Ev%20Aletleri&q=Buharlı" },
+        { label: "Leke Çıkarma", href: "/kategori?cat=Ev%20Aletleri&q=Leke" },
+        { label: "Zemin Temizliği", href: "/kategori?cat=Ev%20Aletleri&q=Zemin" },
         { label: "Tümünü Gör", href: "/kategori?cat=Ev%20Aletleri", all: true }
       ]
     ]]
@@ -612,9 +614,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Elektronik",
     groups: [[
       "Ürün Türleri", [
-        { label: "Oyun Teknolojileri", href: "/kategori?cat=Elektronik&q=Oyun" },
-        { label: "Spor Teknolojileri", href: "/kategori?cat=Elektronik&q=Spor" },
-        { label: "Ev ve Ofis Teknolojileri", href: "/kategori?cat=Elektronik&q=Ofis" },
+        { label: "Akıllı Ev Ürünleri", href: "/kategori?cat=Elektronik&q=Akıllı%20Ev" },
+        { label: "Görüntü & Ses Sistemleri", href: "/kategori?cat=Elektronik&q=Görüntü" },
+        { label: "Küçük Elektronikler", href: "/kategori?cat=Elektronik&q=Küçük" },
         { label: "Tümünü Gör", href: "/kategori?cat=Elektronik", all: true }
       ]
     ]]
@@ -624,9 +626,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Güzellik%20Teknolojileri",
     groups: [[
       "Ürün Türleri", [
-        { label: "Saç Bakım Teknolojileri", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Saç" },
         { label: "Cilt Bakım Cihazları", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Cilt" },
-        { label: "Kişisel Bakım Cihazları", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Kişisel" },
+        { label: "Saç Şekillendirme", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Saç" },
+        { label: "Epilasyon Cihazları", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Epilasyon" },
+        { label: "Masaj & Bakım", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Masaj" },
         { label: "Tümünü Gör", href: "/kategori?cat=Güzellik%20Teknolojileri", all: true }
       ]
     ]]
@@ -636,9 +639,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     href: "/kategori?cat=Premium",
     groups: [[
       "Ürün Türleri", [
-        { label: "Koşu Bantları", href: "/kategori?cat=Premium&q=Koşu" },
-        { label: "Yürüyüş Bantları", href: "/kategori?cat=Premium&q=Yürüyüş" },
-        { label: "Ev Aletleri", href: "/kategori?cat=Premium&q=Ev%20Aletleri" },
+        { label: "Premium Spor Aletleri", href: "/kategori?cat=Premium&q=Spor" },
+        { label: "Premium Ev Aletleri", href: "/kategori?cat=Premium&q=Ev%20Aletleri" },
+        { label: "Popüler Premium Modeller", href: "/kategori?cat=Premium&q=Popüler" },
         { label: "Tümünü Gör", href: "/kategori?cat=Premium", all: true }
       ]
     ]]
@@ -649,9 +652,9 @@ export const NAV_CATEGORIES: NavCategory[] = [
     highlight: true,
     groups: [[
       "Ürün Türleri", [
-        { label: "Bisiklet", href: "/kategori?cat=Yaz%20Sezonu&q=Bisiklet" },
-        { label: "Kompakt Spor Ürünleri", href: "/kategori?cat=Yaz%20Sezonu&q=Kompakt" },
-        { label: "Kampanyalı Ürünler", href: "/kategori?cat=Yaz%20Sezonu&q=Kampanyalı" },
+        { label: "Elektrikli Bisiklet & Scooter", href: "/kategori?cat=Yaz%20Sezonu&q=Elektrikli" },
+        { label: "Açık Hava Ürünleri", href: "/kategori?cat=Yaz%20Sezonu&q=Açık%20Hava" },
+        { label: "Tatil & Sezonluk Kullanım", href: "/kategori?cat=Yaz%20Sezonu&q=Sezonluk" },
         { label: "Tümünü Gör", href: "/kategori?cat=Yaz%20Sezonu", all: true }
       ]
     ]]

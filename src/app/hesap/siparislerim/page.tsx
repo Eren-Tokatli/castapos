@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 function getStatusLabel(status: string) {
   switch (status) {
     case "PENDING_PAYMENT":
-      return { text: "Ödeme Bekliyor", class: "bg-yellow-50 text-yellow-700 border-yellow-200" };
+      return { text: "Ödeme Bekliyor", class: "bg-orange-50 text-orange-700 border-orange-200" };
     case "PROCESSING":
       return { text: "Hazırlanıyor", class: "bg-blue-50 text-blue-700 border-blue-200" };
     case "PAID":
@@ -64,7 +64,7 @@ export default async function OrderHistoryPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="bg-[#fffaf0] border-b border-[#ece2c8] text-[#8a7a52] font-bold uppercase tracking-wide text-xs">
+                    <tr className="bg-[#fff1ec] border-b border-[#ffd6c8] text-[#475467] font-bold uppercase tracking-wide text-xs">
                       <th className="p-4">Sipariş No</th>
                       <th className="p-4">Tarih</th>
                       <th className="p-4">Ürünler</th>
@@ -78,7 +78,7 @@ export default async function OrderHistoryPage() {
                       const status = getStatusLabel(order.status);
 
                       return (
-                        <tr key={order.id} className="hover:bg-[#fffaf0]/60 transition-colors">
+                        <tr key={order.id} className="hover:bg-[#fff1ec]/60 transition-colors">
                           <td className="p-4 font-bold text-slate-900">#{order.orderNumber}</td>
                           <td className="p-4">{order.createdAt.toLocaleDateString("tr-TR")}</td>
                           <td className="p-4 truncate max-w-[280px]">
