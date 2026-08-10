@@ -67,7 +67,7 @@ const EASY_STEPS = [
   {
     icon: Repeat,
     title: "Kararını rahat ver",
-    text: "Süreni uzat, ürünü iade et veya satın alma seçeneği varsa deneyim sonrası karar ver.",
+    text: "Süreni uzat veya kiralama bitiminde ürünü kolayca iade et.",
     image: "/assets/products/bissell-proheat.svg",
     label: "Esnek kapanış",
     note: "Satın almadan önce gerçek kullanım deneyimi.",
@@ -82,7 +82,17 @@ export default function HomePage() {
   const slides = [
     { href: "/kategori?cat=Fitness", img: "/assets/banners/banner-cardio-wide.png", alt: "Eliptik bisiklet kiralama fırsatları" },
     { href: "/kategori?cat=Yürüyüş%20Bantları", img: "/assets/banners/banner-walkingpad-premium.png", alt: "Yer kaplamayan spor aleti kiralama fırsatları" },
-    { href: "/kategori?cat=Yaz%20Sezonu", img: "/assets/banners/banner-summer-premium-wide.png", alt: "Yaz sezonu elektrikli bisiklet ve scooter kiralama" },
+    {
+      href: "/kategori?cat=Yaz%20Sezonu",
+      img: "/assets/banners/banner-summer-season-offer.jpg",
+      alt: "Yaz sezonu elektrikli bisiklet ve scooter kiralama",
+      overlay: {
+        badge: "Sezon Fırsatı",
+        title: "Yaz Sezonuna Özel Çözümler",
+        description: "Katlanabilir şehir bisikletleri, kompakt eliptik aletleri ve yaz aylarında formda kalmanızı sağlayacak tüm ekipmanlar.",
+        cta: "Fırsatları İncele",
+      },
+    },
     { href: "/kategori?cat=Ev%20Aletleri", img: "/assets/banners/banner-cleaning-premium-wide.png", alt: "Halı ve koltuk temizliği için kiralama çözümleri" },
   ];
 
@@ -111,52 +121,60 @@ export default function HomePage() {
     <div className="home-shell">
       {/* HERO SLIDER SECTION */}
       <section className="home-hero">
-        <div className="container">
-          <div className="promo-slider">
-            <div className="promo-track">
-              {slides.map((slide, idx) => (
-                <Link
-                  key={idx}
-                  className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
-                  href={slide.href}
-                >
-                  <img src={slide.img} alt={slide.alt} />
-                </Link>
-              ))}
-            </div>
-            
-            {slides.length > 1 && (
-              <>
-                <button
-                  className="slider-arrow prev"
-                  type="button"
-                  onClick={() => setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length)}
-                  aria-label="Önceki afiş"
-                >
-                  ‹
-                </button>
-                <button
-                  className="slider-arrow next"
-                  type="button"
-                  onClick={() => setActiveSlide((prev) => (prev + 1) % slides.length)}
-                  aria-label="Sonraki afiş"
-                >
-                  ›
-                </button>
-
-                <div className="slider-dots">
-                  {slides.map((_, idx) => (
-                    <button
-                      key={idx}
-                      className={idx === activeSlide ? "active" : ""}
-                      onClick={() => setActiveSlide(idx)}
-                      aria-label={`${idx + 1}. afiş`}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+        <div className="promo-slider">
+          <div className="promo-track">
+            {slides.map((slide, idx) => (
+              <Link
+                key={idx}
+                className={`promo-slide ${slide.overlay ? "promo-slide-overlay" : ""} ${idx === activeSlide ? "active" : ""}`}
+                href={slide.href}
+              >
+                <img src={slide.img} alt={slide.alt} />
+                {slide.overlay && (
+                  <div className="promo-slide-panel">
+                    <span className="promo-slide-badge">{slide.overlay.badge}</span>
+                    <h2>{slide.overlay.title}</h2>
+                    <p>{slide.overlay.description}</p>
+                    <span className="promo-slide-btn">
+                      {slide.overlay.cta} →
+                    </span>
+                  </div>
+                )}
+              </Link>
+            ))}
           </div>
+
+          {slides.length > 1 && (
+            <>
+              <button
+                className="slider-arrow prev"
+                type="button"
+                onClick={() => setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                aria-label="Önceki afiş"
+              >
+                ‹
+              </button>
+              <button
+                className="slider-arrow next"
+                type="button"
+                onClick={() => setActiveSlide((prev) => (prev + 1) % slides.length)}
+                aria-label="Sonraki afiş"
+              >
+                ›
+              </button>
+
+              <div className="slider-dots">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={idx === activeSlide ? "active" : ""}
+                    onClick={() => setActiveSlide(idx)}
+                    aria-label={`${idx + 1}. afiş`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
 

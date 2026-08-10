@@ -28,8 +28,8 @@ const faqGroups = [
         a: "Ürün detay sayfasında uygun olan 1, 3, 6 ve 9 ay seçenekleri gösterilir. Seçtiğin süreye göre aylık ve günlük karşılık otomatik hesaplanır.",
       },
       {
-        q: "Kiraladığım ürünü satın alabilir miyim?",
-        a: "Satın alma seçeneği sunulan ürünlerde ürün detayında satın alma bilgisi ayrıca gösterilir. Her ürün için bu seçenek değişebilir.",
+        q: "Ürünleri satın alabilir miyim?",
+        a: "Hayır, Castapos üzerindeki tüm ürünler yalnızca kiralama modeliyle sunulur; satın alma seçeneği bulunmaz.",
       },
     ],
   },

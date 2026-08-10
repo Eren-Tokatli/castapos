@@ -4,10 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LayoutDashboard, Package, LifeBuoy, MapPin, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { useTheme } from "@/context/ThemeContext";
 import { NAV_CATEGORIES, PRODUCTS, getProduct, formatPrice, defaultPeriod, monthlyPrice } from "@/lib/products-data";
+import { ACCOUNT_MENU_LINKS } from "@/lib/account-menu";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CookieScripts } from "@/components/CookieScripts";
 import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
@@ -31,7 +32,7 @@ export default function StorefrontLayout({
     } else if (session?.user?.role === "SUPPORT") {
       accountLinkHref = "/destek";
     } else {
-      accountLinkHref = "/hesap/panel";
+      accountLinkHref = "/hesap/kullanici-bilgilerim";
     }
   }
   const { theme, toggleTheme } = useTheme();
@@ -43,6 +44,10 @@ export default function StorefrontLayout({
     monthlyTotal,
     isCartOpen,
     setIsCartOpen,
+    favorites,
+    toggleFavorite,
+    isFavoritesOpen,
+    setIsFavoritesOpen,
   } = useStore();
   const drawerSuggestedProducts = PRODUCTS.slice(0, 3);
 
@@ -149,10 +154,15 @@ export default function StorefrontLayout({
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <Link href="/hesap/favorilerim" className="action-link fav-action">
+            <button
+              type="button"
+              onClick={() => setIsFavoritesOpen(true)}
+              className={`action-link fav-action ${favorites.length > 0 ? "has-items" : ""}`}
+              style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+            >
               <span className="action-icon"><Heart size={22} /></span>
               <small>Favorilerim</small>
-            </Link>
+            </button>
 
             <button
               onClick={() => setIsCartOpen(true)}
@@ -193,10 +203,9 @@ export default function StorefrontLayout({
                     )}
                     {session.user.role === "CUSTOMER" && (
                       <div className="account-menu-links">
-                        <Link href="/hesap/panel"><LayoutDashboard size={15} /> Hesap Paneli</Link>
-                        <Link href="/hesap/siparislerim"><Package size={15} /> Siparişlerim</Link>
-                        <Link href="/hesap/destek"><LifeBuoy size={15} /> Destek Taleplerim</Link>
-                        <Link href="/hesap/adreslerim"><MapPin size={15} /> Adreslerim</Link>
+                        {ACCOUNT_MENU_LINKS.map(({ href, icon: Icon, label }) => (
+                          <Link key={href} href={href}><Icon size={15} /> {label}</Link>
+                        ))}
                       </div>
                     )}
                     <button
@@ -466,11 +475,8 @@ export default function StorefrontLayout({
               <div className="drawer-items">
                 {cart.map((item, idx) => {
                   const p = getProduct(item.id);
-                  const isBuy = item.mode === "buy";
                   const period = Number(item.period || defaultPeriod(p));
-                  const total = isBuy
-                    ? (p.buyPrice || p.price) * item.qty
-                    : monthlyPrice(p, period) * item.qty * period;
+                  const total = monthlyPrice(p, period) * item.qty * period;
 
                   return (
                     <article key={idx} className="drawer-item">
@@ -478,14 +484,12 @@ export default function StorefrontLayout({
                       <div>
                         <b>{p.name}</b>
                         <span className="drawer-period-meta">
-                          {isBuy
-                            ? `Satın alma · ${item.qty} adet`
-                            : `${period} aylık kiralama · ${item.qty} adet`}
+                          {`${period} aylık kiralama · ${item.qty} adet`}
                         </span>
-                        {!isBuy && <small className="drawer-total-label">Toplam ödeme</small>}
+                        <small className="drawer-total-label">Toplam ödeme</small>
                         <strong>{formatPrice(total)}</strong>
                       </div>
-                      
+
                       <button
                         className="remove-line"
                         type="button"
@@ -505,7 +509,7 @@ export default function StorefrontLayout({
                           </button>
                         </div>
                         <Link
-                          href={`/urun/${p.id}${!isBuy ? `?period=${period}` : ""}`}
+                          href={`/urun/${p.id}?period=${period}`}
                           className="text-link"
                           onClick={() => setIsCartOpen(false)}
                         >
@@ -559,6 +563,79 @@ export default function StorefrontLayout({
                 </Link>
               </>
             )}
+          </div>
+        </aside>
+      </div>
+
+      {/* SIDE FAVORITES DRAWER */}
+      <div className={`cart-backdrop ${isFavoritesOpen ? "open" : ""}`} onClick={() => setIsFavoritesOpen(false)}>
+        <aside className="side-cart" onClick={(e) => e.stopPropagation()}>
+          <div className="side-cart-head">
+            <strong>Favorilerim</strong>
+            <button type="button" onClick={() => setIsFavoritesOpen(false)}>
+              ×
+            </button>
+          </div>
+
+          <div className="side-cart-body">
+            {favorites.length === 0 ? (
+              <div className="empty-mini-cart premium-empty-mini-cart">
+                <div className="empty-cart-orb">
+                  <Heart size={30} />
+                </div>
+                <span className="empty-cart-kicker">Favori listen</span>
+                <h3>Favori listen boş</h3>
+                <p>Ürün kartlarındaki kalp simgesini kullanarak favori listeni oluşturabilirsin.</p>
+              </div>
+            ) : (
+              <div className="drawer-items">
+                {favorites.map((entry) => {
+                  const p = getProduct(entry.id);
+                  const period = entry.period;
+                  const monthly = monthlyPrice(p, period);
+
+                  return (
+                    <article key={entry.id} className="drawer-item">
+                      <img src={p.image} alt={p.name} />
+                      <div>
+                        <b>{p.name}</b>
+                        <span className="drawer-period-meta">{period} aylık plan</span>
+                        <small className="drawer-total-label">Aylık ödeme</small>
+                        <strong>{formatPrice(monthly)}</strong>
+                      </div>
+
+                      <button
+                        className="remove-line"
+                        type="button"
+                        onClick={() => toggleFavorite(entry.id, period)}
+                      >
+                        Sil
+                      </button>
+
+                      <div className="drawer-item-actions" style={{ display: "flex", gap: "10px", alignItems: "center", width: "100%", gridColumn: "2 / -1" }}>
+                        <Link
+                          href={`/urun/${p.id}?period=${period}`}
+                          className="text-link"
+                          onClick={() => setIsFavoritesOpen(false)}
+                        >
+                          Ürüne git →
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="side-cart-footer">
+            <Link
+              className="btn btn-primary full"
+              href="/kategori"
+              onClick={() => setIsFavoritesOpen(false)}
+            >
+              Ürünleri Keşfet
+            </Link>
           </div>
         </aside>
       </div>

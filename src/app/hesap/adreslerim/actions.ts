@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function addAddress(form: {
+  label?: string;
   firstName: string;
   lastName: string;
   company?: string;
@@ -14,6 +15,8 @@ export async function addAddress(form: {
   postcode: string;
   province?: string;
   country: string;
+  deliveryPhone?: string;
+  directions?: string;
   isDefault: boolean;
 }) {
   const session = await auth();
@@ -24,7 +27,14 @@ export async function addAddress(form: {
   }
 
   // Basic validation
-  if (!form.firstName.trim() || !form.lastName.trim() || !form.addressLine1.trim() || !form.city.trim() || !form.postcode.trim()) {
+  if (
+    !form.firstName.trim() ||
+    !form.lastName.trim() ||
+    !form.addressLine1.trim() ||
+    !form.province?.trim() ||
+    !form.city.trim() ||
+    !form.postcode.trim()
+  ) {
     return { success: false, error: "Gerekli alanları doldurun." };
   }
 
@@ -41,6 +51,7 @@ export async function addAddress(form: {
 
   // Create new address object matching the Address composite type
   const newAddress = {
+    label: form.label?.trim() || null,
     firstName: form.firstName.trim(),
     lastName: form.lastName.trim(),
     company: form.company?.trim() || null,
@@ -50,6 +61,8 @@ export async function addAddress(form: {
     postcode: form.postcode.trim(),
     province: form.province?.trim() || null,
     country: form.country || "Türkiye",
+    deliveryPhone: form.deliveryPhone?.trim() || null,
+    directions: form.directions?.trim() || null,
     isDefault: form.isDefault,
   };
 

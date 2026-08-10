@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Search, Eye, Filter, Calendar, Mail, User } from "lucide-react";
 import { updateOrderStatus } from "./actions";
 import { OrderStatus } from "@/generated/prisma";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { useAdminToast } from "../_components/ToastProvider";
 
 interface OrderItem {
   productId: string;
@@ -40,10 +42,12 @@ interface Order {
 }
 
 export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
+  const toast = useAdminToast();
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"ALL" | OrderStatus>("ALL");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   // Status mapping
   const statuses: { value: OrderStatus; label: string; class: string }[] = [
@@ -62,8 +66,9 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: nextStatus });
       }
+      toast("Sipariş durumu güncellendi.");
     } else {
-      alert(res.error || "Durum güncellenirken hata oluştu.");
+      setAlertMessage(res.error || "Durum güncellenirken hata oluştu.");
     }
   };
 
@@ -276,6 +281,14 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!alertMessage}
+        title="İşlem Başarısız"
+        message={alertMessage || ""}
+        danger={false}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

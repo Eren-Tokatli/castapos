@@ -5,21 +5,21 @@ import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
   title: "Mesafeli Sözleşme | Castapos",
-  description: "Castapos mesafeli kiralama ve satış süreçlerine ilişkin sözleşme bilgilendirmesi.",
+  description: "Castapos mesafeli kiralama süreçlerine ilişkin sözleşme bilgilendirmesi.",
 };
 
 const sections = [
   {
     title: "Taraflar ve konu",
-    body: "Bu metin, Castapos platformu üzerinden kullanıcı ile Castapos arasında elektronik ortamda kurulan ürün kiralama veya uygun ürünlerde satın alma süreçlerine ilişkin temel hükümleri açıklar.",
+    body: "Bu metin, Castapos platformu üzerinden kullanıcı ile Castapos arasında elektronik ortamda kurulan ürün kiralama süreçlerine ilişkin temel hükümleri açıklar.",
   },
   {
     title: "Ürün ve fiyat bilgisi",
-    body: "Ürün adı, marka, teknik özellikler, kiralama süresi, aylık ödeme tutarı, varsa satın alma bedeli, teslimat ve kampanya bilgileri sipariş onayı öncesinde kullanıcıya gösterilir.",
+    body: "Ürün adı, marka, teknik özellikler, kiralama süresi, aylık ödeme tutarı, teslimat ve kampanya bilgileri sipariş onayı öncesinde kullanıcıya gösterilir.",
   },
   {
     title: "Siparişin kurulması",
-    body: "Kullanıcı sepet ve ödeme adımlarındaki bilgileri onayladığında kiralama planı veya satın alma siparişi oluşturulur. Siparişin tamamlanması ödeme ve operasyon uygunluğuna bağlıdır.",
+    body: "Kullanıcı sepet ve ödeme adımlarındaki bilgileri onayladığında kiralama planı oluşturulur. Siparişin tamamlanması ödeme ve operasyon uygunluğuna bağlıdır.",
   },
   {
     title: "Teslimat ve ifa",
@@ -44,7 +44,7 @@ export default function MesafeliSozlesmePage() {
             </nav>
             <span className="section-kicker">Sözleşmeler</span>
             <h1>Mesafeli Sözleşme</h1>
-            <p>Elektronik ortamda oluşturulan kiralama ve uygun ürünlerde satın alma süreçleri için ana hükümler.</p>
+            <p>Elektronik ortamda oluşturulan kiralama süreçleri için ana hükümler.</p>
           </div>
         </div>
       </section>

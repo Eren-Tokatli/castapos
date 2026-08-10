@@ -8,6 +8,8 @@ import {
   deleteAgreement,
   toggleInstallmentPaid,
 } from "./actions";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { useAdminToast } from "../_components/ToastProvider";
 
 interface Installment {
   id: string;
@@ -44,6 +46,7 @@ interface AgreementsClientProps {
 }
 
 export function AgreementsClient({ agreements }: AgreementsClientProps) {
+  const toast = useAdminToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeModal, setActiveModal] = useState<"create" | "edit" | "installments" | null>(null);
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
@@ -84,6 +87,9 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
     notes: "",
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<Agreement | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
   const filteredAgreements = agreements.filter((a) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -123,6 +129,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
         deliveryStatus: "PENDING",
         paymentDueDay: "5",
       });
+      toast("Sözleşme oluşturuldu.");
     }
   };
 
@@ -158,15 +165,19 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
     } else {
       setLoading(false);
       setActiveModal(null);
+      toast("Sözleşme güncellendi.");
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bu sözleşmeyi ve tüm taksitlerini silmek istediğinize emin misiniz?")) return;
-    const res = await deleteAgreement(id);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const res = await deleteAgreement(deleteTarget.id);
+    setDeleteTarget(null);
     if (!res.success) {
-      alert(res.error || "Silme işlemi başarısız.");
+      setAlertMessage(res.error || "Silme işlemi başarısız.");
+      return;
     }
+    toast("Sözleşme silindi.");
   };
 
   const handleInstallmentsClick = (agreement: Agreement) => {
@@ -181,12 +192,13 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
       const updatedInsts = selectedAgreement.installments?.map((inst) =>
         inst.id === instId ? { ...inst, paid: !currentPaid } : inst
       );
+      toast(!currentPaid ? "Taksit ödendi olarak işaretlendi." : "Taksit ödenmedi olarak işaretlendi.");
       setSelectedAgreement({
         ...selectedAgreement,
         installments: updatedInsts,
       });
     } else {
-      alert("Durum güncellenemedi.");
+      setAlertMessage("Durum güncellenemedi.");
     }
   };
 
@@ -313,7 +325,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                           <Pencil size={13} /> Düzenle
                         </button>
                         <button
-                          onClick={() => handleDelete(a.id)}
+                          onClick={() => setDeleteTarget(a)}
                           className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition"
                         >
                           Sil
@@ -783,6 +795,23 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Sözleşmeyi Sil"
+        message={deleteTarget ? `${deleteTarget.tenantName} adına kayıtlı "${deleteTarget.assetName}" sözleşmesini ve tüm taksitlerini silmek istediğine emin misin? Bu işlem geri alınamaz.` : ""}
+        confirmLabel="Evet, Sil"
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!alertMessage}
+        title="İşlem Başarısız"
+        message={alertMessage || ""}
+        danger={false}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

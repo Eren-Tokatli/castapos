@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { toggleInstallmentPaid } from "../agreements/actions";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { useAdminToast } from "../_components/ToastProvider";
 
 interface Installment {
   id: string;
@@ -20,9 +22,11 @@ interface InstallmentsClientProps {
 }
 
 export function InstallmentsClient({ initialInstallments }: InstallmentsClientProps) {
+  const toast = useAdminToast();
   const [installments, setInstallments] = useState<Installment[]>(initialInstallments);
   const [filter, setFilter] = useState<"all" | "overdue" | "week" | "month">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const handleTogglePaid = async (id: string, currentPaid: boolean) => {
     const res = await toggleInstallmentPaid(id, !currentPaid);
@@ -31,8 +35,9 @@ export function InstallmentsClient({ initialInstallments }: InstallmentsClientPr
       setInstallments((prev) =>
         prev.map((i) => (i.id === id ? { ...i, paid: !currentPaid } : i))
       );
+      toast(!currentPaid ? "Ödeme alındı olarak işaretlendi." : "Ödeme durumu geri alındı.");
     } else {
-      alert("Hata oluştu, güncellenemedi.");
+      setAlertMessage("Hata oluştu, güncellenemedi.");
     }
   };
 
@@ -229,6 +234,14 @@ export function InstallmentsClient({ initialInstallments }: InstallmentsClientPr
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!alertMessage}
+        title="İşlem Başarısız"
+        message={alertMessage || ""}
+        danger={false}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

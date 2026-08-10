@@ -120,16 +120,19 @@ type ProductOption {
 }
 
 type Address {
-  firstName    String
-  lastName     String
-  company      String?
-  addressLine1 String
-  addressLine2 String?
-  city         String
-  postcode     String
-  province     String?
-  country      String  @default("Türkiye")
-  isDefault    Boolean @default(false)
+  label         String? // e.g. "Ev", "İş" — lets customers tell multiple addresses apart
+  firstName     String
+  lastName      String
+  company       String?
+  addressLine1  String
+  addressLine2  String?
+  city          String
+  postcode      String
+  province      String?
+  country       String  @default("Türkiye")
+  deliveryPhone String? // number carriers should call for this address specifically
+  directions    String? // optional free-text "adres tarifi"
+  isDefault     Boolean @default(false)
 }
 
 type LineItemOption {
@@ -225,6 +228,7 @@ model User {
   customerProfile CustomerProfile?
   storeProfile    StoreProfile?
   supportTickets  SupportTicket[]
+  reviews         Review[]
 }
 
 model CustomerProfile {
@@ -262,6 +266,15 @@ model SupportTicket {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   messages    TicketMessage[]
+
+  // Optional order/product context — set when the ticket was opened from
+  // "Yeni Soru ve Talep" → sipariş → ürün → sebep akışı.
+  orderId      String? @db.ObjectId
+  orderNumber  String?
+  productId    String? @db.ObjectId
+  productName  String?
+  reasonCode   String?
+  reasonLabel  String?
 
   @@index([userId])
 }
@@ -332,6 +345,22 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Review {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId    String   @db.ObjectId
+  productName  String
+  productImage String?
+  orderId      String?  @db.ObjectId
+  rating       Int
+  comment      String
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([productId])
 }
 
 model RewardTransaction {

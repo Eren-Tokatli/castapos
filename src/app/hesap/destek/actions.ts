@@ -4,7 +4,18 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function createTicket(subject: string, description: string) {
+export async function createTicket(
+  subject: string,
+  description: string,
+  context?: {
+    orderId?: string;
+    orderNumber?: string;
+    productId?: string;
+    productName?: string;
+    reasonCode?: string;
+    reasonLabel?: string;
+  }
+) {
   const session = await auth();
   const userId = session?.user?.id;
 
@@ -16,12 +27,30 @@ export async function createTicket(subject: string, description: string) {
     return { success: false, error: "Konu ve açıklama gereklidir." };
   }
 
+  // Verify the referenced order actually belongs to this user before trusting
+  // the client-supplied context.
+  let verifiedOrderId: string | undefined;
+  let verifiedOrderNumber: string | undefined;
+  if (context?.orderId) {
+    const order = await prisma.order.findUnique({ where: { id: context.orderId } });
+    if (order && order.userId === userId) {
+      verifiedOrderId = order.id;
+      verifiedOrderNumber = order.orderNumber;
+    }
+  }
+
   await prisma.supportTicket.create({
     data: {
       userId,
       subject: subject.trim(),
       description: description.trim(),
       status: "OPEN",
+      orderId: verifiedOrderId,
+      orderNumber: verifiedOrderNumber,
+      productId: context?.productId,
+      productName: context?.productName,
+      reasonCode: context?.reasonCode,
+      reasonLabel: context?.reasonLabel,
     },
   });
 

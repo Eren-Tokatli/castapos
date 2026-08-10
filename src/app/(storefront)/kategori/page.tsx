@@ -31,7 +31,6 @@ function KategoriPageContent() {
   const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
   const [advantages, setAdvantages] = useState<RentalAdvantages>({
     campaigned: false,
-    buyoutOption: false,
     fastDelivery: false,
   });
   const [sortBy, setSortBy] = useState(
@@ -113,9 +112,6 @@ function KategoriPageContent() {
   // 6. Filter by advantages
   if (advantages.campaigned) {
     filteredProducts = filteredProducts.filter((p) => p.discount !== null);
-  }
-  if (advantages.buyoutOption) {
-    filteredProducts = filteredProducts.filter((p) => p.buyPrice !== null);
   }
   if (advantages.fastDelivery) {
     // Simulated advantage: premium items are marked as fast delivery

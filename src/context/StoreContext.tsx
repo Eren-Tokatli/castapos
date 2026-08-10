@@ -6,7 +6,6 @@ import { PRODUCTS, getProduct, defaultPeriod, monthlyPrice } from "@/lib/product
 export interface CartItem {
   id: string;
   period: number;
-  mode: "rent" | "buy";
   qty: number;
 }
 
@@ -17,7 +16,7 @@ export interface FavoriteItem {
 
 interface StoreContextType {
   cart: CartItem[];
-  addToCart: (id: string, period: number, mode?: "rent" | "buy") => void;
+  addToCart: (id: string, period: number) => void;
   removeFromCart: (index: number) => void;
   updateCartItemQty: (index: number, delta: number) => void;
   cartCount: number;
@@ -36,6 +35,9 @@ interface StoreContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
 
+  isFavoritesOpen: boolean;
+  setIsFavoritesOpen: (open: boolean) => void;
+
   coupon: { code: string } | null;
   applyCoupon: (code: string) => boolean;
   removeCoupon: () => void;
@@ -48,6 +50,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [compareList, setCompareList] = useState<string[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [coupon, setCoupon] = useState<{ code: string } | null>(null);
 
@@ -80,14 +83,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const addToCart = (id: string, period: number, mode: "rent" | "buy" = "rent") => {
-    const p = getProduct(id);
-    const selectedMode: "rent" | "buy" = mode === "buy" && p.buyPrice ? "buy" : "rent";
-    const per = selectedMode === "buy" ? 0 : period;
-
+  const addToCart = (id: string, period: number) => {
     setCart((prev) => {
       const existingIndex = prev.findIndex(
-        (x) => x.id === id && x.mode === selectedMode && x.period === per
+        (x) => x.id === id && x.period === period
       );
 
       let updated;
@@ -96,7 +95,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           idx === existingIndex ? { ...item, qty: item.qty + 1 } : item
         );
       } else {
-        updated = [...prev, { id, period: per, mode: selectedMode, qty: 1 }];
+        updated = [...prev, { id, period, qty: 1 }];
       }
       localStorage.setItem("castaposCart", JSON.stringify(updated));
       return updated;
@@ -221,8 +220,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const monthlyTotal = cart.reduce((sum, item) => {
     const p = getProduct(item.id);
-    const base = item.mode === "buy" ? (p.buyPrice || p.price) : monthlyPrice(p, item.period);
-    return sum + base * item.qty;
+    return sum + monthlyPrice(p, item.period) * item.qty;
   }, 0);
 
   return (
@@ -244,6 +242,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setIsCompareOpen,
         isCartOpen,
         setIsCartOpen,
+        isFavoritesOpen,
+        setIsFavoritesOpen,
         coupon,
         applyCoupon,
         removeCoupon

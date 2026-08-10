@@ -95,7 +95,7 @@ export function ProductCard({ p }: { p: ProductStatic }) {
         <button
           className="card-wide-btn standalone"
           type="button"
-          onClick={() => addToCart(p.id, selectedPeriod, "rent")}
+          onClick={() => addToCart(p.id, selectedPeriod)}
         >
           Hemen kirala
         </button>

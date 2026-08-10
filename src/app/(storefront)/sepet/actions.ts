@@ -7,7 +7,6 @@ interface CartItem {
   id: string;
   qty: number;
   period?: number;
-  mode: "buy" | "rent";
 }
 
 export async function createStorefrontOrder(
@@ -40,18 +39,10 @@ export async function createStorefrontOrder(
           throw new Error(`Ürün bulunamadı: ${item.id}`);
         }
 
-        const isBuy = item.mode === "buy";
-        let unitPrice = 0;
-        let rentalTierLabel = null;
-
-        if (isBuy) {
-          unitPrice = product.buyPrice || 0;
-        } else {
-          const duration = item.period || 1;
-          const tier = product.rentalTiers.find((t) => t.durationMonths === duration);
-          unitPrice = tier ? tier.price : (product.rentalTiers[0]?.price || 0);
-          rentalTierLabel = tier ? tier.label : `${duration} Ay`;
-        }
+        const duration = item.period || 1;
+        const tier = product.rentalTiers.find((t) => t.durationMonths === duration);
+        const unitPrice = tier ? tier.price : (product.rentalTiers[0]?.price || 0);
+        const rentalTierLabel = tier ? tier.label : `${duration} Ay`;
 
         const lineTotal = unitPrice * item.qty;
 
@@ -59,7 +50,7 @@ export async function createStorefrontOrder(
           productId: product.id,
           name: product.name,
           sku: product.sku,
-          saleMode: isBuy ? "BUY" : "RENT" as any,
+          saleMode: "RENT" as any,
           rentalTierLabel,
           quantity: item.qty,
           unitPrice,

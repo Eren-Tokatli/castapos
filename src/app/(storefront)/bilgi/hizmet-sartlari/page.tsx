@@ -19,7 +19,7 @@ const sections = [
   },
   {
     title: "Kiralama planı ve ödeme",
-    body: "Ürün detayında gösterilen kiralama süresi, aylık ödeme tutarı ve varsa satın alma seçeneği kullanıcıya karar aşamasında sunulur. Sepette yer alan ödeme özeti, sipariş onayı öncesinde kontrol edilmelidir.",
+    body: "Ürün detayında gösterilen kiralama süresi ve aylık ödeme tutarı kullanıcıya karar aşamasında sunulur. Sepette yer alan ödeme özeti, sipariş onayı öncesinde kontrol edilmelidir.",
   },
   {
     title: "Teslimat ve ürün kullanımı",

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Search, Plus, Copy, Check, Trash2, Link as LinkIcon, FileText, X } from "lucide-react";
 import { createPaymentLink, deletePaymentLink } from "./actions";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { useAdminToast } from "../_components/ToastProvider";
 
 interface PaymentRecord {
   id: string;
@@ -37,6 +39,7 @@ interface PaymentsClientProps {
 }
 
 export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) {
+  const toast = useAdminToast();
   const [activeTab, setActiveTab] = useState<"logs" | "links">("logs");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<PaymentRecord | null>(null);
@@ -53,6 +56,8 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<PaymentLinkRecord | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
   const handleCreateLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,13 +98,14 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
     setFormDesc("");
   };
 
-  const handleDeleteLink = async (id: string) => {
-    if (!confirm("Bu ödeme linkini iptal etmek/silmek istediğinize emin misiniz?")) return;
-    const res = await deletePaymentLink(id);
+  const confirmDeleteLink = async () => {
+    if (!deleteTarget) return;
+    const res = await deletePaymentLink(deleteTarget.id);
+    setDeleteTarget(null);
     if (res.success) {
       window.location.reload();
     } else {
-      alert("Silme işlemi başarısız.");
+      setAlertMessage("Silme işlemi başarısız.");
     }
   };
 
@@ -340,7 +346,7 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                             )}
                           </button>
                           <button
-                            onClick={() => handleDeleteLink(link.id)}
+                            onClick={() => setDeleteTarget(link)}
                             className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
                             title="Linki İptal Et/Sil"
                           >
@@ -571,6 +577,23 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Ödeme Linkini Sil"
+        message={deleteTarget ? `${deleteTarget.payerName} adına oluşturulan ödeme linkini iptal etmek/silmek istediğine emin misin?` : ""}
+        confirmLabel="Evet, Sil"
+        onConfirm={confirmDeleteLink}
+        onClose={() => setDeleteTarget(null)}
+      />
+
+      <ConfirmDialog
+        open={!!alertMessage}
+        title="İşlem Başarısız"
+        message={alertMessage || ""}
+        danger={false}
+        onClose={() => setAlertMessage(null)}
+      />
     </div>
   );
 }

@@ -3,14 +3,26 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import {
   BarChart3, FileText, CalendarClock, Package, CreditCard, ShoppingBag,
-  Menu, X, ChevronLeft, ChevronRight, Home, LogOut
+  FolderTree, Users, Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Sun, Moon
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
+  const { data: session } = useSession();
+  const adminName = session?.user?.name || "Yönetici";
+  const adminEmail = session?.user?.email || "";
+  const adminInitials = adminName
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -20,6 +32,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { label: "Sözleşmeler", icon: FileText, href: "/admin/agreements" },
     { label: "Taksitler & Kasa", icon: CalendarClock, href: "/admin/installments" },
     { label: "Ürünler & Stok", icon: Package, href: "/admin/products" },
+    { label: "Kategoriler", icon: FolderTree, href: "/admin/categories" },
+    { label: "Kullanıcılar", icon: Users, href: "/admin/users" },
     { label: "Ödeme Kayıtları", icon: CreditCard, href: "/admin/payments" },
   ];
 
@@ -33,7 +47,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const currentLabel = menuItems.find((item) => isActive(item.href))?.label ?? "Dashboard";
 
   return (
-    <div className="min-h-screen bg-[#f6f7fb] flex flex-col md:flex-row font-sans overflow-hidden">
+    <div className="min-h-screen bg-[#f6f7fb] dark:bg-[#0b1220] flex flex-col md:flex-row font-sans overflow-hidden">
       {/* Mobile Navbar Header */}
       <header className="md:hidden h-16 bg-[var(--navy)] border-b border-white/10 flex items-center justify-between px-4 text-white z-30">
         <Link href="/admin" className="flex items-center gap-2">
@@ -132,13 +146,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             `}
           >
             <div className="w-9 h-9 shrink-0 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center font-bold text-white text-xs ring-2 ring-orange-500/20">
-              ADM
+              {adminInitials || "AD"}
             </div>
             {!isCollapsed && (
               <>
                 <div className="min-w-0 flex-1">
-                  <span className="text-xs font-bold text-slate-200 block truncate">Yönetici</span>
-                  <span className="text-[10px] text-slate-500 block truncate">admin@castapos.com</span>
+                  <span className="text-xs font-bold text-slate-200 block truncate">{adminName}</span>
+                  <span className="text-[10px] text-slate-500 block truncate">{adminEmail}</span>
                 </div>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
@@ -153,33 +167,44 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      {/* Main Content Area — "admin-shell" scopes the dark-mode CSS overrides in
+          globals.css to just the topbar + page content, leaving the sidebar
+          (already permanently dark navy) untouched. */}
+      <div className="admin-shell flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 bg-white/85 backdrop-blur-xl border-b border-slate-200/70 flex items-center justify-between px-6 shrink-0 z-20">
+        <header className="h-16 bg-white/85 dark:bg-[#0f172a]/90 backdrop-blur-xl border-b border-slate-200/70 dark:border-white/10 flex items-center justify-between px-6 shrink-0 z-20">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-orange-500">Yönetim Paneli</p>
-            <h1 className="text-lg font-bold text-slate-800 leading-tight">{currentLabel}</h1>
+            <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-tight">{currentLabel}</h1>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === "dark" ? "Gündüz moduna geç" : "Gece moduna geç"}
+              title={theme === "dark" ? "Gündüz modu" : "Gece modu"}
+              className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <Link
               href="/"
-              className="text-xs text-orange-600 hover:bg-orange-50 font-bold flex items-center gap-1.5 px-3 py-2 rounded-lg border border-orange-100 transition"
+              className="text-xs text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 font-bold flex items-center gap-1.5 px-3 py-2 rounded-lg border border-orange-100 dark:border-orange-900/40 transition"
             >
               <Home size={13} /> Mağaza Anasayfası
             </Link>
-            <span className="h-6 w-px bg-slate-200 hidden sm:block"></span>
+            <span className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden sm:block"></span>
             <div className="items-center gap-2 hidden sm:flex">
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center font-bold text-white text-[10px]">
-                A
+                {adminInitials || "AD"}
               </div>
-              <span className="text-sm font-semibold text-slate-600">Hoş Geldiniz, Admin</span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">Hoş Geldiniz, {adminName.split(" ")[0]}</span>
             </div>
           </div>
         </header>
 
         {/* Children components render */}
-        <main className="flex-1 p-6 overflow-y-auto bg-[#f6f7fb]">
+        <main className="flex-1 p-6 overflow-y-auto bg-[#f6f7fb] dark:bg-[#0b1220]">
           {children}
         </main>
       </div>

@@ -9,11 +9,17 @@ export const authConfig = {
     authorized() {
       return true; // Handle route guarding manually in middleware.ts
     },
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.isPremiumMember = user.isPremiumMember ?? false;
+      }
+      // Client called `update({ name })` after a profile edit — refresh the
+      // token's name so header/menu re-render without a re-login. Email is
+      // intentionally never accepted here: it can't be changed post-signup.
+      if (trigger === "update" && session?.name) {
+        token.name = session.name;
       }
       return token;
     },

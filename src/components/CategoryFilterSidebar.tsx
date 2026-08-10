@@ -2,7 +2,6 @@
 
 export interface RentalAdvantages {
   campaigned: boolean;
-  buyoutOption: boolean;
   fastDelivery: boolean;
 }
 
@@ -24,7 +23,6 @@ const rentalPeriods = [1, 3, 6, 9];
 
 const advantageLabels: { key: keyof RentalAdvantages; label: string }[] = [
   { key: "campaigned", label: "Kampanyalı" },
-  { key: "buyoutOption", label: "Satın alma opsiyonu" },
   { key: "fastDelivery", label: "Hızlı teslimat" },
 ];
 

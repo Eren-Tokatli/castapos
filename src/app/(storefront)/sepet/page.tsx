@@ -255,14 +255,13 @@ export default function SepetPage() {
               <div className="rental-plan-list">
                 {cart.map((item, idx) => {
                   const p = getProduct(item.id);
-                  const isBuy = item.mode === "buy";
                   const period = Number(item.period || defaultPeriod(p));
-                  const summaryTitle = isBuy ? "Satın alma toplamı" : `${period} aylık toplam ödeme`;
-                  
-                  const base = isBuy ? (p.buyPrice || p.price) : monthlyPrice(p, period);
+                  const summaryTitle = `${period} aylık toplam ödeme`;
+
+                  const base = monthlyPrice(p, period);
                   const total = base * item.qty;
-                  const daily = isBuy ? 0 : dailyPrice(p, period) * item.qty;
-                  const detailHref = `/urun/${p.id}${!isBuy ? `?period=${period}` : ""}`;
+                  const daily = dailyPrice(p, period) * item.qty;
+                  const detailHref = `/urun/${p.id}?period=${period}`;
 
                   return (
                     <article key={idx} className="rental-plan-item">
@@ -283,8 +282,8 @@ export default function SepetPage() {
                         
                         <div className="plan-meta-row">
                           <div className="selected-plan-tag">
-                            <span>{isBuy ? "İşlem" : "Seçili plan"}</span>
-                            <b>{isBuy ? "Satın Alma" : `${period} Ay`}</b>
+                            <span>Seçili plan</span>
+                            <b>{period} Ay</b>
                           </div>
                           <div className="delivery-estimate">
                             <span>Tahmini teslimat</span>
@@ -316,11 +315,9 @@ export default function SepetPage() {
                       <div className="plan-price-summary">
                         <span>{summaryTitle}</span>
                         <b>{formatPrice(total)}</b>
-                        {!isBuy && (
-                          <small>
-                            Günlük karşılığı <strong className="daily-cart-value">{formatPrice(daily)}</strong>
-                          </small>
-                        )}
+                        <small>
+                          Günlük karşılığı <strong className="daily-cart-value">{formatPrice(daily)}</strong>
+                        </small>
                       </div>
                     </article>
                   );

@@ -46,7 +46,6 @@ function getCatalogContext() {
         `marka: ${product.brand}`,
         `aylik: ${formatPrice(monthlyPrice(product, period))}`,
         `sureler: ${product.periods.join(", ")} ay`,
-        product.buyPrice ? `satinalma: ${formatPrice(product.buyPrice)}` : "satinalma: yok",
         `url: /urun/${product.id}`,
       ].join(" | ");
     })

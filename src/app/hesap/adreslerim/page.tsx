@@ -30,7 +30,7 @@ export default async function AddressesPage() {
             <Link href="/">Ana Sayfa</Link> › <Link href="/hesap/panel">Hesabım</Link> › <span>Adreslerim</span>
           </nav>
           <h1>Teslimat Adreslerim</h1>
-          <p>Kiralama ve satın alma işlemlerinizde kullanmak üzere kayıtlı adreslerinizi buradan yönetin.</p>
+          <p>Kiralama işlemlerinizde kullanmak üzere kayıtlı adreslerinizi buradan yönetin.</p>
         </div>
       </section>
 

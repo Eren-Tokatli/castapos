@@ -10,9 +10,6 @@ export interface ProductFormData {
   sku: string;
   slug: string;
   description: string;
-  saleMode: "BUY" | "RENT" | "BOTH";
-  buyPrice: string;
-  buySpecialPrice: string;
   quantity: string;
   stockStatus: "IN_STOCK" | "OUT_OF_STOCK" | "PREORDER";
   status: "ACTIVE" | "INACTIVE";
@@ -40,9 +37,9 @@ function buildProductData(data: ProductFormData) {
     sku: data.sku.trim(),
     slug: data.slug.trim(),
     description: data.description.trim() || undefined,
-    saleMode: data.saleMode,
-    buyPrice: data.saleMode !== "RENT" && data.buyPrice ? parseFloat(data.buyPrice) : null,
-    buySpecialPrice: data.saleMode !== "RENT" && data.buySpecialPrice ? parseFloat(data.buySpecialPrice) : null,
+    saleMode: "RENT" as const,
+    buyPrice: null,
+    buySpecialPrice: null,
     quantity: parseInt(data.quantity, 10) || 0,
     stockStatus: data.stockStatus,
     status: data.status === "ACTIVE",
@@ -50,18 +47,15 @@ function buildProductData(data: ProductFormData) {
     images: data.images
       .filter((img) => img.url.trim())
       .map((img, i) => ({ url: img.url.trim(), alt: img.alt.trim() || undefined, sortOrder: i })),
-    rentalTiers:
-      data.saleMode !== "BUY"
-        ? data.rentalTiers
-            .filter((t) => t.label.trim())
-            .map((t, i) => ({
-              label: t.label.trim(),
-              durationMonths: parseInt(t.durationMonths, 10) || 0,
-              price: parseFloat(t.price) || 0,
-              originalPrice: t.originalPrice ? parseFloat(t.originalPrice) : null,
-              sortOrder: i,
-            }))
-        : [],
+    rentalTiers: data.rentalTiers
+      .filter((t) => t.label.trim())
+      .map((t, i) => ({
+        label: t.label.trim(),
+        durationMonths: parseInt(t.durationMonths, 10) || 0,
+        price: parseFloat(t.price) || 0,
+        originalPrice: t.originalPrice ? parseFloat(t.originalPrice) : null,
+        sortOrder: i,
+      })),
     options: data.options
       .filter((o) => o.name.trim())
       .map((o, i) => ({
@@ -125,15 +119,14 @@ export async function updateFullProduct(id: string, data: ProductFormData) {
 
 export async function updateProduct(id: string, data: any) {
   try {
-    const { quantity, stockStatus, buyPrice, buySpecialPrice, status } = data;
+    await requireAdmin();
+    const { quantity, stockStatus, status } = data;
 
     const updated = await prisma.product.update({
       where: { id },
       data: {
         quantity: parseInt(quantity) || 0,
         stockStatus,
-        buyPrice: buyPrice ? parseFloat(buyPrice) : null,
-        buySpecialPrice: buySpecialPrice ? parseFloat(buySpecialPrice) : null,
         status: status === "ACTIVE",
       },
     });

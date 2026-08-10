@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { MapPin, Plus, Check, Trash2, Home, X } from "lucide-react";
+import { MapPin, Plus, Check, Trash2, Home, X, AlertTriangle } from "lucide-react";
 import { addAddress, deleteAddress, setDefaultAddress } from "./actions";
+import { TURKEY_PROVINCES, TURKEY_PROVINCE_NAMES } from "@/lib/turkey-provinces";
 
 interface Address {
+  label?: string | null;
   firstName: string;
   lastName: string;
   company?: string | null;
@@ -14,6 +16,8 @@ interface Address {
   postcode: string;
   province?: string | null;
   country: string;
+  deliveryPhone?: string | null;
+  directions?: string | null;
   isDefault: boolean;
 }
 
@@ -22,6 +26,7 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
   const [showAddForm, setShowAddForm] = useState(false);
 
   // Form states
+  const [label, setLabel] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [company, setCompany] = useState("");
@@ -31,36 +36,16 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
   const [postcode, setPostcode] = useState("");
   const [province, setProvince] = useState("");
   const [country, setCountry] = useState("Türkiye");
+  const [deliveryPhone, setDeliveryPhone] = useState("");
+  const [directions, setDirections] = useState("");
   const [isDefault, setIsDefault] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
-  const handleCreateAddress = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    const res = await addAddress({
-      firstName,
-      lastName,
-      company: company || undefined,
-      addressLine1,
-      addressLine2: addressLine2 || undefined,
-      city,
-      postcode,
-      province: province || undefined,
-      country,
-      isDefault,
-    });
-    setLoading(false);
-
-    if (!res.success) {
-      setError(res.error || "Adres kaydedilirken bir hata oluştu.");
-      return;
-    }
-
-    // Reset fields & close
+  const resetForm = () => {
+    setLabel("");
     setFirstName("");
     setLastName("");
     setCompany("");
@@ -70,16 +55,47 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
     setPostcode("");
     setProvince("");
     setCountry("Türkiye");
+    setDeliveryPhone("");
+    setDirections("");
     setIsDefault(false);
-    setShowAddForm(false);
+  };
 
-    // Refresh page state
+  const handleCreateAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    const res = await addAddress({
+      label: label || undefined,
+      firstName,
+      lastName,
+      company: company || undefined,
+      addressLine1,
+      addressLine2: addressLine2 || undefined,
+      city,
+      postcode,
+      province: province || undefined,
+      country,
+      deliveryPhone: deliveryPhone || undefined,
+      directions: directions || undefined,
+      isDefault,
+    });
+    setLoading(false);
+
+    if (!res.success) {
+      setError(res.error || "Adres kaydedilirken bir hata oluştu.");
+      return;
+    }
+
+    resetForm();
+    setShowAddForm(false);
     window.location.reload();
   };
 
-  const handleDelete = async (index: number) => {
-    if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return;
-    const res = await deleteAddress(index);
+  const confirmDelete = async () => {
+    if (deleteIndex === null) return;
+    const res = await deleteAddress(deleteIndex);
+    setDeleteIndex(null);
     if (res.success) {
       window.location.reload();
     }
@@ -94,236 +110,317 @@ export function AddressesClient({ initialAddresses }: { initialAddresses: Addres
 
   return (
     <div className="space-y-6">
-      {/* Add Address Trigger Header */}
       <div className="flex justify-end">
-        {!showAddForm && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="premium-btn"
-          >
-            <Plus size={16} /> Yeni Adres Ekle
-          </button>
+        <button onClick={() => setShowAddForm(true)} className="premium-btn">
+          <Plus size={16} /> Yeni Adres Ekle
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {addresses.length === 0 ? (
+          <div className="premium-surface p-8 text-center text-slate-400 col-span-2">
+            <MapPin size={48} className="mx-auto opacity-20 mb-3" />
+            Kayıtlı teslimat adresiniz bulunmuyor.
+          </div>
+        ) : (
+          addresses.map((addr, idx) => (
+            <div
+              key={idx}
+              className={`bg-white border rounded-2xl p-5 flex flex-col justify-between min-h-[190px] transition ${
+                addr.isDefault ? "border-[var(--brand)] shadow-[0_0_0_3px_rgba(243,95,54,0.12)]" : "border-slate-200 shadow-xs"
+              }`}
+            >
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wide">
+                    <Home size={14} className="text-slate-400" /> {addr.label || "Teslimat Adresi"}
+                  </span>
+                  {addr.isDefault && (
+                    <span className="text-[10px] font-bold text-[var(--brand-dark)] bg-[#fff1ec] px-2 py-0.5 rounded-full border border-[#ffd6c8] flex items-center gap-1">
+                      <Check size={10} /> Varsayılan
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-sm font-bold text-slate-800">
+                  {addr.firstName} {addr.lastName}
+                </p>
+                {addr.company && <p className="text-xs font-semibold text-slate-400 mt-0.5">{addr.company}</p>}
+
+                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                  {addr.addressLine1}
+                  {addr.addressLine2 && `, ${addr.addressLine2}`}
+                </p>
+                <p className="text-xs text-slate-500 mt-1 font-semibold">
+                  {addr.postcode} / {addr.city} / {addr.province} / {addr.country}
+                </p>
+                {addr.deliveryPhone && (
+                  <p className="text-xs text-slate-500 mt-1">Kargo Telefonu: {addr.deliveryPhone}</p>
+                )}
+                {addr.directions && (
+                  <p className="text-xs text-slate-400 mt-1 italic leading-relaxed">{addr.directions}</p>
+                )}
+              </div>
+
+              <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs">
+                {!addr.isDefault ? (
+                  <button
+                    onClick={() => handleSetDefault(idx)}
+                    className="text-[var(--gold-dark)] hover:text-[var(--navy)] font-bold hover:underline"
+                  >
+                    Varsayılan Yap
+                  </button>
+                ) : (
+                  <span className="text-[var(--gold-dark)] font-bold">Birincil Adres</span>
+                )}
+
+                <button
+                  onClick={() => setDeleteIndex(idx)}
+                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-slate-50 rounded-lg transition"
+                  title="Adresi Sil"
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* LEFT/MAIN AREA: Address Cards Grid */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {addresses.length === 0 ? (
-            <div className="premium-surface p-8 text-center text-slate-400 col-span-2">
-              <MapPin size={48} className="mx-auto opacity-20 mb-3" />
-              Kayıtlı teslimat adresiniz bulunmuyor.
-            </div>
-          ) : (
-            addresses.map((addr, idx) => (
-              <div
-                key={idx}
-                className={`bg-white border rounded-2xl p-5 flex flex-col justify-between min-h-[190px] transition ${
-                  addr.isDefault ? "border-[var(--brand)] shadow-[0_0_0_3px_rgba(243,95,54,0.12)]" : "border-slate-200 shadow-xs"
-                }`}
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="flex items-center gap-1.5 text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      <Home size={14} className="text-slate-400" /> Teslimat Adresi
-                    </span>
-                    {addr.isDefault && (
-                      <span className="text-[10px] font-bold text-[var(--brand-dark)] bg-[#fff1ec] px-2 py-0.5 rounded-full border border-[#ffd6c8] flex items-center gap-1">
-                        <Check size={10} /> Varsayılan
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm font-bold text-slate-800">
-                    {addr.firstName} {addr.lastName}
-                  </p>
-                  {addr.company && <p className="text-xs font-semibold text-slate-400 mt-0.5">{addr.company}</p>}
-
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                    {addr.addressLine1}
-                    {addr.addressLine2 && `, ${addr.addressLine2}`}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1 font-semibold">
-                    {addr.postcode} / {addr.city} / {addr.country}
-                  </p>
-                </div>
-
-                <div className="border-t border-slate-100 pt-3 mt-4 flex justify-between items-center text-xs">
-                  {!addr.isDefault ? (
-                    <button
-                      onClick={() => handleSetDefault(idx)}
-                      className="text-[var(--gold-dark)] hover:text-[var(--navy)] font-bold hover:underline"
-                    >
-                      Varsayılan Yap
-                    </button>
-                  ) : (
-                    <span className="text-[var(--gold-dark)] font-bold">Birincil Adres</span>
-                  )}
-
-                  <button
-                    onClick={() => handleDelete(idx)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-slate-50 rounded-lg transition"
-                    title="Adresi Sil"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
+      {showAddForm && (
+        <div className="compare-modal-backdrop open" onClick={() => setShowAddForm(false)}>
+          <div className="compare-modal" style={{ width: "min(880px, 94vw)" }} onClick={(e) => e.stopPropagation()}>
+            <div className="compare-modal-head">
+              <div>
+                <span>Adreslerim</span>
+                <h2 style={{ fontSize: 20 }}>Yeni Adres Bilgisi</h2>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* RIGHT AREA: Form to Add Address */}
-        {showAddForm && (
-          <div className="premium-surface p-6 space-y-4 lg:col-span-1">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="font-bold text-slate-800 text-base">Yeni Adres Bilgisi</h3>
-              <button
-                onClick={() => setShowAddForm(false)}
-                className="p-1 hover:bg-slate-100 rounded-full text-slate-400 transition"
-              >
-                <X size={18} />
+              <button onClick={() => setShowAddForm(false)} aria-label="Kapat">
+                <X size={20} />
               </button>
             </div>
 
-            {error && <div className="p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">{error}</div>}
+            <div className="compare-modal-body">
+              {error && <div className="p-3 mb-4 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">{error}</div>}
 
-            <form onSubmit={handleCreateAddress} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+              <form onSubmit={handleCreateAddress} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-slate-400 font-bold mb-1">Ad *</label>
+                  <label className="block text-slate-400 font-bold mb-1">Adres Adı</label>
+                  <input
+                    type="text"
+                    placeholder="Örn: Ev, İş"
+                    value={label}
+                    onChange={(e) => setLabel(e.target.value)}
+                    className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Ad *</label>
+                    <input
+                      type="text"
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Soyad *</label>
+                    <input
+                      type="text"
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Şirket Adı</label>
+                    <input
+                      type="text"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 font-bold mb-1">Adres Satırı 1 *</label>
                   <input
                     type="text"
                     required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Mahalle, sokak, daire no..."
+                    value={addressLine1}
+                    onChange={(e) => setAddressLine1(e.target.value)}
                     className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-slate-400 font-bold mb-1">Soyad *</label>
+                  <label className="block text-slate-400 font-bold mb-1">Adres Satırı 2 (İsteğe Bağlı)</label>
                   <input
                     type="text"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Apartman adı, blok..."
+                    value={addressLine2}
+                    onChange={(e) => setAddressLine2(e.target.value)}
                     className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-slate-400 font-bold mb-1">Şirket Adı (İsteğe Bağlı)</label>
-                <input
-                  type="text"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                  className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">İl *</label>
+                    <select
+                      required
+                      value={province}
+                      onChange={(e) => {
+                        setProvince(e.target.value);
+                        setCity("");
+                      }}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)] bg-white"
+                    >
+                      <option value="">İl seçin</option>
+                      {TURKEY_PROVINCE_NAMES.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">İlçe *</label>
+                    <select
+                      required
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      disabled={!province}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)] bg-white disabled:bg-slate-50 disabled:text-slate-400"
+                    >
+                      <option value="">{province ? "İlçe seçin" : "Önce il seçin"}</option>
+                      {(TURKEY_PROVINCES[province] || []).map((d) => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Posta Kodu *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="34357"
+                      value={postcode}
+                      onChange={(e) => setPostcode(e.target.value)}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-slate-400 font-bold mb-1">Adres Satırı 1 *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Mahalle, sokak, daire no..."
-                  value={addressLine1}
-                  onChange={(e) => setAddressLine1(e.target.value)}
-                  className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Ülke</label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-bold mb-1">Kargo Telefonu</label>
+                    <input
+                      type="text"
+                      placeholder="Kurye bu numarayı arasın"
+                      value={deliveryPhone}
+                      onChange={(e) => setDeliveryPhone(e.target.value.replace(/[^0-9]/g, ""))}
+                      maxLength={11}
+                      className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    />
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-slate-400 font-bold mb-1">Adres Satırı 2 (İsteğe Bağlı)</label>
-                <input
-                  type="text"
-                  placeholder="Apartman adı, blok..."
-                  value={addressLine2}
-                  onChange={(e) => setAddressLine2(e.target.value)}
-                  className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-400 font-bold mb-1">İlçe / Şehir *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Örn: Beşiktaş / İstanbul"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                  <label className="block text-slate-400 font-bold mb-1">Adres Tarifi (İsteğe Bağlı)</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Örn: Market ile eczane arası, mavi kapılı bina..."
+                    value={directions}
+                    onChange={(e) => setDirections(e.target.value)}
+                    className="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)] resize-y"
                   />
                 </div>
-                <div>
-                  <label className="block text-slate-400 font-bold mb-1">Posta Kodu *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="34357"
-                    value={postcode}
-                    onChange={(e) => setPostcode(e.target.value)}
-                    className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-400 font-bold mb-1">Semt / Eyalet</label>
+                <div className="flex items-center gap-2 py-1">
                   <input
-                    type="text"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
+                    type="checkbox"
+                    id="defaultCheck"
+                    checked={isDefault}
+                    onChange={(e) => setIsDefault(e.target.checked)}
+                    className="rounded border-slate-200 text-[var(--gold-dark)] focus:ring-[var(--gold)] w-4 h-4"
                   />
+                  <label htmlFor="defaultCheck" className="text-slate-500 font-bold cursor-pointer">
+                    Varsayılan Teslimat Adresi Yap
+                  </label>
                 </div>
-                <div>
-                  <label className="block text-slate-400 font-bold mb-1">Ülke</label>
-                  <input
-                    type="text"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="w-full h-9 px-2.5 border border-slate-200 rounded-xl focus:outline-none focus:border-[var(--gold)]"
-                  />
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl font-bold transition"
+                  >
+                    Vazgeç
+                  </button>
+                  <button type="submit" disabled={loading} className="premium-btn">
+                    {loading ? "Kaydediliyor..." : "Adresi Kaydet"}
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 py-1">
-                <input
-                  type="checkbox"
-                  id="defaultCheck"
-                  checked={isDefault}
-                  onChange={(e) => setIsDefault(e.target.checked)}
-                  className="rounded border-slate-200 text-[var(--gold-dark)] focus:ring-[var(--gold)] w-4 h-4"
-                />
-                <label htmlFor="defaultCheck" className="text-slate-500 font-bold cursor-pointer">
-                  Varsayılan Teslimat Adresi Yap
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl font-bold transition"
-                >
-                  Vazgeç
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="premium-btn"
-                >
-                  {loading ? "Kaydediliyor..." : "Adresi Kaydet"}
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {deleteIndex !== null && (
+        <div className="compare-modal-backdrop open" onClick={() => setDeleteIndex(null)}>
+          <div className="compare-modal" style={{ width: "min(380px, 100%)" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: "28px 24px 20px", textAlign: "center" }}>
+              <div
+                style={{
+                  width: 48, height: 48, margin: "0 auto 16px", borderRadius: "50%",
+                  background: "#fef3f2", color: "#b42318", display: "grid", placeItems: "center",
+                }}
+              >
+                <AlertTriangle size={22} />
+              </div>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#101828" }}>Adresi Sil</h3>
+              <p style={{ margin: "8px 0 0", fontSize: 14, color: "#667085", lineHeight: 1.5 }}>
+                Bu adresi silmek istediğine emin misin? Bu işlem geri alınamaz.
+              </p>
+            </div>
+            <div style={{ padding: 16, borderTop: "1px solid #edf0f5", display: "flex", gap: 10, background: "#fafafb" }}>
+              <button
+                type="button"
+                onClick={() => setDeleteIndex(null)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-50 rounded-xl font-bold transition"
+                style={{ flex: 1 }}
+              >
+                Vazgeç
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                style={{
+                  flex: 1, border: 0, borderRadius: 12, color: "#fff", fontWeight: 800, cursor: "pointer",
+                  background: "linear-gradient(180deg, #f04438, #d92d20)",
+                }}
+              >
+                Evet, Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

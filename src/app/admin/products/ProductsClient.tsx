@@ -4,14 +4,15 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Plus, Package, CheckCircle2, XCircle, EyeOff, Pencil, RefreshCcw } from "lucide-react";
 import { updateProduct } from "./actions";
+import { useAdminToast } from "../_components/ToastProvider";
+import { useTableControls } from "../_components/useTableControls";
+import { SortableTh } from "../_components/SortableTh";
+import { Pagination } from "../_components/Pagination";
 
 interface Product {
   id: string;
   sku: string;
   name: string;
-  saleMode: string;
-  buyPrice: number | null;
-  buySpecialPrice: number | null;
   quantity: number;
   stockStatus: string;
   status: boolean;
@@ -25,12 +26,6 @@ interface ProductsClientProps {
   products: Product[];
 }
 
-const MODE_STYLES: Record<string, { label: string; dot: string; className: string }> = {
-  BUY: { label: "Sadece Satılık", dot: "bg-sky-500", className: "bg-sky-50 border-sky-200 text-sky-700" },
-  RENT: { label: "Sadece Kiralık", dot: "bg-orange-500", className: "bg-orange-50 border-orange-200 text-orange-700" },
-  BOTH: { label: "Satılık & Kiralık", dot: "bg-violet-500", className: "bg-violet-50 border-violet-200 text-violet-700" },
-};
-
 const STOCK_STYLES: Record<string, { label: string; dot: string; className: string }> = {
   IN_STOCK: { label: "Stokta Var", dot: "bg-emerald-500", className: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   OUT_OF_STOCK: { label: "Tükendi", dot: "bg-red-500", className: "bg-red-50 text-red-700 border-red-200" },
@@ -38,12 +33,11 @@ const STOCK_STYLES: Record<string, { label: string; dot: string; className: stri
 };
 
 export function ProductsClient({ products }: ProductsClientProps) {
+  const toast = useAdminToast();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [editForm, setEditForm] = useState({
     quantity: "0",
     stockStatus: "IN_STOCK",
-    buyPrice: "",
-    buySpecialPrice: "",
     status: "ACTIVE",
   });
   const [loading, setLoading] = useState(false);
@@ -56,13 +50,17 @@ export function ProductsClient({ products }: ProductsClientProps) {
     hidden: products.filter((p) => !p.status).length,
   };
 
+  const productsWithPrice = products.map((p) => ({
+    ...p,
+    minPrice: p.rentalTiers.reduce((min, tier) => (tier.price < min ? tier.price : min), Infinity),
+  }));
+  const table = useTableControls(productsWithPrice, 10);
+
   const handleEditClick = (p: Product) => {
     setSelectedProduct(p);
     setEditForm({
       quantity: p.quantity.toString(),
       stockStatus: p.stockStatus,
-      buyPrice: p.buyPrice ? p.buyPrice.toString() : "",
-      buySpecialPrice: p.buySpecialPrice ? p.buySpecialPrice.toString() : "",
       status: p.status ? "ACTIVE" : "INACTIVE",
     });
   };
@@ -80,6 +78,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
     } else {
       setLoading(false);
       setSelectedProduct(null);
+      toast("Stok bilgisi güncellendi.");
     }
   };
 
@@ -124,23 +123,17 @@ export function ProductsClient({ products }: ProductsClientProps) {
           <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200/70 text-slate-500 font-bold text-[11px] uppercase tracking-wider">
-                <th className="py-3.5 px-5">SKU / Cihaz Adı</th>
-                <th className="py-3.5 px-5">Mod</th>
-                <th className="py-3.5 px-5">Satış Fiyatı</th>
-                <th className="py-3.5 px-5">Kiralama Fiyatı (En Düşük)</th>
-                <th className="py-3.5 px-5">Stok Miktarı</th>
+                <SortableTh label="SKU / Cihaz Adı" active={table.sortKey === "name"} dir={table.sortDir} onClick={() => table.toggleSort("name")} />
+                <SortableTh label="Kiralama Fiyatı (En Düşük)" active={table.sortKey === "minPrice"} dir={table.sortDir} onClick={() => table.toggleSort("minPrice")} />
+                <SortableTh label="Stok Miktarı" active={table.sortKey === "quantity"} dir={table.sortDir} onClick={() => table.toggleSort("quantity")} />
                 <th className="py-3.5 px-5">Stok Durumu</th>
                 <th className="py-3.5 px-5">Yayın Durumu</th>
                 <th className="py-3.5 px-5 text-right">Eylemler</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {products.map((p) => {
-                const minRentalPrice = p.rentalTiers.reduce(
-                  (min, tier) => (tier.price < min ? tier.price : min),
-                  Infinity
-                );
-                const mode = MODE_STYLES[p.saleMode] ?? MODE_STYLES.BUY;
+              {table.pageItems.map((p) => {
+                const minRentalPrice = p.minPrice;
                 const stock = STOCK_STYLES[p.stockStatus] ?? STOCK_STYLES.IN_STOCK;
 
                 return (
@@ -152,15 +145,6 @@ export function ProductsClient({ products }: ProductsClientProps) {
                       <span className="text-[11px] text-slate-400 font-mono bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5 inline-block mt-1">
                         {p.sku}
                       </span>
-                    </td>
-                    <td className="py-3.5 px-5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 border rounded-full w-fit ${mode.className}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${mode.dot}`} />
-                        {mode.label}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-5 font-semibold text-slate-800 tabular-nums">
-                      {p.buyPrice ? `₺${p.buyPrice.toLocaleString("tr-TR")}` : <span className="text-slate-300">—</span>}
                     </td>
                     <td className="py-3.5 px-5 font-semibold text-slate-800 tabular-nums">
                       {minRentalPrice !== Infinity ? `₺${minRentalPrice.toLocaleString("tr-TR")} / ay` : <span className="text-slate-300">—</span>}
@@ -206,6 +190,13 @@ export function ProductsClient({ products }: ProductsClientProps) {
             </tbody>
           </table>
         </div>
+        <Pagination
+          page={table.page}
+          totalPages={table.totalPages}
+          totalCount={table.totalCount}
+          pageSize={10}
+          onPageChange={table.setPage}
+        />
       </div>
 
       {/* Edit Modal */}
@@ -253,29 +244,6 @@ export function ProductsClient({ products }: ProductsClientProps) {
                   <option value="PREORDER">Ön Sipariş</option>
                 </select>
               </div>
-
-              {selectedProduct.saleMode !== "RENT" && (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Normal Satış Fiyatı</label>
-                    <input
-                      type="number"
-                      value={editForm.buyPrice}
-                      onChange={(e) => setEditForm({ ...editForm, buyPrice: e.target.value })}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">İndirimli Satış Fiyatı</label>
-                    <input
-                      type="number"
-                      value={editForm.buySpecialPrice}
-                      onChange={(e) => setEditForm({ ...editForm, buySpecialPrice: e.target.value })}
-                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition"
-                    />
-                  </div>
-                </>
-              )}
 
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Yayın Durumu</label>

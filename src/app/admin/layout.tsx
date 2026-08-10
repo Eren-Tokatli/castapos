@@ -1,5 +1,6 @@
 import React from "react";
 import { AdminLayoutClient } from "./AdminLayoutClient";
+import { AdminToastProvider } from "./_components/ToastProvider";
 
 export const metadata = {
   title: "Castapos Admin Panel",
@@ -11,5 +12,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return (
+    <AdminToastProvider>
+      <AdminLayoutClient>{children}</AdminLayoutClient>
+    </AdminToastProvider>
+  );
 }

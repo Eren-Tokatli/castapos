@@ -1,10 +1,19 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+
+async function requireAdmin() {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    throw new Error("Yetkisiz işlem.");
+  }
+}
 
 export async function createAgreement(formData: any) {
   try {
+    await requireAdmin();
     const {
       tenantName,
       taxOrNationalId,
@@ -82,6 +91,7 @@ export async function createAgreement(formData: any) {
 
 export async function updateAgreement(id: string, formData: any) {
   try {
+    await requireAdmin();
     const {
       tenantName,
       taxOrNationalId,
@@ -126,6 +136,7 @@ export async function updateAgreement(id: string, formData: any) {
 
 export async function deleteAgreement(id: string) {
   try {
+    await requireAdmin();
     // Delete associated installments first
     await prisma.installment.deleteMany({
       where: { rentalAgreementId: id },
@@ -147,6 +158,7 @@ export async function deleteAgreement(id: string) {
 
 export async function toggleInstallmentPaid(id: string, paid: boolean) {
   try {
+    await requireAdmin();
     const installment = await prisma.installment.update({
       where: { id },
       data: { paid },

@@ -31,7 +31,7 @@ const REVIEW_DATA_DEFAULT = {
   qa: [
     { q: "Teslimat ne kadar sürede yapılıyor?", a: "Ürün uygunluğuna göre teslimat planı destek ekibi tarafından 1-3 iş günü içinde organize edilir." },
     { q: "Kiralama süresi sonunda uzatma yapabiliyor muyum?", a: "Uygun stok bulunması halinde kiralama süresi uzatma talebi oluşturabilirsin." },
-    { q: "Satın alma opsiyonu nasıl çalışıyor?", a: "Satın alma opsiyonu olan ürünlerde kira süreci sonrası kalan bedel üzerinden satın alma değerlendirmesi yapılabilir." }
+    { q: "Kiralama sürem bitmeden ürünü iade edebilir miyim?", a: "Erken iade talebi destek ekibi üzerinden değerlendirilir; kalan süreye göre bilgilendirme yapılır." }
   ],
   reviews: [
     { name: "Merve A.", rating: 5, text: "Ürün beklediğimden sessiz çıktı. Kurulum ve teslimat süreci de sorunsuz ilerledi." },
@@ -65,7 +65,7 @@ function expandedQa(seed: QAItem[]): QAItem[] {
     "Teslimat kurulumu da kapsıyor mu?",
     "Ürün teslimatı hafta sonu yapılabiliyor mu?",
     "Kiralama süresi sonunda uzatma talebi nasıl açılır?",
-    "Satın alma opsiyonu aktif olduğunda nasıl ilerliyor?",
+    "Kiralama süresini uzatmak için ekstra ücret var mı?",
     "Üründe arıza olursa teknik servis süreci nasıl işliyor?",
     "Aynı üründen iki adet kiralayabilir miyim?",
     "Kurulum için ekstra ücret çıkıyor mu?",
@@ -96,7 +96,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
   const { addToCart, toggleFavorite, isFavorite, toggleCompare, compareList } = useStore();
 
   const [period, setPeriod] = useState(defaultPeriod(p));
-  const [choiceMode, setChoiceMode] = useState<"rent" | "buy">("rent");
   const [activeTab, setActiveTab] = useState("description");
   const [starRating, setStarRating] = useState<number | null>(null);
   const [reviewText, setReviewText] = useState("");
@@ -105,10 +104,9 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
 
   const currentMonthly = monthlyPrice(p, period);
   const rentTotal = currentMonthly * period;
-  const buyActive = Boolean(p.buyPrice);
   const reviewCount = ratingCount(p);
 
-  const selectedTotal = choiceMode === "buy" && buyActive ? (p.buyPrice || p.price) : rentTotal;
+  const selectedTotal = rentTotal;
   const favorited = isFavorite(p.id);
   const inCompare = compareList.includes(p.id);
 
@@ -157,7 +155,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
     return text
       .replace(/(\d+[\.,]?\d*\s?km\/s)/gi, "<strong>$1</strong>")
       .replace(/(\d+[\.,]?\d*\s?HP)/gi, "<strong>$1</strong>")
-      .replace(/(Bluetooth|Wi[- ]?Fi|katlanabilir|satın alma opsiyonu|sessiz motor|taşıma kapasitesi)/gi, "<strong>$1</strong>");
+      .replace(/(Bluetooth|Wi[- ]?Fi|katlanabilir|sessiz motor|taşıma kapasitesi)/gi, "<strong>$1</strong>");
   };
 
   const heartIcon = (active: boolean) => (
@@ -254,42 +252,15 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
               </button>
             </div>
 
-            {/* Price Choices Grid */}
-            <div className="detail-price-grid selectable">
-              <button
-                type="button"
-                className={`price-mini-card ${choiceMode === "rent" ? "active" : ""}`}
-                onClick={() => setChoiceMode("rent")}
-              >
-                <small>Kirala</small>
-                <b>{formatPrice(currentMonthly)}</b>
-                <span>/ aylık ödeme</span>
-              </button>
-              
-              <button
-                type="button"
-                className={`price-mini-card ${choiceMode === "buy" ? "active" : ""} ${
-                  buyActive ? "buy-available" : "buy-disabled"
-                }`}
-                disabled={!buyActive}
-                onClick={() => setChoiceMode("buy")}
-              >
-                <small>Satın Al</small>
-                <b>{buyActive && p.buyPrice ? formatPrice(p.buyPrice) : "Aktif değil"}</b>
-                <span>{buyActive ? "tek sefer ödeme" : "yalnızca kiralama"}</span>
-              </button>
-            </div>
-
             {/* Period selector */}
-            <div className={`periods top-periods compact-pills ${choiceMode === "buy" ? "disabled-periods" : ""}`}>
+            <div className="periods top-periods compact-pills">
               <label>Kiralama Süresi</label>
               <div>
                 {p.periods.map((m) => (
                   <button
                     key={m}
                     className={`period-chip ${m === period ? "active" : ""}`}
-                    onClick={() => choiceMode === "rent" && setPeriod(m)}
-                    disabled={choiceMode === "buy"}
+                    onClick={() => setPeriod(m)}
                   >
                     {m} Ay
                   </button>
@@ -300,50 +271,26 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             <div className="key-benefits compact tighter">
               <Link href="/bilgi/sikca-sorulan-sorular"><Check size={14} /> Ücretsiz teslimat</Link>
               <Link href="/bilgi/iletisim"><Check size={14} /> Teknik servis desteği</Link>
-              <Link href="/bilgi/nasil-calisir"><Check size={14} /> Satın alma opsiyonu</Link>
+              <Link href="/bilgi/nasil-calisir"><Check size={14} /> Esnek kiralama süresi</Link>
             </div>
 
             {/* Total / Monthly Installment Box */}
             <div className="installment-box refined compact cleaner light">
-              <span>
-                {choiceMode === "buy" && buyActive
-                  ? "Satın alma toplamı"
-                  : `Toplam · `}
-                {choiceMode === "rent" && (
-                  <strong className="period-accent">{period} Ay</strong>
-                )}
-              </span>
-              <div className="big-total">{formatPrice(selectedTotal)}</div>
-              {choiceMode === "buy" && buyActive ? (
-                <em className="detail-buy-note">
-                  <span className="metric-label">Tek seferlik satın alma tutarı.</span>
-                </em>
-              ) : (
-                <em className="detail-monthly-cost">
-                  <span className="metric-label">Aylık ödeme tutarı:</span>{" "}
-                  <strong className="metric-value">{formatPrice(currentMonthly)}</strong>
-                </em>
-              )}
+              <span>Aylık ödeme tutarı</span>
+              <div className="big-total">{formatPrice(currentMonthly)}</div>
+              <em className="detail-monthly-cost">
+                <span className="metric-label">
+                  Toplam · <strong className="period-accent">{period} Ay</strong>:
+                </span>{" "}
+                <strong className="metric-value">{formatPrice(selectedTotal)}</strong>
+              </em>
             </div>
-
-            {/* Buy active banner */}
-            {buyActive ? (
-              <div className="compact-buy-meta active">
-                <span>Satın alma opsiyonu</span>
-                <b>Aktif</b>
-              </div>
-            ) : (
-              <div className="compact-buy-meta inactive">
-                <span>Satın alma opsiyonu</span>
-                <b>Aktif değil</b>
-              </div>
-            )}
 
             <div className="detail-actions compact-actions single">
               <button
                 className="btn btn-primary"
                 type="button"
-                onClick={() => addToCart(p.id, period, choiceMode)}
+                onClick={() => addToCart(p.id, period)}
               >
                 Sepete Ekle
               </button>
@@ -558,7 +505,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                 <div className="premium-tab-head">
                   <span><ClipboardCheck size={15} /> Destek yanıtları</span>
                   <h3>Soru & Cevap</h3>
-                  <p>Teslimat, kurulum, uzatma ve satın alma opsiyonu gibi konularda hızlı bilgi al.</p>
+                  <p>Teslimat, kurulum ve uzatma gibi konularda hızlı bilgi al.</p>
                 </div>
                 <form className="question-box" onSubmit={handleQuestionSubmit}>
                   <h4>Sorunu Sor</h4>
@@ -610,8 +557,8 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                   </article>
                   <article>
                     <span>03</span>
-                    <b>Satın alma opsiyonu</b>
-                    <p>Satın alma opsiyonu bulunan ürünlerde kira sonrası satın alma değerlendirmesi yapılabilir.</p>
+                    <b>Kiralama uzatma</b>
+                    <p>Uygun stok bulunması halinde kiralama süresi uzatma talebi oluşturabilirsin.</p>
                   </article>
                 </div>
               </section>

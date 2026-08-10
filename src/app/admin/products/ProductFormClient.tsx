@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduct, updateFullProduct, deleteProduct, type ProductFormData } from "./actions";
+import { ConfirmDialog } from "../_components/ConfirmDialog";
+import { useAdminToast } from "../_components/ToastProvider";
+import { ImagePreviewThumb } from "../_components/ImagePreviewThumb";
 
 interface Category {
   id: string;
@@ -21,9 +24,6 @@ const emptyForm: ProductFormData = {
   sku: "",
   slug: "",
   description: "",
-  saleMode: "BUY",
-  buyPrice: "",
-  buySpecialPrice: "",
   quantity: "0",
   stockStatus: "IN_STOCK",
   status: "ACTIVE",
@@ -49,10 +49,12 @@ function slugify(input: string): string {
 
 export function ProductFormClient({ mode, productId, categories, initialData }: ProductFormProps) {
   const router = useRouter();
+  const toast = useAdminToast();
   const [form, setForm] = useState<ProductFormData>(initialData ?? emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleNameChange = (name: string) => {
     setForm((f) => ({ ...f, name, slug: slugTouched ? f.slug : slugify(name) }));
@@ -72,14 +74,21 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
       return;
     }
 
+    toast(mode === "create" ? "Ürün oluşturuldu." : "Ürün güncellendi.");
     router.push("/admin/products");
     router.refresh();
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!productId) return;
-    if (!confirm("Bu ürünü kalıcı olarak silmek istediğinize emin misiniz?")) return;
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!productId) return;
+    setShowDeleteConfirm(false);
     setLoading(true);
+    toast("Ürün silindi.");
     await deleteProduct(productId);
   };
 
@@ -93,6 +102,7 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
       <div>
         <h2 className="text-2xl font-bold text-slate-800">
@@ -190,123 +200,85 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
-        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Satış Modu & Fiyat</h3>
+        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Kiralama Fiyatlandırması</h3>
 
         <div>
-          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Satış Modu</label>
-          <select
-            value={form.saleMode}
-            onChange={(e) => setForm({ ...form, saleMode: e.target.value as ProductFormData["saleMode"] })}
-            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none bg-white"
-          >
-            <option value="BUY">Sadece Satılık</option>
-            <option value="RENT">Sadece Kiralık</option>
-            <option value="BOTH">Satılık & Kiralık</option>
-          </select>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs font-bold text-slate-500 uppercase">Kiralama Süreleri</label>
+            <button
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  rentalTiers: [...f.rentalTiers, { label: "", durationMonths: "", price: "", originalPrice: "" }],
+                }))
+              }
+              className="text-xs font-bold text-orange-600 hover:text-orange-700"
+            >
+              + Süre Ekle
+            </button>
+          </div>
+          <div className="space-y-2">
+            {form.rentalTiers.map((tier, i) => (
+              <div key={i} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
+                <input
+                  placeholder="Etiket (ör. 3 Ay)"
+                  value={tier.label}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, label: e.target.value } : t)),
+                    }))
+                  }
+                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                />
+                <input
+                  placeholder="Ay"
+                  type="number"
+                  value={tier.durationMonths}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, durationMonths: e.target.value } : t)),
+                    }))
+                  }
+                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                />
+                <input
+                  placeholder="Fiyat"
+                  type="number"
+                  value={tier.price}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, price: e.target.value } : t)),
+                    }))
+                  }
+                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                />
+                <input
+                  placeholder="Eski Fiyat"
+                  type="number"
+                  value={tier.originalPrice}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, originalPrice: e.target.value } : t)),
+                    }))
+                  }
+                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, rentalTiers: f.rentalTiers.filter((_, idx) => idx !== i) }))}
+                  className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-
-        {form.saleMode !== "RENT" && (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Normal Satış Fiyatı</label>
-              <input
-                type="number"
-                value={form.buyPrice}
-                onChange={(e) => setForm({ ...form, buyPrice: e.target.value })}
-                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">İndirimli Satış Fiyatı</label>
-              <input
-                type="number"
-                value={form.buySpecialPrice}
-                onChange={(e) => setForm({ ...form, buySpecialPrice: e.target.value })}
-                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-              />
-            </div>
-          </div>
-        )}
-
-        {form.saleMode !== "BUY" && (
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-bold text-slate-500 uppercase">Kiralama Süreleri</label>
-              <button
-                type="button"
-                onClick={() =>
-                  setForm((f) => ({
-                    ...f,
-                    rentalTiers: [...f.rentalTiers, { label: "", durationMonths: "", price: "", originalPrice: "" }],
-                  }))
-                }
-                className="text-xs font-bold text-orange-600 hover:text-orange-700"
-              >
-                + Süre Ekle
-              </button>
-            </div>
-            <div className="space-y-2">
-              {form.rentalTiers.map((tier, i) => (
-                <div key={i} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
-                  <input
-                    placeholder="Etiket (ör. 3 Ay)"
-                    value={tier.label}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, label: e.target.value } : t)),
-                      }))
-                    }
-                    className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <input
-                    placeholder="Ay"
-                    type="number"
-                    value={tier.durationMonths}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, durationMonths: e.target.value } : t)),
-                      }))
-                    }
-                    className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <input
-                    placeholder="Fiyat"
-                    type="number"
-                    value={tier.price}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, price: e.target.value } : t)),
-                      }))
-                    }
-                    className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <input
-                    placeholder="Eski Fiyat"
-                    type="number"
-                    value={tier.originalPrice}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, originalPrice: e.target.value } : t)),
-                      }))
-                    }
-                    className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, rentalTiers: f.rentalTiers.filter((_, idx) => idx !== i) }))}
-                    className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
@@ -350,7 +322,8 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
         </div>
         <div className="space-y-2">
           {form.images.map((img, i) => (
-            <div key={i} className="grid grid-cols-[2fr_1fr_auto] gap-2 items-center">
+            <div key={i} className="grid grid-cols-[40px_2fr_1fr_auto] gap-2 items-center">
+              <ImagePreviewThumb url={img.url} />
               <input
                 placeholder="Görsel URL"
                 value={img.url}
@@ -595,5 +568,15 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
         </div>
       </div>
     </form>
+
+    <ConfirmDialog
+      open={showDeleteConfirm}
+      title="Ürünü Sil"
+      message="Bu ürünü kalıcı olarak silmek istediğine emin misin? Bu işlem geri alınamaz."
+      confirmLabel="Evet, Sil"
+      onConfirm={confirmDelete}
+      onClose={() => setShowDeleteConfirm(false)}
+    />
+    </>
   );
 }
