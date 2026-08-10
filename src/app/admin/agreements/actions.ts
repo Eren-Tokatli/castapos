@@ -11,9 +11,38 @@ async function requireAdmin() {
   }
 }
 
+function isValidPhone(phone: string): boolean {
+  const digits = (phone || "").replace(/\D/g, "");
+  return digits.length === 10 || digits.length === 11;
+}
+
+function validateCustomerInfo(formData: any): string | null {
+  const { tenantName, taxOrNationalId, phone, email, address, city } = formData;
+  if (
+    !tenantName?.trim() ||
+    !taxOrNationalId?.trim() ||
+    !phone?.trim() ||
+    !email?.trim() ||
+    !address?.trim() ||
+    !city?.trim()
+  ) {
+    return "Müşteri bilgileri eksiksiz girilmelidir.";
+  }
+  if (!isValidPhone(phone)) {
+    return "Telefon numarası 10 veya 11 haneli olmalıdır.";
+  }
+  return null;
+}
+
 export async function createAgreement(formData: any) {
   try {
     await requireAdmin();
+
+    const validationError = validateCustomerInfo(formData);
+    if (validationError) {
+      return { success: false, error: validationError };
+    }
+
     const {
       tenantName,
       taxOrNationalId,
@@ -92,6 +121,12 @@ export async function createAgreement(formData: any) {
 export async function updateAgreement(id: string, formData: any) {
   try {
     await requireAdmin();
+
+    const validationError = validateCustomerInfo(formData);
+    if (validationError) {
+      return { success: false, error: validationError };
+    }
+
     const {
       tenantName,
       taxOrNationalId,

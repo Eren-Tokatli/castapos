@@ -8702,7 +8702,7 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 .home-shell .promo-track {
-  height: clamp(320px, 36vw, 500px) !important;
+  height: clamp(340px, 40vw, 560px) !important;
   aspect-ratio: auto !important;
   min-height: 0;
   max-height: none;
@@ -8963,7 +8963,7 @@ body.page-urun-detay .review-form-box .btn {
 
   .home-shell .promo-track {
     height: auto !important;
-    aspect-ratio: 16 / 9 !important;
+    aspect-ratio: 16 / 10 !important;
     min-height: 0 !important;
     max-height: none !important;
   }

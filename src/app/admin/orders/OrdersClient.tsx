@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Eye, Filter, Calendar, Mail, User } from "lucide-react";
+import { Search, Eye, Mail, User, FileCheck2, X } from "lucide-react";
 import { updateOrderStatus } from "./actions";
 import { OrderStatus } from "@/generated/prisma";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
@@ -41,7 +41,13 @@ interface Order {
   createdAt: string;
 }
 
-export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
+export function OrdersClient({
+  initialOrders,
+  agreementByOrderNumber = {},
+}: {
+  initialOrders: Order[];
+  agreementByOrderNumber?: Record<string, string>;
+}) {
   const toast = useAdminToast();
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [search, setSearch] = useState("");
@@ -85,9 +91,9 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+    <div className="space-y-6">
       {/* FILTER & SEARCH & TABLE SECTION */}
-      <div className="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           {/* Search bar */}
@@ -158,7 +164,14 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
                   };
                   return (
                     <tr key={o.id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-3 font-bold text-slate-900">#{o.orderNumber}</td>
+                      <td className="p-3">
+                        <button
+                          onClick={() => setSelectedOrder(o)}
+                          className="font-bold text-slate-900 hover:text-orange-500 hover:underline transition"
+                        >
+                          #{o.orderNumber}
+                        </button>
+                      </td>
                       <td className="p-3">
                         <div className="font-semibold text-slate-800">
                           {o.billingFirstName} {o.billingLastName}
@@ -202,85 +215,125 @@ export function OrdersClient({ initialOrders }: { initialOrders: Order[] }) {
         </div>
       </div>
 
-      {/* SELECTED ORDER SIDEBAR DETAILS SECTION */}
-      <div className="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-        <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider border-b border-slate-100 pb-2">
-          Sipariş Kartı
-        </h3>
-        {selectedOrder ? (
-          <div className="space-y-4 text-xs text-slate-600">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center">
-                <User size={14} />
-              </span>
+      {/* SELECTED ORDER DETAIL MODAL */}
+      {selectedOrder && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedOrder(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl">
               <div>
-                <p className="text-[10px] text-slate-400 font-bold">MÜŞTERİ</p>
-                <p className="font-bold text-slate-800">
-                  {selectedOrder.billingFirstName} {selectedOrder.billingLastName}
+                <h3 className="font-bold text-slate-900 text-lg">#{selectedOrder.orderNumber}</h3>
+                <p className="text-xs text-slate-400">
+                  {new Date(selectedOrder.createdAt).toLocaleString("tr-TR")}
                 </p>
               </div>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center">
-                <Mail size={14} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[10px] text-slate-400 font-bold">İLETİŞİM</p>
-                <p className="font-bold text-slate-800 truncate">{selectedOrder.email}</p>
-                <p className="text-[10px] text-slate-400">{selectedOrder.phone || "-"}</p>
-              </div>
-            </div>
+            <div className="p-5 space-y-4 text-xs text-slate-600">
+              {agreementByOrderNumber[selectedOrder.orderNumber] && (
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-3 py-2 font-semibold">
+                  <FileCheck2 size={14} />
+                  Bu siparişten otomatik bir kiralama sözleşmesi oluşturuldu.
+                </div>
+              )}
 
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center">
-                <Calendar size={14} />
-              </span>
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold">SİPARİŞ TARİHİ</p>
-                <p className="font-bold text-slate-800">
-                  {new Date(selectedOrder.createdAt).toLocaleDateString("tr-TR")}
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 block mb-2">TESLİMAT ADRESİ</span>
-              <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1 leading-normal text-slate-500">
-                <p className="font-bold text-slate-700">
-                  {selectedOrder.billingFirstName} {selectedOrder.billingLastName}
-                </p>
-                <p>{selectedOrder.billingAddressLine1}</p>
-                {selectedOrder.billingAddressLine2 && <p>{selectedOrder.billingAddressLine2}</p>}
-                <p className="font-semibold text-slate-600">
-                  {selectedOrder.billingPostcode} / {selectedOrder.billingCity}
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100">
-              <span className="text-[10px] font-bold text-slate-400 block mb-2">SİPARİŞ ÖZETİ</span>
-              <div className="space-y-2">
-                {selectedOrder.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-[11px] text-slate-700">
-                    <span className="truncate max-w-[120px] font-semibold">{item.name}</span>
-                    <span className="font-bold text-slate-400">x{item.quantity}</span>
-                    <span className="font-black text-slate-800">₺{item.lineTotal.toLocaleString("tr-TR")}</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center shrink-0">
+                    <User size={14} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-slate-400 font-bold">MÜŞTERİ</p>
+                    <p className="font-bold text-slate-800">
+                      {selectedOrder.billingFirstName} {selectedOrder.billingLastName}
+                    </p>
                   </div>
-                ))}
-                <div className="border-t border-slate-100 pt-2 flex justify-between font-black text-sm text-orange-500">
-                  <span>Toplam:</span>
-                  <span>₺{selectedOrder.total.toLocaleString("tr-TR")}</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-8 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center shrink-0">
+                    <Mail size={14} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-slate-400 font-bold">İLETİŞİM</p>
+                    <p className="font-bold text-slate-800 truncate">{selectedOrder.email}</p>
+                    <p className="text-[10px] text-slate-400">{selectedOrder.phone || "-"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 block mb-2">TESLİMAT ADRESİ</span>
+                <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1 leading-normal text-slate-500">
+                  <p className="font-bold text-slate-700">
+                    {selectedOrder.billingFirstName} {selectedOrder.billingLastName}
+                  </p>
+                  <p>{selectedOrder.billingAddressLine1}</p>
+                  {selectedOrder.billingAddressLine2 && <p>{selectedOrder.billingAddressLine2}</p>}
+                  <p className="font-semibold text-slate-600">
+                    {selectedOrder.billingPostcode} / {selectedOrder.billingCity}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100">
+                <span className="text-[10px] font-bold text-slate-400 block mb-2">SİPARİŞ İÇERİĞİ</span>
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold">
+                        <th className="p-2.5">Ürün</th>
+                        <th className="p-2.5">Plan</th>
+                        <th className="p-2.5 text-center">Adet</th>
+                        <th className="p-2.5 text-right">Aylık</th>
+                        <th className="p-2.5 text-right">Tutar</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {selectedOrder.items.map((item, idx) => (
+                        <tr key={idx}>
+                          <td className="p-2.5 font-semibold text-slate-800">
+                            {item.name}
+                            {item.sku && <span className="block text-[10px] text-slate-400 font-normal">{item.sku}</span>}
+                          </td>
+                          <td className="p-2.5 text-slate-500">{item.rentalTierLabel || "-"}</td>
+                          <td className="p-2.5 text-center text-slate-500">{item.quantity}</td>
+                          <td className="p-2.5 text-right text-slate-500">
+                            ₺{item.unitPrice.toLocaleString("tr-TR")}
+                          </td>
+                          <td className="p-2.5 text-right font-bold text-slate-800">
+                            ₺{item.lineTotal.toLocaleString("tr-TR")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-between items-center pt-3 mt-1">
+                  <span className="text-slate-500">
+                    Ara toplam ₺{selectedOrder.subtotal.toLocaleString("tr-TR")} + KDV ₺
+                    {selectedOrder.taxTotal.toLocaleString("tr-TR")}
+                  </span>
+                  <span className="font-black text-base text-orange-500">
+                    Toplam ₺{selectedOrder.total.toLocaleString("tr-TR")}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        ) : (
-          <div className="text-center py-10 text-xs text-slate-400">
-            Sipariş detaylarını görüntülemek için tabloda "Detay" düğmesine tıklayın.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <ConfirmDialog
         open={!!alertMessage}

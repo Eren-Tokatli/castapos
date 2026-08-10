@@ -37,3 +37,5 @@ pnpm-debug.log*
 *.sqlite
 *.sqlite3
 *.dump
+.vercel
+.env*

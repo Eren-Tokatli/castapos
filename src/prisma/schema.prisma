@@ -335,6 +335,9 @@ model Order {
   email String
   phone String?
 
+  /// T.C. / vergi no — kiralanan ürünler için otomatik RentalAgreement oluşturmada kullanılır.
+  taxOrNationalId String?
+
   items      OrderItem[]
   totalLines OrderTotalLine[]
 

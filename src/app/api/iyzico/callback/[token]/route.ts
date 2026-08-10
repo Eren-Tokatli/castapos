@@ -1,6 +1,68 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { retrieveCheckoutForm } from "@/lib/iyzico";
+import { revalidatePath } from "next/cache";
+import type { Order } from "@/generated/prisma";
+
+/// Creates one RentalAgreement (+ full installment calendar) per RENT item
+/// in a just-paid Order. The order's checkout payment covers the first
+/// month only (see sepet/actions.ts), so installment #1 is marked paid and
+/// the rest are left open for later collection via the customer's /takip
+/// portal or an admin-sent payment link.
+async function createRentalAgreementsFromOrder(order: Order) {
+  const rentItems = order.items.filter((item) => item.saleMode === "RENT");
+
+  for (const item of rentItems) {
+    const product = await prisma.product.findUnique({ where: { id: item.productId } });
+    const tier = product?.rentalTiers.find((t) => t.label === item.rentalTierLabel);
+    const term = tier?.durationMonths || 1;
+    const monthlyAmount = item.unitPrice;
+    const rentalStart = new Date();
+    const rentalEnd = new Date(rentalStart);
+    rentalEnd.setMonth(rentalStart.getMonth() + term);
+
+    const agreement = await prisma.rentalAgreement.create({
+      data: {
+        userId: order.userId || undefined,
+        orderReferenceNo: order.orderNumber,
+        assetSku: item.sku || undefined,
+        assetName: item.name,
+        tenantName: `${order.billingFirstName} ${order.billingLastName}`.trim(),
+        taxOrNationalId: order.taxOrNationalId || "",
+        phone: order.phone || "",
+        email: order.email,
+        address: `${order.billingAddressLine1} ${order.billingAddressLine2 || ""}`.trim(),
+        city: order.billingCity,
+        rentalTermMonths: term,
+        monthlyAmount,
+        rentalStart,
+        rentalEnd,
+        deliveryStatus: "PENDING",
+        paymentStatus: term <= 1 ? "COMPLETED" : "CURRENT",
+        paymentDueDay: rentalStart.getDate(),
+      },
+    });
+
+    const installmentsData = Array.from({ length: term }, (_, i) => {
+      const dueDate = new Date(rentalStart);
+      dueDate.setMonth(rentalStart.getMonth() + i);
+      return {
+        rentalAgreementId: agreement.id,
+        dueDate,
+        amount: monthlyAmount,
+        paid: i === 0, // first month already collected at checkout
+        description: `${i + 1}. Ay Ödemesi`,
+      };
+    });
+
+    await prisma.installment.createMany({ data: installmentsData });
+  }
+
+  if (rentItems.length > 0) {
+    revalidatePath("/admin/agreements");
+    revalidatePath("/admin");
+  }
+}
 
 export async function POST(
   request: Request,
@@ -43,13 +105,18 @@ export async function POST(
 
       if (paymentRecord.kind === "ORDER" && paymentRecord.orderId) {
         // Update storefront Order status
-        await prisma.order.update({
+        const order = await prisma.order.update({
           where: { id: paymentRecord.orderId },
           data: {
             paymentStatus: "SUCCESS",
             status: "PAID",
           },
         });
+
+        // Auto-create a RentalAgreement (+ installment plan) for each rented
+        // item in the order — first month is already paid (this checkout),
+        // remaining months stay unpaid and get collected via /takip later.
+        await createRentalAgreementsFromOrder(order);
 
         // Redirect to success page
         return NextResponse.redirect(

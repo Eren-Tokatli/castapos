@@ -53,6 +53,7 @@ export default function SepetPage() {
     lastName: "",
     email: "",
     phone: "",
+    taxOrNationalId: "",
     city: "İstanbul",
     district: "",
     address: "",
@@ -114,8 +115,20 @@ export default function SepetPage() {
 
   // Step 1: Address submission & order creation in DB
   const handleProceedToPayment = async () => {
-    if (!shippingForm.firstName || !shippingForm.lastName || !shippingForm.email || !shippingForm.phone || !shippingForm.address) {
+    if (
+      !shippingForm.firstName ||
+      !shippingForm.lastName ||
+      !shippingForm.email ||
+      !shippingForm.phone ||
+      !shippingForm.taxOrNationalId ||
+      !shippingForm.address
+    ) {
       showToast("Lütfen tüm gerekli alanları doldurun.");
+      return;
+    }
+
+    if (shippingForm.taxOrNationalId.length !== 11) {
+      showToast("T.C. kimlik numarası 11 haneli olmalıdır.");
       return;
     }
 
@@ -477,6 +490,22 @@ export default function SepetPage() {
                             onChange={(e) => handlePhoneInput(e.target.value)}
                           />
                         </div>
+                      </label>
+                      <label>
+                        T.C. Kimlik No
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="11 haneli T.C. kimlik numaranız"
+                          maxLength={11}
+                          value={shippingForm.taxOrNationalId}
+                          onChange={(e) =>
+                            setShippingForm({
+                              ...shippingForm,
+                              taxOrNationalId: e.target.value.replace(/[^0-9]/g, ""),
+                            })
+                          }
+                        />
                       </label>
                       <label>
                         İl

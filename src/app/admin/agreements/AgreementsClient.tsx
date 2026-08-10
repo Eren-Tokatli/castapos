@@ -389,9 +389,11 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <input
                   type="text"
                   required
+                  minLength={10}
+                  maxLength={11}
                   value={createForm.phone}
-                  onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value })}
-                  placeholder="+90555..."
+                  onChange={(e) => setCreateForm({ ...createForm, phone: e.target.value.replace(/[^0-9]/g, "") })}
+                  placeholder="5xxxxxxxxx"
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
                 />
               </div>
@@ -400,6 +402,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">E-posta</label>
                 <input
                   type="email"
+                  required
                   value={createForm.email}
                   onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
@@ -410,6 +413,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Teslimat Adresi</label>
                 <input
                   type="text"
+                  required
                   value={createForm.address}
                   onChange={(e) => setCreateForm({ ...createForm, address: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
@@ -420,6 +424,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Şehir</label>
                 <input
                   type="text"
+                  required
                   value={createForm.city}
                   onChange={(e) => setCreateForm({ ...createForm, city: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
@@ -599,8 +604,11 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <input
                   type="text"
                   required
+                  minLength={10}
+                  maxLength={11}
                   value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value.replace(/[^0-9]/g, "") })}
+                  placeholder="5xxxxxxxxx"
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
                 />
               </div>
@@ -609,6 +617,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">E-posta</label>
                 <input
                   type="email"
+                  required
                   value={editForm.email}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
@@ -619,6 +628,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Teslimat Adresi</label>
                 <input
                   type="text"
+                  required
                   value={editForm.address}
                   onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
@@ -629,6 +639,7 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
                 <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Şehir</label>
                 <input
                   type="text"
+                  required
                   value={editForm.city}
                   onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
                   className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
