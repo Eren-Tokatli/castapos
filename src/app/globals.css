@@ -6461,7 +6461,7 @@ body.page-product-detail .installment-box.refined.compact.cleaner.light em {
 
 body.page-urun-detay .installment-box.refined.compact.cleaner.light .big-total,
 body.page-product-detail .installment-box.refined.compact.cleaner.light .big-total {
-  color: #fff !important;
+  color: #22c55e !important;
   font-size: 40px;
   letter-spacing: -.03em;
 }
@@ -6717,9 +6717,12 @@ body.page-urun-detay .installment-box.refined.compact.cleaner.light {
   color: #fff !important;
 }
 
-body.page-urun-detay .detail-price-grid.selectable .price-mini-card.active b,
-body.page-urun-detay .installment-box.refined.compact.cleaner.light .big-total {
+body.page-urun-detay .detail-price-grid.selectable .price-mini-card.active b {
   color: #fff !important;
+}
+
+body.page-urun-detay .installment-box.refined.compact.cleaner.light .big-total {
+  color: #22c55e !important;
 }
 
 body.page-urun-detay .detail-price-grid.selectable .price-mini-card.active small,
@@ -7135,7 +7138,7 @@ body.page-urun-detay .detail-tab-panel:before {
 
 .premium-description-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: 16px;
 }
 
@@ -7168,10 +7171,12 @@ body.page-urun-detay .detail-tab-panel:before {
   display: grid;
   align-content: center;
   gap: 10px;
+  padding: 20px;
   background:
     radial-gradient(circle at 92% 10%, rgba(243, 95, 54, .22), transparent 28%),
     linear-gradient(145deg, #111827, #1b2942);
   color: #fff;
+  box-shadow: 0 14px 34px rgba(17, 24, 39, .22);
 }
 
 .premium-copy-card.side span {
@@ -14619,3 +14624,224 @@ body.page-canli-destek .live-support-page-note div {
 
 /* Scrollbar-adjacent surfaces used for modal backdrops already work as-is
    (bg-slate-950/60 is intentionally dark in both themes). */
+
+/* Ürün sayfası: pasif sekmeler dinlenme halinde de pill olarak okunsun,
+   sadece hover'da değil (aktif/hover stilleri değişmedi). */
+body.page-urun-detay .detail-tabs button:not(.active) {
+  background: rgba(17, 24, 39, .035);
+  border: 1px solid rgba(17, 24, 39, .05) !important;
+}
+
+/* Ürün sayfası: ana görsel butona dönüştü (büyütme için) — buton
+   varsayılanlarını sıfırla, görseli çerçeveye biraz daha doldur. */
+.main-gallery-image.clean.product-hero-image {
+  border: 0;
+  padding: 0;
+  font: inherit;
+  width: 100%;
+}
+.main-gallery-image.clean.product-hero-image img {
+  transform: scale(1.08);
+  transition: transform .25s ease;
+}
+.main-gallery-image.clean.product-hero-image:hover img {
+  transform: scale(1.12);
+}
+.gallery-zoom-hint {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(17, 24, 39, .82);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 12px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+.main-gallery-image.clean.product-hero-image {
+  position: relative;
+}
+.main-gallery-image.clean.product-hero-image:hover .gallery-zoom-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ürün görseli büyütme (lightbox) */
+.image-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, .72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 400;
+}
+.image-zoom-modal {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: 90vh;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 40px 90px rgba(16, 24, 40, .3);
+  padding: 32px;
+  display: grid;
+  place-items: center;
+}
+.image-zoom-modal img {
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+}
+.image-zoom-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid #e5e7ee;
+  background: #fff;
+  color: #344054;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.image-zoom-close:hover {
+  background: #f7f8fb;
+}
+
+/* Ürün sayfası: aylık ödeme kutusu — büyük tutarın rengi (body.page-urun-detay
+   ...big-total !important kuralları, ~satır 6462 ve 6721) zaten yeşile
+   çevrildi; burada sadece altta sol/sağ köşelerdeki günlük/toplam satırı. */
+.installment-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.installment-bottom-row .daily-amount,
+.installment-bottom-row .total-amount {
+  font-size: 13px;
+  font-weight: 800;
+  color: #d4dceb;
+}
+.installment-bottom-row .total-amount {
+  color: #fff;
+}
+
+/* Ürün sayfası: fiyat kartı + bilgi kartları ayrı bir wrapper'da, aynı
+   sağ kolonda — kartlar galeriye değil, fiyat kartına hizalanır. */
+.detail-panel-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: stretch;
+}
+
+/* Fiyat kartının DIŞINDA, hemen altında, alt alta duran bilgi kartları
+   (zarar/taksit/garanti) — aradaki boşluklar büyüyerek son kartın altını
+   soldaki görsel kolonunun altıyla hizalar. */
+.detail-info-teaser-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  gap: 10px;
+}
+.info-teaser-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #d8dde7;
+  border-radius: 16px;
+  padding: 16px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.info-teaser-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(16, 24, 40, .08);
+  border-color: rgba(243, 95, 54, .35);
+}
+.info-teaser-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #fff0ea;
+  color: var(--brand);
+}
+.info-teaser-text {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.35;
+}
+
+
+/* Ürün sayfası: zarar/taksit/garanti bilgi paneli (görsel + açıklama) */
+.info-panel-modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 40px 90px rgba(16, 24, 40, .3);
+  padding: 40px 36px 36px;
+  text-align: center;
+}
+.info-panel-visual {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #111827, #1b2942);
+  color: #ffb199;
+}
+.info-panel-modal h3 {
+  font-size: 22px;
+  margin: 0 0 12px;
+  color: #111827;
+}
+.info-panel-modal p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #667085;
+  margin: 0;
+}
+
+/* Ürün sayfası: sol (galeri) ve sağ (fiyat kartı + bilgi kartları) kolonların
+   alt kenarları HER ekran genişliğinde hizalı kalsın. Hangi kolon o an daha
+   uzunsa satır yüksekliğini o belirler; diğer kolon (align-self:stretch ile)
+   o yüksekliğe esner. Sağ kolonda esneyen kısım kart aralarındaki boşluk
+   (bkz. .detail-info-teaser-stack), sol kolonda esneyen kısım ana görsel. */
+.gallery-panel.detail-clean {
+  align-self: stretch !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+}
+.main-gallery-image.clean.product-hero-image {
+  height: auto !important;
+  min-height: 320px !important;
+  flex: 1 1 auto !important;
+}

@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, Check, ArrowLeftRight, BadgeCheck, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { Star, Check, ArrowLeftRight, BadgeCheck, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldAlert, ShieldCheck, Sparkles, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
   ProductStatic,
   PRODUCTS,
   defaultPeriod,
   monthlyPrice,
+  dailyPrice,
   ratingCount,
   formatPrice,
 } from "@/lib/products-data";
@@ -92,11 +93,31 @@ function expandedQa(seed: QAItem[]): QAItem[] {
   }));
 }
 
+const INFO_PANELS = {
+  damage: {
+    icon: ShieldAlert,
+    title: "Ürüne zarar gelirse ne olur?",
+    text: "Kiralama süresi boyunca üründe oluşabilecek normal kullanım kaynaklı arızalar Castapos güvencesi kapsamındadır — destek ekibimizle iletişime geçmen yeterli, teknik ekip ürünü yerinde inceler ve gerekirse ücretsiz onarım ya da değişim sağlanır. Kasıtlı hasar veya ürünün amacı dışında kullanımı durumunda hasar bedeli sözleşme koşullarına göre ayrıca değerlendirilir."
+  },
+  installment: {
+    icon: Wallet,
+    title: "Taksit ödemelerimi nasıl yapacağım?",
+    text: "Aylık ödemen, sipariş sırasında kayıtlı kartından her ay otomatik olarak tahsil edilir; ödeme tarihinden birkaç gün önce hatırlatma bildirimi alırsın. Güncel taksit durumunu ve ödeme geçmişini T.C. kimlik numaranla giriş yaptığın /takip sayfasından ya da Hesabım > Siparişlerim ekranından her an takip edebilirsin."
+  },
+  warranty: {
+    icon: BadgeCheck,
+    title: "Ürünün garantisi var mı?",
+    text: "Tüm kiralık ürünler teslimattan önce Castapos teknik ekibi tarafından kontrolden geçirilir ve kiralama süren boyunca garanti kapsamındadır. Üretim kaynaklı bir arıza yaşarsan ücretsiz teknik servis desteği alır, gerekirse ürün aynı gün içinde değiştirilir."
+  }
+} as const;
+
 export function ProductDetailClient({ product: p }: { product: ProductStatic }) {
   const { addToCart, toggleFavorite, isFavorite, toggleCompare, compareList } = useStore();
 
   const [period, setPeriod] = useState(defaultPeriod(p));
   const [activeTab, setActiveTab] = useState("description");
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [infoPanel, setInfoPanel] = useState<keyof typeof INFO_PANELS | null>(null);
   const [starRating, setStarRating] = useState<number | null>(null);
   const [reviewText, setReviewText] = useState("");
   const [questionText, setQuestionText] = useState("");
@@ -179,9 +200,17 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
         <div className="container product-detail-grid refined compact-detail-grid">
           {/* Gallery Panel */}
           <div className="gallery-panel detail-clean">
-            <div className="main-gallery-image clean product-hero-image">
+            <button
+              type="button"
+              className="main-gallery-image clean product-hero-image"
+              onClick={() => setZoomOpen(true)}
+              aria-label="Görseli büyüt"
+            >
               <img src={p.image} alt={p.name} />
-            </div>
+              <span className="gallery-zoom-hint">
+                <ZoomIn size={15} /> Büyüt
+              </span>
+            </button>
             <div className="thumb-row clean">
               <span><img src={p.image} alt="" /></span>
               <span><img src={p.image} alt="" /></span>
@@ -195,7 +224,8 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             </div>
           </div>
 
-          {/* Details Panel */}
+          {/* Details Panel + info teaser stack — aynı sağ kolon */}
+          <div className="detail-panel-column">
           <div className="detail-panel refined clean compact-panel">
             <div className="detail-top-row">
               <nav className="breadcrumb">
@@ -278,12 +308,10 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             <div className="installment-box refined compact cleaner light">
               <span>Aylık ödeme tutarı</span>
               <div className="big-total">{formatPrice(currentMonthly)}</div>
-              <em className="detail-monthly-cost">
-                <span className="metric-label">
-                  Toplam · <strong className="period-accent">{period} Ay</strong>:
-                </span>{" "}
-                <strong className="metric-value">{formatPrice(selectedTotal)}</strong>
-              </em>
+              <div className="installment-bottom-row">
+                <span className="daily-amount">Günlük {formatPrice(dailyPrice(p, period))}</span>
+                <span className="total-amount">Toplam: {formatPrice(selectedTotal)}</span>
+              </div>
             </div>
 
             <div className="detail-actions compact-actions single">
@@ -299,6 +327,26 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             <div className="detail-security-row">
               <span><ShieldCheck size={15} /> 3D Secure ödeme</span>
               <span><Truck size={15} /> İstanbul içi planlı teslimat</span>
+            </div>
+          </div>
+
+            {/* Info teaser stack — fiyat kartının dışında, hemen altında */}
+            <div className="detail-info-teaser-stack">
+              {(Object.keys(INFO_PANELS) as (keyof typeof INFO_PANELS)[]).map((key) => {
+                const panel = INFO_PANELS[key];
+                const Icon = panel.icon;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className="info-teaser-card"
+                    onClick={() => setInfoPanel(key)}
+                  >
+                    <span className="info-teaser-icon"><Icon size={22} /></span>
+                    <span className="info-teaser-text">{panel.title}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -579,6 +627,47 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             ))}
           </div>
         </section>
+      )}
+
+      {/* IMAGE ZOOM LIGHTBOX */}
+      {zoomOpen && (
+        <div className="image-zoom-backdrop open" onClick={() => setZoomOpen(false)}>
+          <div className="image-zoom-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="image-zoom-close"
+              onClick={() => setZoomOpen(false)}
+              aria-label="Kapat"
+            >
+              <X size={20} />
+            </button>
+            <img src={p.image} alt={p.name} />
+          </div>
+        </div>
+      )}
+
+      {/* INFO PANEL (zarar/taksit/garanti) */}
+      {infoPanel && (
+        <div className="image-zoom-backdrop open" onClick={() => setInfoPanel(null)}>
+          <div className="info-panel-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="image-zoom-close"
+              onClick={() => setInfoPanel(null)}
+              aria-label="Kapat"
+            >
+              <X size={20} />
+            </button>
+            <div className="info-panel-visual">
+              {(() => {
+                const Icon = INFO_PANELS[infoPanel].icon;
+                return <Icon size={40} />;
+              })()}
+            </div>
+            <h3>{INFO_PANELS[infoPanel].title}</h3>
+            <p>{INFO_PANELS[infoPanel].text}</p>
+          </div>
+        </div>
       )}
     </>
   );
