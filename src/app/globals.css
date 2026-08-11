@@ -9318,6 +9318,7 @@ body.page-urun-detay .review-form-box .btn {
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   min-height: 62px;
   padding: 18px 20px 16px !important;
   border-bottom: 1px solid rgba(243, 95, 54, .18) !important;
@@ -9327,19 +9328,32 @@ body.page-urun-detay .review-form-box .btn {
   letter-spacing: -.01em;
 }
 
-.kategori-shell .filter-title::before {
-  content: "";
-  width: 9px;
-  height: 9px;
-  margin-right: 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--brand), var(--gold));
-  box-shadow: 0 0 0 5px rgba(243, 95, 54, .1);
-}
-
 .kategori-shell .filter-block {
   padding: 18px 20px !important;
   border-bottom: 1px solid rgba(243, 95, 54, .16) !important;
+}
+
+.price-range-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.price-range-row input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  border: 1px solid #d8dde7;
+  border-radius: 10px;
+  padding: 0 10px;
+  outline: 0;
+  font-size: 13px;
+}
+.price-range-row input:focus {
+  border-color: var(--brand);
+}
+.price-range-row span {
+  color: #98a2b3;
+  font-weight: 800;
 }
 
 .kategori-shell .filter-block:last-child {

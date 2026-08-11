@@ -28,6 +28,8 @@ function KategoriPageContent() {
   const searchQuery = urlQuery;
 
   const [selectedBrand, setSelectedBrand] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
   const [advantages, setAdvantages] = useState<RentalAdvantages>({
     campaigned: false,
@@ -93,14 +95,24 @@ function KategoriPageContent() {
     filteredProducts = filteredProducts.filter((p) => p.brand === selectedBrand);
   }
 
-  // 4. Filter by kiralama süresi (Periods)
+  // 4. Filter by price range
+  const min = Number(minPrice);
+  if (minPrice && !Number.isNaN(min)) {
+    filteredProducts = filteredProducts.filter((p) => p.price >= min);
+  }
+  const max = Number(maxPrice);
+  if (maxPrice && !Number.isNaN(max)) {
+    filteredProducts = filteredProducts.filter((p) => p.price <= max);
+  }
+
+  // 5. Filter by kiralama süresi (Periods)
   if (selectedPeriods.length > 0) {
     filteredProducts = filteredProducts.filter((p) =>
       p.periods.some((per) => selectedPeriods.includes(per))
     );
   }
 
-  // 5. Filter by advantages
+  // 6. Filter by advantages
   if (advantages.campaigned) {
     filteredProducts = filteredProducts.filter((p) => p.discount !== null);
   }
@@ -158,6 +170,10 @@ function KategoriPageContent() {
             brands={brands}
             selectedBrand={selectedBrand}
             onBrandChange={handleBrandChange}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            onMinPriceChange={setMinPrice}
+            onMaxPriceChange={setMaxPrice}
             selectedPeriods={selectedPeriods}
             onPeriodChange={handlePeriodChange}
             advantages={advantages}

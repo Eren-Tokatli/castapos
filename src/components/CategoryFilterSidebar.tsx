@@ -9,6 +9,10 @@ interface CategoryFilterSidebarProps {
   brands: string[];
   selectedBrand: string;
   onBrandChange: (brand: string) => void;
+  minPrice: string;
+  maxPrice: string;
+  onMinPriceChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
   selectedPeriods: number[];
   onPeriodChange: (period: number) => void;
   advantages: RentalAdvantages;
@@ -26,6 +30,10 @@ export function CategoryFilterSidebar({
   brands,
   selectedBrand,
   onBrandChange,
+  minPrice,
+  maxPrice,
+  onMinPriceChange,
+  onMaxPriceChange,
   selectedPeriods,
   onPeriodChange,
   advantages,
@@ -48,6 +56,29 @@ export function CategoryFilterSidebar({
               <span>{brand}</span>
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="filter-block">
+        <h3>Fiyat Aralığı</h3>
+        <div className="price-range-row">
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="Min ₺"
+            value={minPrice}
+            onChange={(e) => onMinPriceChange(e.target.value)}
+          />
+          <span>—</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="Max ₺"
+            value={maxPrice}
+            onChange={(e) => onMaxPriceChange(e.target.value)}
+          />
         </div>
       </div>
 
