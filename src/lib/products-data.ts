@@ -445,8 +445,8 @@ export const PRODUCTS: ProductStatic[] = [
     name: "Wero AI Bike Pro Akıllı Kondisyon Bisikleti",
     code: "PRM701",
     brand: "Wero",
-    category: "Premium",
-    collection: "Premium",
+    category: "Fitness",
+    collection: "Fitness",
     price: 4950,
     badge: "Premium",
     discount: null,
@@ -467,8 +467,8 @@ export const PRODUCTS: ProductStatic[] = [
     name: "WalkingPad X23 Premium Koşu Bandı",
     code: "PRM702",
     brand: "WalkingPad",
-    category: "Premium",
-    collection: "Premium",
+    category: "Koşu Bantları",
+    collection: "Koşu Bantları",
     price: 5290,
     badge: "Premium",
     discount: null,
@@ -489,8 +489,8 @@ export const PRODUCTS: ProductStatic[] = [
     name: "Bissell HydroSteam Premium Temizlik Makinesi",
     code: "PRM703",
     brand: "Bissell",
-    category: "Premium",
-    collection: "Premium",
+    category: "Ev Aletleri",
+    collection: "Ev Aletleri",
     price: 4590,
     badge: "Premium",
     discount: null,
@@ -607,18 +607,6 @@ export const NAV_CATEGORIES: NavCategory[] = [
         { label: "Epilasyon Cihazları", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Epilasyon" },
         { label: "Masaj & Bakım", href: "/kategori?cat=Güzellik%20Teknolojileri&q=Masaj" },
         { label: "Tümünü Gör", href: "/kategori?cat=Güzellik%20Teknolojileri", all: true }
-      ]
-    ]]
-  },
-  {
-    name: "Premium",
-    href: "/kategori?cat=Premium",
-    groups: [[
-      "Ürün Türleri", [
-        { label: "Premium Spor Aletleri", href: "/kategori?cat=Premium&q=Spor" },
-        { label: "Premium Ev Aletleri", href: "/kategori?cat=Premium&q=Ev%20Aletleri" },
-        { label: "Popüler Premium Modeller", href: "/kategori?cat=Premium&q=Popüler" },
-        { label: "Tümünü Gör", href: "/kategori?cat=Premium", all: true }
       ]
     ]]
   },

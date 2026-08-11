@@ -70,13 +70,10 @@ function KategoriPageContent() {
     filteredProducts = filteredProducts.filter((p) =>
       ["Koşu Bantları", "Yürüyüş Bantları", "Bisiklet", "Fitness"].includes(p.collection)
     );
-  } else if (activeCategory && !["Yaz Sezonu", "Premium"].includes(activeCategory)) {
+  } else if (activeCategory && activeCategory !== "Yaz Sezonu") {
     filteredProducts = filteredProducts.filter(
       (p) => p.collection === activeCategory || p.category === activeCategory
     );
-  }
-  if (activeCategory === "Premium") {
-    filteredProducts = filteredProducts.filter((p) => p.premium);
   }
   if (activeCategory === "Yaz Sezonu") {
     filteredProducts = filteredProducts.filter((p) =>
