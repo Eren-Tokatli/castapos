@@ -2,7 +2,7 @@
 
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bot, Loader2, Send, UserRound } from "lucide-react";
+import { BadgeCheck, Bot, Headphones, Loader2, Send, Sparkles, UserRound } from "lucide-react";
 
 type RecommendedProduct = {
   id: string;
@@ -66,6 +66,8 @@ function renderMessageText(text: string): ReactNode[] {
 
   return parts;
 }
+
+const quickPrompts = ["Koşu bandı öner", "KDV dahil fiyat nasıl görünür?", "Teslimat ne zaman olur?", "Halı yıkama için hangi ürün?"];
 
 const starterMessages: ChatMessage[] = [
   {
@@ -158,7 +160,33 @@ export function AiChatClient() {
   };
 
   return (
-    <section className="ai-chat-surface">
+    <>
+      <div className="ai-chat-copy">
+        <span className="section-kicker">Akıllı destek</span>
+        <h1>Kiralama kararını birkaç soruyla netleştir.</h1>
+        <p>
+          Ürün seçimi, kiralama süresi, ödeme özeti veya teslimat hakkında hızlıca fikir al. Gerekirse canlı destek
+          ekibine yönlenebilirsin.
+        </p>
+        <div className="ai-chat-prompt-list">
+          {quickPrompts.map((prompt) => (
+            <button key={prompt} type="button" onClick={() => sendMessage(prompt)} disabled={loading}>
+              <Sparkles size={14} />
+              {prompt}
+            </button>
+          ))}
+        </div>
+        <div className="ai-chat-side-note">
+          <BadgeCheck size={18} />
+          <span>Bu ekran öneri amaçlıdır. Sipariş ve ödeme adımlarındaki nihai bilgiler esas alınır.</span>
+        </div>
+        <Link className="btn btn-soft" href="/canli-destek">
+          <Headphones size={17} />
+          Canlı desteğe geç
+        </Link>
+      </div>
+
+      <section className="ai-chat-surface">
       <div className="ai-chat-header">
         <span>
           <Bot size={22} />
@@ -229,6 +257,7 @@ export function AiChatClient() {
           {loading ? <Loader2 size={18} /> : <Send size={18} />}
         </button>
       </form>
-    </section>
+      </section>
+    </>
   );
 }

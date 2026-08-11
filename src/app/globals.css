@@ -13988,7 +13988,7 @@ body.page-canli-destek .live-support-page-note div {
   margin: 20px 0;
 }
 
-.ai-chat-prompt-list span {
+.ai-chat-prompt-list button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -13999,6 +13999,17 @@ body.page-canli-destek .live-support-page-note div {
   color: #344054;
   font-weight: 800;
   font-size: 13px;
+  cursor: pointer;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.ai-chat-prompt-list button:hover:not(:disabled) {
+  border-color: var(--brand);
+  color: var(--brand);
+  background: #fff5f1;
+}
+.ai-chat-prompt-list button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
 
 .ai-chat-prompt-list svg,
@@ -14247,7 +14258,7 @@ body.page-canli-destek .live-support-page-note div {
 :root[data-theme="dark"] .live-support-page-note div,
 :root[data-theme="dark"] .ai-chat-surface,
 :root[data-theme="dark"] .ai-chat-form,
-:root[data-theme="dark"] .ai-chat-prompt-list span,
+:root[data-theme="dark"] .ai-chat-prompt-list button,
 :root[data-theme="dark"] .ai-chat-side-note,
 :root[data-theme="dark"] .ai-chat-message p {
   border-color: rgba(255, 255, 255, .1);
@@ -14271,7 +14282,7 @@ body.page-canli-destek .live-support-page-note div {
 :root[data-theme="dark"] .live-support-action small,
 :root[data-theme="dark"] .live-support-page-note div,
 :root[data-theme="dark"] .ai-chat-copy p,
-:root[data-theme="dark"] .ai-chat-prompt-list span,
+:root[data-theme="dark"] .ai-chat-prompt-list button,
 :root[data-theme="dark"] .ai-chat-side-note,
 :root[data-theme="dark"] .ai-chat-message p {
   color: #cbd3df;
