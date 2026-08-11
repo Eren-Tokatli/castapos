@@ -17,6 +17,7 @@ interface CategoryFilterSidebarProps {
   onPeriodChange: (period: number) => void;
   advantages: RentalAdvantages;
   onAdvantageToggle: (key: keyof RentalAdvantages) => void;
+  onApply: () => void;
 }
 
 const rentalPeriods = [1, 3, 6, 9];
@@ -38,6 +39,7 @@ export function CategoryFilterSidebar({
   onPeriodChange,
   advantages,
   onAdvantageToggle,
+  onApply,
 }: CategoryFilterSidebarProps) {
   return (
     <aside className="filter-sidebar">
@@ -111,6 +113,12 @@ export function CategoryFilterSidebar({
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="filter-block filter-apply-block">
+        <button type="button" className="filter-apply-btn" onClick={onApply}>
+          Uygula
+        </button>
       </div>
     </aside>
   );
