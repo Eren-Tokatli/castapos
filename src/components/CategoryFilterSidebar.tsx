@@ -9,10 +9,6 @@ interface CategoryFilterSidebarProps {
   brands: string[];
   selectedBrand: string;
   onBrandChange: (brand: string) => void;
-  typeTitle: string;
-  typeOptions: string[];
-  activeType: string;
-  onTypeChange: (type: string) => void;
   selectedPeriods: number[];
   onPeriodChange: (period: number) => void;
   advantages: RentalAdvantages;
@@ -30,10 +26,6 @@ export function CategoryFilterSidebar({
   brands,
   selectedBrand,
   onBrandChange,
-  typeTitle,
-  typeOptions,
-  activeType,
-  onTypeChange,
   selectedPeriods,
   onPeriodChange,
   advantages,
@@ -55,22 +47,6 @@ export function CategoryFilterSidebar({
               />
               <span>{brand}</span>
             </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="filter-block">
-        <h3>{typeTitle}</h3>
-        <div className="type-filters flex flex-col gap-2">
-          {typeOptions.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={`filter-chip ${activeType === option ? "active" : ""}`}
-              onClick={() => onTypeChange(option)}
-            >
-              {option}
-            </button>
           ))}
         </div>
       </div>

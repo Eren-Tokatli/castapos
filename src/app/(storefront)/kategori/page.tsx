@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { notFound, useSearchParams } from "next/navigation";
-import { PRODUCTS, uniqueBrands, categoryTypeConfig, ratingCount, ProductStatic } from "@/lib/products-data";
+import { PRODUCTS, uniqueBrands, ratingCount } from "@/lib/products-data";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFilterSidebar, RentalAdvantages } from "@/components/CategoryFilterSidebar";
 import { PremiumSortDropdown, SortOption } from "@/components/PremiumSortDropdown";
@@ -28,7 +28,6 @@ function KategoriPageContent() {
   const searchQuery = urlQuery;
 
   const [selectedBrand, setSelectedBrand] = useState("");
-  const [activeType, setActiveType] = useState("Tüm ürünler");
   const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
   const [advantages, setAdvantages] = useState<RentalAdvantages>({
     campaigned: false,
@@ -59,15 +58,6 @@ function KategoriPageContent() {
   const handleAdvantageToggle = (key: keyof RentalAdvantages) => {
     setAdvantages((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  // Helper matching main.js matchesType
-  const matchesType = (product: ProductStatic, type: string) => {
-    if (!type || type === "Tüm ürünler") return true;
-    return product.collection === type || product.category === type;
-  };
-
-  // Get type config for category filters
-  const typeConfig = categoryTypeConfig();
 
   // Filtering products
   let filteredProducts = PRODUCTS.slice();
@@ -103,17 +93,14 @@ function KategoriPageContent() {
     filteredProducts = filteredProducts.filter((p) => p.brand === selectedBrand);
   }
 
-  // 4. Filter by type option
-  filteredProducts = filteredProducts.filter((p) => matchesType(p, activeType));
-
-  // 5. Filter by kiralama süresi (Periods)
+  // 4. Filter by kiralama süresi (Periods)
   if (selectedPeriods.length > 0) {
     filteredProducts = filteredProducts.filter((p) =>
       p.periods.some((per) => selectedPeriods.includes(per))
     );
   }
 
-  // 6. Filter by advantages
+  // 5. Filter by advantages
   if (advantages.campaigned) {
     filteredProducts = filteredProducts.filter((p) => p.discount !== null);
   }
@@ -171,10 +158,6 @@ function KategoriPageContent() {
             brands={brands}
             selectedBrand={selectedBrand}
             onBrandChange={handleBrandChange}
-            typeTitle={typeConfig.title}
-            typeOptions={typeConfig.options}
-            activeType={activeType}
-            onTypeChange={setActiveType}
             selectedPeriods={selectedPeriods}
             onPeriodChange={handlePeriodChange}
             advantages={advantages}
