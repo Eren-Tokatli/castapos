@@ -26,12 +26,6 @@ interface StoreContextType {
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string, period?: number) => void;
 
-  compareList: string[];
-  toggleCompare: (id: string) => void;
-  clearCompare: () => void;
-  isCompareOpen: boolean;
-  setIsCompareOpen: (open: boolean) => void;
-
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
 
@@ -48,10 +42,8 @@ const StoreContext = createContext<StoreContextType | undefined>(undefined);
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
-  const [compareList, setCompareList] = useState<string[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [coupon, setCoupon] = useState<{ code: string } | null>(null);
 
   // Load from localStorage on mount
@@ -72,9 +64,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setFavorites(defaults);
         localStorage.setItem("castaposFavorites", JSON.stringify(defaults));
       }
-
-      const savedCompare = localStorage.getItem("castaposCompareProducts");
-      if (savedCompare) setCompareList(JSON.parse(savedCompare));
 
       const savedCoupon = localStorage.getItem("castaposCoupon");
       if (savedCoupon) setCoupon(JSON.parse(savedCoupon));
@@ -160,29 +149,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const toggleCompare = (id: string) => {
-    setCompareList((prev) => {
-      const exists = prev.includes(id);
-      let updated;
-      if (exists) {
-        updated = prev.filter((x) => x !== id);
-      } else {
-        if (prev.length >= 3) {
-          showToast("En fazla 3 ürün karşılaştırabilirsin.");
-          return prev;
-        }
-        updated = [...prev, id];
-      }
-      localStorage.setItem("castaposCompareProducts", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const clearCompare = () => {
-    setCompareList([]);
-    localStorage.removeItem("castaposCompareProducts");
-  };
-
   const applyCoupon = (code: string) => {
     const normalized = code.trim().toLowerCase();
     if (normalized === "merhaba10") {
@@ -235,11 +201,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         favorites,
         isFavorite,
         toggleFavorite,
-        compareList,
-        toggleCompare,
-        clearCompare,
-        isCompareOpen,
-        setIsCompareOpen,
         isCartOpen,
         setIsCartOpen,
         isFavoritesOpen,

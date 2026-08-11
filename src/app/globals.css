@@ -4330,6 +4330,10 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
   border-color: var(--border-color) !important;
 }
 
+:root[data-theme="dark"] .thumb-row span.active {
+  border-color: var(--brand) !important;
+}
+
 :root[data-theme="dark"] .period-chip {
   background-color: var(--surface) !important;
   border-color: var(--border-color) !important;
@@ -6368,7 +6372,7 @@ body.page-product-detail .detail-panel.refined.clean.compact-panel {
 body.page-urun-detay .detail-panel.refined.clean.compact-panel h1,
 body.page-product-detail .detail-panel.refined.clean.compact-panel h1 {
   color: #101828;
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-geist-sans), Inter, Arial, sans-serif;
   font-weight: 700;
   letter-spacing: -.02em;
 }
@@ -6655,6 +6659,10 @@ body.page-urun-detay .compact-buy-meta {
   background: var(--pd-card) !important;
   border-color: var(--pd-line) !important;
   color: var(--pd-ink) !important;
+}
+
+body.page-urun-detay .thumb-row.clean span.active {
+  border-color: var(--brand) !important;
 }
 
 body.page-urun-detay .detail-product-eyebrow span,
@@ -14686,7 +14694,7 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 }
 .image-zoom-modal {
   position: relative;
-  width: min(720px, 100%);
+  width: min(1000px, 94%);
   max-height: 90vh;
   background: #fff;
   border-radius: 24px;
@@ -14697,8 +14705,28 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 }
 .image-zoom-modal img {
   max-width: 100%;
-  max-height: 72vh;
+  max-height: 76vh;
   object-fit: contain;
+}
+.image-zoom-stage {
+  width: 100%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.image-zoom-slide.from-right {
+  animation: imageZoomFromRight .32s ease;
+}
+.image-zoom-slide.from-left {
+  animation: imageZoomFromLeft .32s ease;
+}
+@keyframes imageZoomFromRight {
+  from { transform: translateX(48px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes imageZoomFromLeft {
+  from { transform: translateX(-48px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 .image-zoom-close {
   position: absolute;
@@ -14717,6 +14745,41 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 }
 .image-zoom-close:hover {
   background: #f7f8fb;
+}
+.image-zoom-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e5e7ee;
+  background: #fff;
+  color: #344054;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, .12);
+}
+.image-zoom-nav:hover {
+  background: #f7f8fb;
+}
+.image-zoom-prev {
+  left: 14px;
+}
+.image-zoom-next {
+  right: 14px;
+}
+
+/* Galeri thumbnail: aktif görsel vurgusu + tıklanabilirlik */
+.thumb-row.clean span {
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.thumb-row.clean span.active {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand) inset;
 }
 
 /* Ürün sayfası: aylık ödeme kutusu — büyük tutarın rengi (body.page-urun-detay
@@ -14798,19 +14861,19 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 /* Ürün sayfası: zarar/taksit/garanti bilgi paneli (görsel + açıklama) */
 .info-panel-modal {
   position: relative;
-  width: min(560px, 100%);
+  width: min(1120px, 96%);
   max-height: 90vh;
   overflow: auto;
   background: #fff;
   border-radius: 24px;
   box-shadow: 0 40px 90px rgba(16, 24, 40, .3);
-  padding: 40px 36px 36px;
+  padding: 56px 36px 52px;
   text-align: center;
 }
 .info-panel-visual {
   width: 76px;
   height: 76px;
-  margin: 0 auto 20px;
+  margin: 0 auto 28px;
   display: grid;
   place-items: center;
   border-radius: 20px;

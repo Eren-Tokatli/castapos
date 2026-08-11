@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, Check, ArrowLeftRight, BadgeCheck, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldAlert, ShieldCheck, Sparkles, Truck, Wallet, X, ZoomIn } from "lucide-react";
+import { Star, Check, BadgeCheck, ChevronLeft, ChevronRight, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldAlert, ShieldCheck, Sparkles, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
   ProductStatic,
@@ -112,11 +112,14 @@ const INFO_PANELS = {
 } as const;
 
 export function ProductDetailClient({ product: p }: { product: ProductStatic }) {
-  const { addToCart, toggleFavorite, isFavorite, toggleCompare, compareList } = useStore();
+  const { addToCart, toggleFavorite, isFavorite } = useStore();
 
   const [period, setPeriod] = useState(defaultPeriod(p));
   const [activeTab, setActiveTab] = useState("description");
   const [zoomOpen, setZoomOpen] = useState(false);
+  const images = p.images && p.images.length > 0 ? p.images : [p.image, p.image, p.image, p.image];
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [infoPanel, setInfoPanel] = useState<keyof typeof INFO_PANELS | null>(null);
   const [starRating, setStarRating] = useState<number | null>(null);
   const [reviewText, setReviewText] = useState("");
@@ -129,12 +132,31 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
 
   const selectedTotal = rentTotal;
   const favorited = isFavorite(p.id);
-  const inCompare = compareList.includes(p.id);
 
   useEffect(() => {
     document.body.classList.add("page-urun-detay", "page-product-detail");
     return () => document.body.classList.remove("page-urun-detay", "page-product-detail");
   }, []);
+
+  const goPrevImage = () => {
+    setSlideDir("left");
+    setActiveImageIndex((i) => (i - 1 + images.length) % images.length);
+  };
+
+  const goNextImage = () => {
+    setSlideDir("right");
+    setActiveImageIndex((i) => (i + 1) % images.length);
+  };
+
+  useEffect(() => {
+    if (!zoomOpen || images.length <= 1) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") goPrevImage();
+      if (e.key === "ArrowRight") goNextImage();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomOpen, images.length]);
 
   // Review & Q&A data
   const qaItems = expandedQa(REVIEW_DATA_DEFAULT.qa);
@@ -206,16 +228,31 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
               onClick={() => setZoomOpen(true)}
               aria-label="Görseli büyüt"
             >
-              <img src={p.image} alt={p.name} />
+              <img src={images[activeImageIndex]} alt={p.name} />
               <span className="gallery-zoom-hint">
                 <ZoomIn size={15} /> Büyüt
               </span>
             </button>
             <div className="thumb-row clean">
-              <span><img src={p.image} alt="" /></span>
-              <span><img src={p.image} alt="" /></span>
-              <span><img src={p.image} alt="" /></span>
-              <span><img src={p.image} alt="" /></span>
+              {images.map((img, idx) => (
+                <span
+                  key={idx}
+                  className={idx === activeImageIndex ? "active" : undefined}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${idx + 1}. görseli göster`}
+                  aria-pressed={idx === activeImageIndex}
+                  onClick={() => setActiveImageIndex(idx)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveImageIndex(idx);
+                    }
+                  }}
+                >
+                  <img src={img} alt="" />
+                </span>
+              ))}
             </div>
             <div className="detail-premium-strip" aria-label="Kiralama avantajları">
               <span><ShieldCheck size={15} /> Kontrol edilmiş ürün</span>
@@ -240,14 +277,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
               <div className="detail-top-actions">
                 <button
                   type="button"
-                  className={`detail-compare-btn ${inCompare ? "active" : ""}`}
-                  onClick={() => toggleCompare(p.id)}
-                >
-                  <ArrowLeftRight size={14} /> {inCompare ? "Karşılaştırmadan Çıkar" : "Karşılaştır"}
-                </button>
-                
-                <button
-                  type="button"
                   className={`detail-fav-btn ${favorited ? "active" : ""}`}
                   onClick={() => toggleFavorite(p.id, period)}
                   aria-label={favorited ? "Favorilerden çıkar" : "Favorilere ekle"}
@@ -255,12 +284,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                   {heartIcon(favorited)}
                 </button>
               </div>
-            </div>
-
-            <div className="detail-product-eyebrow">
-              <span><Sparkles size={13} /> Premium kiralama</span>
-              <span>{p.brand}</span>
-              <span>{p.code}</span>
             </div>
 
             <h1>{p.name}</h1>
@@ -641,7 +664,34 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             >
               <X size={20} />
             </button>
-            <img src={p.image} alt={p.name} />
+            {images.length > 1 && (
+              <button
+                type="button"
+                className="image-zoom-nav image-zoom-prev"
+                onClick={goPrevImage}
+                aria-label="Önceki görsel"
+              >
+                <ChevronLeft size={22} />
+              </button>
+            )}
+            <div className="image-zoom-stage">
+              <img
+                key={activeImageIndex}
+                className={`image-zoom-slide ${slideDir === "left" ? "from-left" : "from-right"}`}
+                src={images[activeImageIndex]}
+                alt={p.name}
+              />
+            </div>
+            {images.length > 1 && (
+              <button
+                type="button"
+                className="image-zoom-nav image-zoom-next"
+                onClick={goNextImage}
+                aria-label="Sonraki görsel"
+              >
+                <ChevronRight size={22} />
+              </button>
+            )}
           </div>
         </div>
       )}

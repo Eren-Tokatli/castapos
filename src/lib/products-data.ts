@@ -10,6 +10,7 @@ export interface ProductStatic {
   discount: string | null;
   premium: boolean;
   image: string;
+  images?: string[];
   summary: string;
   specs: string[];
   periods: number[];
