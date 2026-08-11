@@ -15,11 +15,7 @@ export function ProductCard({ p }: { p: ProductStatic }) {
   const reviewsCount = ratingCount(p);
   const favorited = isFavorite(p.id);
 
-  const badge = p.premium ? (
-    <span className="discount-badge premium-badge">
-      <Star size={12} fill="currentColor" strokeWidth={0} /> Premium
-    </span>
-  ) : p.discount ? (
+  const badge = p.discount ? (
     <span className="discount-badge accent-badge">{p.discount}</span>
   ) : null;
 
