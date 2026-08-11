@@ -1,12 +1,71 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Bot, Loader2, Send, UserRound } from "lucide-react";
+
+type RecommendedProduct = {
+  id: string;
+  name: string;
+  image: string;
+  monthly: string;
+  url: string;
+};
+
+type ClarifyQuestion = {
+  question: string;
+  options: string[];
+};
 
 type ChatMessage = {
   role: "assistant" | "user";
   text: string;
+  displayText?: string;
+  products?: RecommendedProduct[];
+  clarify?: ClarifyQuestion | null;
 };
+
+// Sistem promptu markdown kullanmamasını söylese de AI bazen [Ürün](/urun/slug)
+// linki, **kalın** vurgu veya çıplak /urun/slug yolu yazabiliyor — üçünü de
+// tek geçişte yakalayıp gerçek link/kalın metne çeviriyoruz.
+const MARKDOWN_PATTERN = /\*\*(.+?)\*\*|\[([^\]]+)\]\((\/[^\s)]+)\)|(\/urun\/[a-z0-9-]+)/g;
+
+function renderMessageText(text: string): ReactNode[] {
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  MARKDOWN_PATTERN.lastIndex = 0;
+  while ((match = MARKDOWN_PATTERN.exec(text)) !== null) {
+    const [whole, bold, linkText, linkHref, barePath] = match;
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    if (bold !== undefined) {
+      parts.push(<strong key={key++}>{bold}</strong>);
+    } else if (linkHref !== undefined) {
+      parts.push(
+        <Link key={key++} href={linkHref} className="ai-chat-link">
+          {linkText}
+        </Link>
+      );
+    } else if (barePath !== undefined) {
+      parts.push(
+        <Link key={key++} href={barePath} className="ai-chat-link">
+          {barePath}
+        </Link>
+      );
+    }
+    lastIndex = match.index + whole.length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
+}
 
 const starterMessages: ChatMessage[] = [
   {
@@ -31,14 +90,13 @@ export function AiChatClient() {
     messagesEndRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
   }, [messages, loading, error]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const value = input.trim();
-    if (!value || loading) return;
+  const sendMessage = async (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed || loading) return;
 
     const nextMessages: ChatMessage[] = [
       ...messages,
-      { role: "user", text: value },
+      { role: "user", text: trimmed },
     ];
 
     setMessages(nextMessages);
@@ -50,19 +108,33 @@ export function AiChatClient() {
       const response = await fetch("/api/ai-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        // Yalniz role+text API'ye gider; products/clarify sadece UI icin, backend
+        // sanitizeMessages zaten bunlari yok sayar ama gereksiz veri gondermeyelim.
+        body: JSON.stringify({ messages: nextMessages.map(({ role, text }) => ({ role, text })) }),
       });
-      const data = (await response.json()) as { reply?: string; error?: string };
+      const data = (await response.json()) as {
+        reply?: string;
+        historyReply?: string;
+        products?: RecommendedProduct[];
+        clarify?: ClarifyQuestion | null;
+        error?: string;
+      };
 
       if (!response.ok) {
         throw new Error(data.error || "AI yanıtı alınamadı.");
       }
 
+      const displayText = data.reply || "Şu anda yanıt üretemedim. Canlı desteğe yönlenerek hızlıca yardım alabilirsin.";
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: data.reply || "Şu anda yanıt üretemedim. Canlı desteğe yönlenerek hızlıca yardım alabilirsin.",
+          // historyReply (SORU/SECENEK blogu korunmus) API gecmisine gider,
+          // ekranda ise temizlenmis displayText gosterilir.
+          text: data.historyReply || displayText,
+          displayText,
+          products: data.products,
+          clarify: data.clarify,
         },
       ]);
     } catch (requestError) {
@@ -78,6 +150,11 @@ export function AiChatClient() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    sendMessage(input);
   };
 
   return (
@@ -96,7 +173,37 @@ export function AiChatClient() {
         {messages.map((message, index) => (
           <article key={`${message.role}-${index}`} className={`ai-chat-message ${message.role}`}>
             <span aria-hidden="true">{message.role === "assistant" ? <Bot size={17} /> : <UserRound size={17} />}</span>
-            <p>{message.text}</p>
+            <div>
+              <p>{renderMessageText(message.displayText ?? message.text)}</p>
+              {message.products && message.products.length > 0 && (
+                <div className="ai-chat-product-cards">
+                  {message.products.map((product) => (
+                    <Link key={product.id} href={product.url} className="ai-chat-product-card">
+                      <img src={product.image} alt={product.name} />
+                      <div>
+                        <b>{product.name}</b>
+                        <span>{product.monthly} / ay</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {message.clarify && (
+                <div className="ai-chat-quick-options">
+                  {message.clarify.options.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      className="ai-chat-quick-option"
+                      onClick={() => sendMessage(option)}
+                      disabled={loading}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </article>
         ))}
         {loading && (
