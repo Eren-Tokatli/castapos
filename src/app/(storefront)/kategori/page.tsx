@@ -209,16 +209,11 @@ function KategoriPageContent() {
 
   const isNewListing = sortBy === "new" && !activeCategory && !searchQuery;
   const categoryLabel = isNewListing ? "Yeni Gelenler" : activeCategory || "Tüm Ürünler";
-  const listingTitle = isNewListing
-    ? "Yeni gelen kiralama ürünleri"
-    : activeCategory
-      ? activeCategory + " Kiralama Ürünleri"
-      : "Tüm Kiralama Ürünleri";
   const brands = uniqueBrands();
 
   return (
     <div
-      className={`kategori-shell premium-category-page ${activeCategory === "Spor Aletleri" ? "sports-category-page" : ""} ${
+      className={`kategori-shell premium-category-page sports-category-page ${
         isNewListing ? "new-category-page" : ""
       }`}
     >
@@ -227,10 +222,7 @@ function KategoriPageContent() {
           <nav className="breadcrumb">
             <Link href="/">Ana Sayfa</Link> › <span>{categoryLabel}</span>
           </nav>
-          <div className={`listing-line ${activeCategory === "Spor Aletleri" ? "count-only" : ""}`}>
-            {activeCategory !== "Spor Aletleri" && (
-              <strong>{listingTitle}</strong>
-            )}
+          <div className="listing-line count-only">
             <span>{filteredProducts.length} ürün</span>
           </div>
         </div>
