@@ -11378,11 +11378,6 @@ body.page-urun-detay .breadcrumb a:hover,
   border-color: rgba(16, 24, 40, .08) !important;
 }
 
-.premium-category-page:not(.sports-category-page) .filter-title::before {
-  background: #101a2b !important;
-  box-shadow: 0 0 0 5px rgba(16, 24, 40, .06) !important;
-}
-
 .premium-category-page:not(.sports-category-page) .filter-block h3::after {
   background: linear-gradient(90deg, rgba(16, 24, 40, .12), transparent) !important;
 }
