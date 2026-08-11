@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import { PRODUCTS, uniqueBrands, categoryTypeConfig, ratingCount, ProductStatic } from "@/lib/products-data";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFilterSidebar, RentalAdvantages } from "@/components/CategoryFilterSidebar";
@@ -26,6 +26,7 @@ function KategoriPageContent() {
 
   const activeCategory = urlCat;
   const searchQuery = urlQuery;
+
   const [selectedBrand, setSelectedBrand] = useState("");
   const [activeType, setActiveType] = useState("Tüm ürünler");
   const [selectedPeriods, setSelectedPeriods] = useState<number[]>([]);
@@ -36,6 +37,12 @@ function KategoriPageContent() {
   const [sortBy, setSortBy] = useState(
     sortOptions.some((option) => option.value === urlSort) ? urlSort : "featured"
   );
+
+  // "Premium" artık geçerli bir kategori değil (ürünler taşındı); eski
+  // linkler/bookmarklar boş bir liste yerine 404 görmeli.
+  if (activeCategory === "Premium") {
+    notFound();
+  }
 
   // Handle Brand checkbox change (only one selected at a time, like static js)
   const handleBrandChange = (brand: string) => {
