@@ -77,6 +77,14 @@ const EASY_STEPS = [
 export default function HomePage() {
   const [activeEasyStep, setActiveEasyStep] = useState(0);
 
+  // Hover ile önizleme geçişi sadece masaüstü genişliğinde çalışsın; dar ekranda
+  // (accordion modunda) mouse üzerinden geçiş açılıp kapanmayı tetiklemesin, sadece tıklama açsın.
+  const activateOnHover = (idx: number) => {
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 761px)").matches) {
+      setActiveEasyStep(idx);
+    }
+  };
+
   // Slider State
   const [activeSlide, setActiveSlide] = useState(0);
   const slides = [
@@ -188,7 +196,7 @@ export default function HomePage() {
               <p>Popüler ürünlerde sınırlı süreli kiralama avantajları.</p>
             </div>
             <div className="flash-sale-countdown">
-              <span>Kampanya bitimine</span>
+              <span className="flash-sale-countdown-label">Kampanya bitimine</span>
               <CountdownTimer />
             </div>
           </div>
@@ -226,23 +234,33 @@ export default function HomePage() {
         </div>
         <div className="container easy-experience-grid">
           <div className="easy-step-list">
-            {EASY_STEPS.map((item, idx) => (
-              <button
-                key={item.title}
-                type="button"
-                className={`easy-step-card ${activeEasyStep === idx ? "active" : ""}`}
-                onMouseEnter={() => setActiveEasyStep(idx)}
-                onFocus={() => setActiveEasyStep(idx)}
-                onClick={() => setActiveEasyStep(idx)}
-              >
-                <span className="easy-step-number">{idx + 1}</span>
-                <span className="easy-step-copy">
-                  <span className="easy-step-title">{item.title}</span>
-                  <p>{item.text}</p>
-                </span>
-                <span className="easy-step-icon"><item.icon size={20} /></span>
-              </button>
-            ))}
+            {EASY_STEPS.map((item, idx) => {
+              const isActive = activeEasyStep === idx;
+              return (
+                <div key={item.title} className={`easy-step-item ${isActive ? "active" : ""}`}>
+                  <button
+                    type="button"
+                    className={`easy-step-card ${isActive ? "active" : ""}`}
+                    onMouseEnter={() => activateOnHover(idx)}
+                    onFocus={() => activateOnHover(idx)}
+                    onClick={() => setActiveEasyStep(idx)}
+                  >
+                    <span className="easy-step-number">{idx + 1}</span>
+                    <span className="easy-step-copy">
+                      <span className="easy-step-title">{item.title}</span>
+                      <p>{item.text}</p>
+                    </span>
+                    <span className="easy-step-icon"><item.icon size={20} /></span>
+                  </button>
+                  <div className="easy-step-accordion">
+                    <div className="easy-step-accordion-inner">
+                      <img src={item.image} alt="" />
+                      <p>{item.text}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
           <div className="easy-preview-panel" aria-live="polite">
             <div className="easy-preview-window">

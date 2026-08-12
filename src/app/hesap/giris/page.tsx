@@ -159,7 +159,7 @@ function LoginForm() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Şifreni gir"
                       autoComplete="current-password"
                       data-1p-ignore="true"
                       data-keeper-ignore="true"

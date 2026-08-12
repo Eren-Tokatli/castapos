@@ -55,6 +55,7 @@ export default function StorefrontLayout({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [mobileAccountOpen, setMobileAccountOpen] = useState(false);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState<Record<number, boolean>>({});
 
   const searchRef = useRef<HTMLFormElement>(null);
@@ -82,6 +83,7 @@ export default function StorefrontLayout({
   // Update dynamic year
   const [currentYear] = useState(() => new Date().getFullYear());
 
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -98,7 +100,7 @@ export default function StorefrontLayout({
   };
 
   return (
-    <div className={`${mobileMenuOpen ? "mobile-open" : ""} ${mobileCategoriesOpen ? "mobile-categories-open" : ""} ${isCartOpen ? "cart-open" : ""}`}>
+    <div className={`${mobileMenuOpen ? "mobile-open" : ""} ${mobileCategoriesOpen ? "mobile-categories-open" : ""} ${mobileAccountOpen ? "mobile-account-open" : ""} ${isCartOpen ? "cart-open" : ""}`}>
       {/* HEADER */}
       <header className="commerce-header">
         <div className="container commerce-top">
@@ -370,11 +372,61 @@ export default function StorefrontLayout({
           <span><Heart size={20} /></span>
           <b>Favoriler</b>
         </Link>
-        <Link href="/hesap/kullanici-bilgilerim">
+        <button type="button" onClick={() => setMobileAccountOpen(true)}>
           <span className="mobile-user-outline"></span>
           <b>Hesabım</b>
-        </Link>
+        </button>
       </nav>
+
+      {/* MOBILE ACCOUNT SHEET — Kategoriler ile birebir aynı backdrop/sheet mekanizması */}
+      {mobileAccountOpen && (
+        <div className="mobile-category-backdrop" onClick={() => setMobileAccountOpen(false)}>
+          <aside className="mobile-category-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-category-sheet-head">
+              <h2>Hesabım</h2>
+              <button type="button" onClick={() => setMobileAccountOpen(false)}>
+                ×
+              </button>
+            </div>
+            {isLoggedIn ? (
+              <div className="mobile-category-list">
+                {ACCOUNT_MENU_LINKS.map((item) => (
+                  <div key={item.href} className="mobile-category-row">
+                    <div className="mobile-category-main">
+                      <Link href={item.href} onClick={() => setMobileAccountOpen(false)}>
+                        {item.label}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  className="mobile-account-logout"
+                  onClick={() => {
+                    setMobileAccountOpen(false);
+                    signOut({ callbackUrl: "/" });
+                  }}
+                >
+                  Çıkış Yap
+                </button>
+              </div>
+            ) : (
+              <div className="mobile-category-list">
+                <div className="mobile-auth-intro">
+                  <h3>Hesabına giriş yap</h3>
+                  <p>Siparişlerini takip et, favorilerine hızlıca eriş ve kiralama sürecini yönet.</p>
+                </div>
+                <Link href="/hesap/giris" className="mobile-auth-primary" onClick={() => setMobileAccountOpen(false)}>
+                  Giriş Yap
+                </Link>
+                <Link href="/hesap/kayit" className="mobile-auth-secondary" onClick={() => setMobileAccountOpen(false)}>
+                  Hesap Oluştur
+                </Link>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
 
       {/* MOBILE CATEGORY SHEET */}
       {mobileCategoriesOpen && (

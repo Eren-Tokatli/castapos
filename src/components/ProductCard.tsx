@@ -78,13 +78,13 @@ export function ProductCard({ p }: { p: ProductStatic }) {
         </div>
 
         <div className="price-block rental-card-block compact-price-only">
-          <div className="monthly-primary">
-            <strong>{formatPrice(currentMonthly).replace(" TL", " ₺")}</strong>
-            <span>/ Aylık</span>
-          </div>
           <div className="daily-secondary">
             <strong>{formatPrice(currentDaily).replace(" TL", " ₺")}</strong>
             <span>/ Gün</span>
+          </div>
+          <div className="monthly-primary">
+            <strong>{formatPrice(currentMonthly).replace(" TL", " ₺")}</strong>
+            <span>/ Aylık</span>
           </div>
         </div>
 

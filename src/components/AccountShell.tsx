@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ChevronLeft, LayoutDashboard, LogOut, Menu } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ACCOUNT_MENU_LINKS } from "@/lib/account-menu";
 
 export { ACCOUNT_MENU_LINKS };
@@ -20,6 +20,33 @@ export function AccountShell({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+
+  // Dar ekranda menü yatay kaydırmalı bara dönüşüyor; dokunmatikte parmakla
+  // kaydırma zaten native çalışır ama masaüstünde fareyle tutup sürüklemek
+  // için bu olmadan hiçbir şey olmuyordu — o yüzden fareye özel drag-scroll ekliyoruz.
+  const navRef = useRef<HTMLElement>(null);
+  const dragRef = useRef({ isDown: false, startX: 0, scrollLeft: 0, moved: false });
+
+  const onNavPointerDown = (e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== "mouse") return;
+    dragRef.current = { isDown: true, startX: e.clientX, scrollLeft: e.currentTarget.scrollLeft, moved: false };
+  };
+  const onNavPointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (!dragRef.current.isDown) return;
+    const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 4) dragRef.current.moved = true;
+    e.currentTarget.scrollLeft = dragRef.current.scrollLeft - dx;
+  };
+  const onNavPointerUp = () => {
+    dragRef.current.isDown = false;
+  };
+  const onNavClickCapture = (e: React.MouseEvent) => {
+    if (dragRef.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragRef.current.moved = false;
+    }
+  };
   const initials = displayName
     .split(" ")
     .filter(Boolean)
@@ -56,7 +83,16 @@ export function AccountShell({
             </div>
           </div>
 
-          <nav className="account-side-nav" aria-label="Hesap menüsü">
+          <nav
+            className="account-side-nav"
+            aria-label="Hesap menüsü"
+            ref={navRef}
+            onPointerDown={onNavPointerDown}
+            onPointerMove={onNavPointerMove}
+            onPointerUp={onNavPointerUp}
+            onPointerLeave={onNavPointerUp}
+            onClickCapture={onNavClickCapture}
+          >
             {ACCOUNT_MENU_LINKS.map(({ href, icon: Icon, label, desc }) => (
               <Link key={href} href={href} className={pathname === href ? "is-active" : ""}>
                 <span className="account-side-icon"><Icon size={18} /></span>

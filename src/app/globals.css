@@ -66,6 +66,18 @@
 .detail-tab-panel{display:none;background:#fff;border:1px solid #edf0f5;border-radius:14px;padding:24px}
 .detail-tab-panel.active{display:block}
 .detail-tab-panel h3{margin:0 0 12px;font-size:24px}
+
+/* Mobil: sekmeler anasayfadaki "Ürünü seç" adımları gibi tek bir accordion listesi
+   olarak render ediliyor (bkz. ProductDetailClient isMobileTabs) */
+.detail-tabs-accordion{display:grid;gap:10px}
+.detail-tab-item{scroll-margin-top:96px;border:1px solid #edf0f5;border-radius:14px;background:#fff;overflow:hidden}
+.detail-tab-item > button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:52px;padding:14px 16px;background:none;border:0;font-weight:800;font-size:14px;color:#667085;text-align:left;cursor:pointer}
+.detail-tab-item > button.active{color:#111827}
+.detail-tab-item > button::after{content:"";flex-shrink:0;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .2s ease}
+.detail-tab-item.active > button::after{transform:rotate(225deg)}
+.detail-tab-accordion{display:grid;max-height:0;overflow:hidden;transition:max-height .3s ease}
+.detail-tab-item.active .detail-tab-accordion{max-height:20000px}
+.detail-tab-accordion .detail-tab-panel{display:block;border:0;border-top:1px solid #edf0f5;border-radius:0;padding:18px 16px}
 .qa-list{display:grid;gap:12px}.qa-list article{border:1px solid #edf0f5;border-radius:12px;padding:16px;background:#fff}
 .qa-list b{display:block;margin-bottom:8px}.qa-list p,.return-list li{color:#475467;line-height:1.65}
 .return-list{margin:14px 0 0;padding-left:20px}
@@ -409,6 +421,7 @@ body.cart-open .support-widget{display:none !important}
 .easy-preview-badge svg{color:var(--brand);margin-top:1px}
 .easy-preview-badge strong{display:block;color:#111827;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 .easy-preview-badge span{display:block;color:#475467;font-size:13px;line-height:1.45;margin-top:3px}
+.easy-step-accordion{display:none}
 .testimonials-section{padding-top:10px}
 .testimonial-heading{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
 .testimonial-summary{display:flex;align-items:center;gap:14px}
@@ -1245,51 +1258,55 @@ body.mega-menu-open::before{
 }
 .official-footer a:hover{color:#fff;transform:translateX(2px)}
 .footer-link-chip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  align-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px 22px;
 }
 
 .footer-link-chip-list h4 {
-  flex: 0 0 100%;
+  grid-column: 1 / -1;
 }
 
 .footer-link-chip-list a,
 .footer-link-chip-list .footer-cookie-preferences {
-  display: inline-flex !important;
-  align-items: center;
-  width: fit-content;
+  display: block !important;
+  width: auto;
   margin: 0 !important;
-  padding: 8px 11px;
-  border: 1px solid rgba(7, 17, 31, .08);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, .56);
-  color: var(--footer-text);
-  font-size: 13px;
-  font-weight: 780;
-  line-height: 1;
-  box-shadow: 0 10px 22px rgba(7, 17, 31, .04);
-  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--footer-text) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.4;
+  text-align: left;
+  box-shadow: none;
+  transition: color .18s ease;
 }
 
 .footer-link-chip-list a:hover,
 .footer-link-chip-list .footer-cookie-preferences:hover {
-  transform: translateY(-1px);
-  border-color: rgba(243, 95, 54, .2);
-  background: #fff;
+  transform: none;
+  border-color: transparent;
+  background: none;
   color: var(--brand) !important;
+  text-decoration: underline;
 }
 
 .footer-link-chip-list .footer-cookie-preferences {
-  color: var(--navy);
-  font-weight: 850;
+  color: var(--footer-text);
+  font-weight: 700;
+}
+
+.footer-link-chip-list .footer-cookie-preferences::before {
+  content: none;
 }
 
 :root[data-theme="dark"] .footer-link-chip-list a,
 :root[data-theme="dark"] .footer-link-chip-list .footer-cookie-preferences {
-  border-color: rgba(255, 255, 255, .1);
-  background: rgba(255, 255, 255, .06);
+  border-color: transparent;
+  background: none;
   color: #c7cede;
 }
 .footer-contact-column{max-width:520px}
@@ -1428,7 +1445,7 @@ body.mega-menu-open::before{
 .nav-category>a{padding:0 12px;font-size:12.3px;font-weight:700;color:#202939}
 .nav-category:not(:last-child)::after{height:17px;top:15px;background:#d7dbe3}
 .form-grid.two select,.form-grid.two input,.form-grid.two textarea{color:#273242}
-@media(max-width:1060px){.official-footer-grid,.faq-overview-grid,.about-feature-grid,.legal-shell,.enhanced-about-grid{grid-template-columns:1fr}.legal-side-nav{position:static;grid-template-columns:1fr 1fr}.product-detail-grid.refined.compact-detail-grid{grid-template-columns:1fr}.main-gallery-image.clean{height:460px}.favorite-product-card{grid-template-columns:126px minmax(0,1fr)}.favorite-image{width:126px;height:126px}.favorite-image img{max-height:104px}}
+@media(max-width:1060px){.official-footer-grid,.faq-overview-grid,.about-feature-grid,.legal-shell,.enhanced-about-grid{grid-template-columns:1fr}.legal-side-nav{position:static;grid-template-columns:1fr 1fr}.product-detail-grid.refined.compact-detail-grid{grid-template-columns:minmax(0,1fr)}.main-gallery-image.clean{height:460px}.favorite-product-card{grid-template-columns:126px minmax(0,1fr)}.favorite-image{width:126px;height:126px}.favorite-image img{max-height:104px}}
 @media(max-width:760px){.legal-side-nav{grid-template-columns:1fr}.phone-field{grid-template-columns:1fr}.favorite-product-card{grid-template-columns:110px minmax(0,1fr);padding:14px}.favorite-image{width:110px;height:110px}.favorite-image img{max-height:90px}.favorite-copy{padding-right:34px}.favorite-copy h2{font-size:15px}.main-gallery-image.clean{height:340px}.compact-panel h1{font-size:32px}}
 
 
@@ -1508,7 +1525,7 @@ body{padding-bottom:0}
   .commerce-actions{display:none!important}
   .mobile-menu-btn{display:none!important}
   .main-search{grid-column:1/-1;order:2}
-  .product-detail-grid.refined.compact-detail-grid{grid-template-columns:1fr}
+  .product-detail-grid.refined.compact-detail-grid{grid-template-columns:minmax(0,1fr)}
   .main-gallery-image.clean.product-hero-image{height:380px}
   .favorite-product-card{grid-template-columns:100px minmax(0,1fr);gap:12px;padding:14px;min-height:0}
   .favorite-image{width:100px;height:100px}
@@ -1566,8 +1583,8 @@ body{padding-bottom:0}
   .mobile-bottom-nav button b{font-size:10px;font-weight:800}
   .mobile-category-backdrop{display:block;position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:300;opacity:0;pointer-events:none;transition:.22s}
   .mobile-category-sheet{display:flex;position:absolute;left:0;right:0;bottom:0;max-height:82vh;background:#fff;border-radius:22px 22px 0 0;transform:translateY(100%);transition:.25s;flex-direction:column;overflow:hidden}
-  .mobile-categories-open .mobile-category-backdrop{opacity:1;pointer-events:auto}
-  .mobile-categories-open .mobile-category-sheet{transform:translateY(0)}
+  .mobile-categories-open .mobile-category-backdrop,.mobile-account-open .mobile-category-backdrop{opacity:1;pointer-events:auto}
+  .mobile-categories-open .mobile-category-sheet,.mobile-account-open .mobile-category-sheet{transform:translateY(0)}
   .mobile-category-sheet-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 14px;border-bottom:1px solid #e9ecf1}
   .mobile-category-sheet-head h2{margin:0;font-size:21px}
   .mobile-category-sheet-head button{width:36px;height:36px;border:1px solid #dfe3ea;background:#fff;border-radius:12px;font-size:22px}
@@ -2318,16 +2335,16 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 .auth-phone-field{grid-template-columns:112px 1fr!important;gap:8px!important}
 body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!important}
 
-.mobile-account-sheet .mobile-auth-intro{padding:4px 2px 10px}
-.mobile-account-sheet .mobile-auth-intro h3{margin:0 0 5px;color:#1d2939;font-size:18px}
-.mobile-account-sheet .mobile-auth-intro p{margin:0;color:#667085;font-size:13px;line-height:1.5}
-.mobile-account-sheet .mobile-auth-primary,.mobile-account-sheet .mobile-auth-secondary{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;font-weight:800}
-.mobile-account-sheet .mobile-auth-primary{background:var(--brand);color:#fff}
-.mobile-account-sheet .mobile-auth-secondary{background:#fff7f4;border:1px solid #f3b8a6;color:var(--brand)}
-.mobile-account-sheet .mobile-account-logout{min-height:48px;border:1px solid #fecdca;border-radius:14px;background:#fff5f4;color:#b42318;font:inherit;font-weight:800;cursor:pointer}
+.mobile-account-sheet .mobile-auth-intro,.mobile-category-sheet .mobile-auth-intro{padding:4px 2px 10px}
+.mobile-account-sheet .mobile-auth-intro h3,.mobile-category-sheet .mobile-auth-intro h3{margin:0 0 5px;color:#1d2939;font-size:18px}
+.mobile-account-sheet .mobile-auth-intro p,.mobile-category-sheet .mobile-auth-intro p{margin:0;color:#667085;font-size:13px;line-height:1.5}
+.mobile-account-sheet .mobile-auth-primary,.mobile-account-sheet .mobile-auth-secondary,.mobile-category-sheet .mobile-auth-primary,.mobile-category-sheet .mobile-auth-secondary{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;font-weight:800;margin-top:4px}
+.mobile-account-sheet .mobile-auth-primary,.mobile-category-sheet .mobile-auth-primary{background:var(--brand);color:#fff}
+.mobile-account-sheet .mobile-auth-secondary,.mobile-category-sheet .mobile-auth-secondary{background:#fff7f4;border:1px solid #f3b8a6;color:var(--brand)}
+.mobile-account-sheet .mobile-account-logout,.mobile-category-sheet .mobile-account-logout{min-height:48px;border:1px solid #fecdca;border-radius:14px;background:#fff5f4;color:#b42318;font:inherit;font-weight:800;cursor:pointer;margin-top:6px}
 
 @media(max-width:1060px){
-  .product-detail-grid.refined.compact-detail-grid{grid-template-columns:1fr!important;align-items:start!important}
+  .product-detail-grid.refined.compact-detail-grid{grid-template-columns:minmax(0,1fr)!important;align-items:start!important}
   .gallery-panel.detail-clean{display:block!important;height:auto!important}
   .main-gallery-image.clean{aspect-ratio:1/1!important;height:auto!important}
   .thumb-row.clean{margin-top:12px!important}
@@ -2382,9 +2399,10 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
 .coupon-box.auth-locked input{background:#f7f8fa!important;color:#98a2b3!important;cursor:pointer!important}
 .coupon-box.auth-locked button{opacity:.72}
 @media(max-width:760px){
-  .auth-visual-panel{padding:30px 24px!important}
-  .auth-visual-panel h1{font-size:29px!important}
-  .auth-visual-panel>p{font-size:14px!important;line-height:1.6!important}
+  /* Mobilde formdan önce ekranı kaplayan büyük tanıtım kartı kaldırıldı,
+     kullanıcı direkt giriş/kayıt formuna iniyor. */
+  .auth-visual-panel{display:none!important}
+  .auth-layout{grid-template-columns:1fr!important}
 }
 
 
@@ -4069,8 +4087,13 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
 }
 :root[data-theme="dark"] .easy-step-card p,
 :root[data-theme="dark"] .easy-preview-content p,
-:root[data-theme="dark"] .easy-preview-badge span {
+:root[data-theme="dark"] .easy-preview-badge span,
+:root[data-theme="dark"] .easy-step-accordion-inner p {
   color: #cbd5e1;
+}
+:root[data-theme="dark"] .easy-step-accordion-inner img {
+  background: rgba(18, 27, 44, .6);
+  border-color: rgba(243, 95, 54, .28);
 }
 :root[data-theme="dark"] .easy-preview-window {
   background: linear-gradient(135deg, rgba(18, 27, 44, .98) 0%, rgba(12, 18, 30, .98) 62%, rgba(45, 36, 24, .96) 100%);
@@ -5856,37 +5879,9 @@ body:has(.account-page) .category-bar {
     grid-template-columns: 1fr;
   }
 
+  /* Hesabım artık alttaki mobil sheet'ten yönetiliyor (bkz. layout.tsx
+     MOBILE ACCOUNT SHEET) — bu üstteki sekme çubuğu mobilde gereksiz. */
   .account-side-panel {
-    position: static;
-    min-height: 0;
-    width: auto !important;
-  }
-
-  .account-side-head,
-  .account-side-user {
-    display: none;
-  }
-
-  .account-side-nav {
-    grid-auto-flow: column;
-    grid-auto-columns: max-content;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .account-side-nav a,
-  .account-side-nav button {
-    min-height: 48px;
-    padding: 8px 12px;
-    white-space: nowrap;
-  }
-
-  .account-side-nav button.is-danger {
-    border-top: 0;
-    padding-top: 8px;
-  }
-
-  .account-side-copy small {
     display: none;
   }
 
@@ -5936,23 +5931,6 @@ body:has(.account-page) .category-bar {
 }
 
 @media (max-width: 520px) {
-  .account-side-panel {
-    margin-inline: -4px;
-    padding: 10px;
-    border-radius: 18px;
-  }
-
-  .account-side-nav a,
-  .account-side-nav button {
-    min-height: 44px;
-  }
-
-  .account-side-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 11px;
-  }
-
   .account-panel-content {
     border-radius: 20px;
   }
@@ -6856,7 +6834,11 @@ body.page-urun-detay .review-rating-pick button {
 @media (max-width: 760px) {
   body.page-urun-detay .review-rating-pick button {
     min-width: 0;
-    padding-inline: 11px;
+    padding-inline: 6px;
+  }
+
+  body.page-urun-detay .review-rating-pick .rating-pick-number {
+    font-size: 16px;
   }
 }
 
@@ -7504,12 +7486,56 @@ body.page-urun-detay .review-form-box .btn {
     padding: 22px 16px;
   }
 
+  body.page-urun-detay .detail-tab-accordion .detail-tab-panel {
+    border: 0;
+    border-top: 1px solid #edf0f5;
+    border-radius: 0;
+    padding: 18px 16px;
+  }
+
   .premium-tab-head h3 {
     font-size: 25px !important;
   }
 
+  /* Teknik Özellikler: kart yerine sade, kompakt bir tablo. */
   body.page-urun-detay .spec-table {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+    border: 1px solid #edf0f5 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  body.page-urun-detay .spec-table div {
+    display: grid !important;
+    grid-template-columns: 42% 1fr !important;
+    align-items: center !important;
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #edf0f5 !important;
+    border-radius: 0 !important;
+    background: none !important;
+  }
+
+  body.page-urun-detay .spec-table div:last-child {
+    border-bottom: 0 !important;
+  }
+
+  body.page-urun-detay .spec-table span {
+    min-width: 0;
+    padding: 0 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+  }
+
+  body.page-urun-detay .spec-table b {
+    padding: 0 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
   }
 }
 
@@ -7927,9 +7953,14 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .home-shell #popular-products .product-rail,
-  .home-shell #new-products .product-rail,
-  .home-shell .flash-sale-section .product-rail {
+  .home-shell #new-products .product-rail {
     grid-auto-columns: 78% !important;
+  }
+
+  /* Flaş İndirim: ekranda 2 kart aynı anda görünsün. Bu selector .flash-sale-rail
+     kurallarından daha spesifik (3 class) olduğu için asıl kazanan buydu. */
+  .home-shell .flash-sale-section .product-rail {
+    grid-auto-columns: 48vw !important;
   }
 }
 
@@ -8222,11 +8253,12 @@ body.page-urun-detay .review-form-box .btn {
     white-space: nowrap;
   }
 
-  .home-shell .flash-sale-countdown span {
+  .home-shell .flash-sale-countdown .flash-sale-countdown-label {
     display: none;
   }
 
   .home-shell .flash-sale-countdown .countdown-timer {
+    display: inline;
     font-size: 13px !important;
   }
 
@@ -8242,10 +8274,16 @@ body.page-urun-detay .review-form-box .btn {
     overflow: visible;
   }
 
-  .home-shell .flash-sale-rail,
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
     grid-auto-columns: minmax(184px, 72vw) !important;
+    gap: 12px !important;
+    padding-bottom: 10px !important;
+  }
+
+  /* Flaş İndirim: ekranda 2 kart aynı anda görünsün diye yarım genişlik. */
+  .home-shell .flash-sale-rail {
+    grid-auto-columns: 48vw !important;
     gap: 12px !important;
     padding-bottom: 10px !important;
   }
@@ -8294,7 +8332,7 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .home-shell .easy-preview-panel {
-    order: 2 !important;
+    display: none !important;
   }
 
   .home-shell .easy-step-list {
@@ -8308,6 +8346,40 @@ body.page-urun-detay .review-form-box .btn {
 
   .home-shell .easy-step-copy p {
     display: none;
+  }
+
+  .home-shell .easy-step-accordion {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .28s ease;
+  }
+
+  .home-shell .easy-step-item.active .easy-step-accordion {
+    max-height: 420px;
+  }
+
+  .home-shell .easy-step-accordion-inner {
+    display: grid;
+    gap: 10px;
+    padding: 0 16px 16px;
+  }
+
+  .home-shell .easy-step-accordion-inner img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid rgba(243, 95, 54, .18);
+    border-radius: 14px;
+    padding: 10px;
+  }
+
+  .home-shell .easy-step-accordion-inner p {
+    margin: 0;
+    color: #475467;
+    font-size: 13px;
+    line-height: 1.5;
   }
 
   .home-shell #popular-products,
@@ -8879,17 +8951,9 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .mobile-menu-btn {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    height: 42px;
-    padding: 0 13px !important;
-    border: 1px solid var(--header-border) !important;
-    background: var(--card-bg) !important;
-    color: var(--text-primary) !important;
-    border-radius: 14px !important;
-    box-shadow: 0 8px 22px rgba(16, 24, 40, .08);
+    /* Alt sabit menü (Kategoriler/Hesabım vs.) aynı işi zaten görüyor —
+       üstteki bu buton mobilde gereksiz. */
+    display: none !important;
   }
 
   .main-search {
@@ -9092,10 +9156,18 @@ body.page-urun-detay .review-form-box .btn {
     mask-image: none !important;
   }
 
-  .home-shell .flash-sale-rail,
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
     grid-auto-columns: minmax(205px, 74vw) !important;
+    gap: 12px !important;
+    padding: 2px 18px 12px 0 !important;
+    scroll-padding-left: 0;
+  }
+
+  /* Flaş İndirim burada da (rail-shell negatif margin bloğunda) ayrıca
+     tanımlıydı ve yukarıdaki 2-kart kuralını eziyordu. */
+  .home-shell .flash-sale-rail {
+    grid-auto-columns: 48vw !important;
     gap: 12px !important;
     padding: 2px 18px 12px 0 !important;
     scroll-padding-left: 0;
@@ -9127,6 +9199,13 @@ body.page-urun-detay .review-form-box .btn {
     min-height: 34px !important;
     padding: 0 10px !important;
     font-size: 12px !important;
+  }
+
+  /* Flaş İndirim kartı diğerlerinden dar (ekranda 2 tane sığsın diye) —
+     3 Ay/6 Ay/9 Ay butonları için biraz daha az iç boşluk. */
+  .home-shell .flash-sale-rail .card-period-btn {
+    padding: 0 6px !important;
+    font-size: 11px !important;
   }
 
   .home-shell .monthly-primary strong {
@@ -9288,10 +9367,13 @@ body.page-urun-detay .review-form-box .btn {
     grid-template-columns: 38px 1fr 54px !important;
   }
 
-  .home-shell .flash-sale-rail,
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
     grid-auto-columns: 78vw !important;
+  }
+
+  .home-shell .flash-sale-rail {
+    grid-auto-columns: 48vw !important;
   }
 
   .home-shell .modern-rental-card .product-img {
@@ -10281,12 +10363,19 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 @media (max-width: 430px) {
+  /* İsteğe göre en dar telefonlarda da 2 ürün yan yana kalsın (1 sütuna
+     düşmesin), aşağı kaydırarak devam edilsin. */
   .sports-category-page .catalog-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
   }
 
   .sports-category-page .modern-rental-card .product-img {
-    height: 184px !important;
+    height: 130px !important;
+  }
+
+  .sports-category-page .modern-rental-card .product-img img {
+    max-height: 102px !important;
   }
 }
 
@@ -12024,7 +12113,7 @@ body.page-sepet .summary-tax-line strong {
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   body.page-sepet .cart-section > .container {
     width: calc(100% - 18px) !important;
   }
@@ -12040,28 +12129,9 @@ body.page-sepet .summary-tax-line strong {
     height: 66px !important;
   }
 
-  body.page-sepet .plan-meta-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  body.page-sepet .plan-qty-row {
-    grid-template-columns: 1fr !important;
-    justify-items: start !important;
-  }
-
-  body.page-sepet .remove-line {
-    justify-self: start !important;
-  }
-
-  body.page-sepet .plan-price-summary {
-    grid-template-columns: 1fr !important;
-  }
-
-  body.page-sepet .plan-price-summary > b {
-    grid-column: 1 !important;
-    grid-row: auto !important;
-    justify-self: start !important;
-  }
+  /* Not: Seçili Plan/Tahmini Teslimat kutuları ve Ürünü kaldır satırı
+     kasıtlı olarak burada ezilmiyor — 760px'deki yan yana (2 sütun) düzen
+     her telefon genişliğinde aynı kalsın diye. */
 }
 
 /* About page */
@@ -15057,3 +15127,138 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   min-height: 320px !important;
   flex: 1 1 auto !important;
 }
+
+/* Ürün sayfası: mobilde dış kart (gallery-panel) ile iç görsel kutusu
+   arasında çok fazla boşluk vardı, görsel küçük/kayıp duruyordu.
+   Kenar boşluklarını daraltıp görseli kartı doldururcasına büyütüyoruz. */
+@media (max-width: 760px) {
+  .gallery-panel.detail-clean {
+    padding: 6px !important;
+  }
+  .main-gallery-image.clean {
+    padding: 2px !important;
+  }
+  /* Kutu ile görsel oranı uyuşmuyordu: enine tam oturuyor, boyuna
+     boşluk kalıyordu. Kutunun oranını görselin doğal oranına (4/3)
+     sabitleyip her iki yönde de tam doldurmasını sağlıyoruz. */
+  .main-gallery-image.clean.product-hero-image {
+    aspect-ratio: 4 / 3 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+  }
+}
+
+/* Masaüstünde de aynı sorun vardı: kutu görselin oranından farklı
+   olduğu için (kare/dikeye yakın kutu, 4/3 görsel) enine tam oturup
+   boyuna boşluk kalıyordu. Kolon yüksekliği hizası (yukarıdaki not)
+   bozulmasın diye .gallery-panel'in kendi yüksekliğine dokunmuyoruz;
+   sadece içindeki görsel kutusunu doğal orana kilitleyip satır
+   içinde ortalıyoruz — taşan boşluk artık çerçevenin İÇİNDE değil,
+   kartın kendi dolgusunda kalıyor. */
+@media (min-width: 761px) {
+  .main-gallery-image.clean.product-hero-image {
+    aspect-ratio: 4 / 3 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+    align-self: center !important;
+  }
+}
+
+/* Ürün görseli değiştirildiğinde (küçük resme tıklayınca) ani sıçrama
+   yerine hafif bir geçiş olsun diye — hem mobil hem masaüstü. */
+@keyframes galleryFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.gallery-fade-img {
+  animation: galleryFadeIn .28s ease;
+}
+
+/* Yorumlar filtre çubuğu (Tümü/5 Yıldız/...) mobilde flex-wrap yüzünden
+   2-3 satıra taşıp çok yer kaplıyordu. Tek satıra sabitleyip yatay
+   kaydırmaya çeviriyoruz — yazı boyutuna dokunmuyoruz, sadece
+   satır sarma ve dolgu (padding) daralıyor. */
+@media (max-width: 760px) {
+  body.page-urun-detay .review-filter-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    gap: 6px !important;
+  }
+  body.page-urun-detay .review-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+  body.page-urun-detay .review-filter-bar button {
+    flex: 0 0 auto !important;
+    padding: 7px 12px !important;
+  }
+}
+
+/* Ana sayfa banner'ı mobilde biraz daha uzun (boyuna büyük) dursun.
+   Sadece mobil — masaüstü orijinal haliyle kalıyor. */
+@media (max-width: 760px) {
+  .home-shell .promo-track {
+    height: auto !important;
+    aspect-ratio: 4 / 3 !important;
+  }
+}
+
+/* Mobilde arama çubuğu logonun altında tek başına ayrı bir satırda
+   çirkin duruyordu — logonun sağına, aynı satıra alıyoruz. */
+@media (max-width: 760px) {
+  .commerce-top {
+    grid-template-columns: auto 1fr !important;
+    column-gap: 10px !important;
+  }
+  .main-search {
+    grid-column: 2 / 3 !important;
+    order: 0 !important;
+  }
+}
+
+/* Ürün kartlarında gün fiyatı üstte, ay fiyatı altta — hem mobil hem
+   masaüstü (sıra artık ProductCard.tsx'te DOM seviyesinde). */
+
+/* Yorumlar filtre çubuğu düzeltmesi ekrandan taşıyordu: nowrap+overflow-x
+   verince kutunun kendisi (ve üstündeki review-list-head) genişliğini
+   içeriğe göre büyütüp viewport dışına çıkıyordu. Genişliği konteynere
+   sabitleyip taşan kısmı SADECE kendi içinde kaydırıyoruz. */
+@media (max-width: 760px) {
+  body.page-urun-detay .review-list-head {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+  body.page-urun-detay .review-filter-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Mobil banner yüksekliği: büyütme denemesi geri alındı. Sorun büyüklükte
+   değil — "Eliptik Bisiklet" banner'ı (banner-cardio-wide.png) 2.62:1 gibi
+   aşırı geniş bir görsel; kutu ne boyda olursa olsun (orijinal 16:10 oranında
+   bile) bu görsel contain ile üstte/altta boşluk bırakıyor, çünkü görselin
+   kendisi diğer banner'lardan (1.77:1) çok daha "yassı". Kutuyu büyütmek bu
+   boşluğu büyütüyordu; küçültmek çözmüyor, sadece kaynak görseli yeniden
+   kırpmak (veya bu tek slide'a özel cover uygulayıp kenarlardan kırpmak)
+   gerçek çözüm — CSS ile kutu boyutu bunu düzeltemiyor. */
+
+/* Ürün detay sayfasındaki "Benzer ürünler" de kategori sayfasıyla aynı
+   1-sütuna-düşme hatasını taşıyordu (genel .catalog-grid kuralı). */
+@media (max-width: 760px) {
+  .similar-products-section .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+@media (max-width: 480px) {
+  .similar-products-section .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+}
+

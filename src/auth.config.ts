@@ -1,6 +1,10 @@
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
+  // IP adresi üzerinden (LAN testleri, ters proxy, dinamik preview URL'leri)
+  // erişimde Auth.js isteği "UntrustedHost" diye reddediyordu — bu satır
+  // olmadan sadece NEXTAUTH_URL/localhost üzerinden gelen istekler kabul edilir.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/hesap/giris",

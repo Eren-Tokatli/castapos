@@ -16,6 +16,14 @@ import {
 import { ProductCard } from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
 
+const PRODUCT_DETAIL_TABS = [
+  { key: "description", label: "Ürün Açıklaması" },
+  { key: "specs", label: "Teknik Özellikler" },
+  { key: "reviews", label: "Değerlendirmeler" },
+  { key: "qa", label: "Soru & Cevap" },
+  { key: "return", label: "İptal & İade Koşulları" },
+] as const;
+
 interface Review {
   name: string;
   rating: number;
@@ -125,6 +133,47 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
   const [reviewText, setReviewText] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [reviewFilter, setReviewFilter] = useState<string>("Tümü");
+  // Ürün Açıklaması/Teknik Özellikler/... sekmeleri mobilde anasayfadaki
+  // "Ürünü seç" adımları gibi tek bir accordion listesine dönüşüyor;
+  // masaüstünde mevcut sticky sekme çubuğu + altında tek panel aynen duruyor.
+  const [isMobileTabs, setIsMobileTabs] = useState(false);
+  const tabItemRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Uzun bir panel (ör. Soru & Cevap) kapanıp yeni sekme açılınca sayfa
+  // yüksekliği aniden değişiyor ve kullanıcı ekranda "kaybolmuş" oluyordu.
+  // setTimeout yerine gerçek CSS geçişinin (max-height) bitişini bekleyip
+  // ondan sonra yeni açılan sekmeyi ekranın üstüne kaydırıyoruz — animasyon
+  // süresi cihaza göre değişse de (arka plan sekmesi vs.) doğru anı yakalar.
+  const scrollTabIntoView = (key: string) => {
+    const itemEl = tabItemRefs.current[key];
+    if (!itemEl) return;
+    const accordionEl = itemEl.querySelector<HTMLElement>(".detail-tab-accordion");
+    const doScroll = () => itemEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!accordionEl) {
+      doScroll();
+      return;
+    }
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      accordionEl.removeEventListener("transitionend", onEnd);
+      doScroll();
+    };
+    const onEnd = (e: TransitionEvent) => {
+      if (e.propertyName === "max-height") finish();
+    };
+    accordionEl.addEventListener("transitionend", onEnd);
+    // transitionend hiç ateşlenmezse (ör. reduced-motion) diye güvenlik ağı.
+    window.setTimeout(finish, 500);
+  };
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 760px)");
+    const update = () => setIsMobileTabs(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const currentMonthly = monthlyPrice(p, period);
   const rentTotal = currentMonthly * period;
@@ -228,7 +277,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
               onClick={() => setZoomOpen(true)}
               aria-label="Görseli büyüt"
             >
-              <img src={images[activeImageIndex]} alt={p.name} />
+              <img key={activeImageIndex} className="gallery-fade-img" src={images[activeImageIndex]} alt={p.name} />
               <span className="gallery-zoom-hint">
                 <ZoomIn size={15} /> Büyüt
               </span>
@@ -377,41 +426,10 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
 
       {/* DETAIL TABS SECTION */}
       <section className="section product-info-section">
-        <div className="container">
-          <div className="detail-tabs" id="reviews-anchor">
-            <button
-              className={activeTab === "description" ? "active" : ""}
-              onClick={() => setActiveTab("description")}
-            >
-              Ürün Açıklaması
-            </button>
-            <button
-              className={activeTab === "specs" ? "active" : ""}
-              onClick={() => setActiveTab("specs")}
-            >
-              Teknik Özellikler
-            </button>
-            <button
-              className={activeTab === "reviews" ? "active" : ""}
-              onClick={() => setActiveTab("reviews")}
-            >
-              Değerlendirmeler
-            </button>
-            <button
-              className={activeTab === "qa" ? "active" : ""}
-              onClick={() => setActiveTab("qa")}
-            >
-              Soru & Cevap
-            </button>
-            <button
-              className={activeTab === "return" ? "active" : ""}
-              onClick={() => setActiveTab("return")}
-            >
-              İptal & İade Koşulları
-            </button>
-          </div>
-
-          <div className="detail-tab-panels">
+        <div className="container" id="reviews-anchor">
+          {(() => {
+            const activePanelContent = (
+              <>
             {/* Description Panel */}
             {activeTab === "description" && (
               <section className="detail-tab-panel active">
@@ -500,7 +518,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                     <form className="review-form-box" onSubmit={handleReviewSubmit}>
                       <div className="review-form-head">
                         <h4>Değerlendirme Yap</h4>
-                        <span>Deneyimini paylaş</span>
                       </div>
                       <div className="review-rating-pick">
                         {[1, 2, 3, 4, 5].map((n) => (
@@ -512,9 +529,7 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                         >
                           <span className="rating-pick-number">{n}</span>
                           <span className="rating-pick-stars" aria-hidden="true">
-                            {Array.from({ length: n }, (_, idx) => (
-                              <Star key={idx} size={12} fill="currentColor" strokeWidth={0} />
-                            ))}
+                            <Star size={12} fill="currentColor" strokeWidth={0} />
                           </span>
                         </button>
                       ))}
@@ -634,7 +649,54 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                 </div>
               </section>
             )}
-          </div>
+              </>
+            );
+
+            if (isMobileTabs) {
+              return (
+                <div className="detail-tabs-accordion">
+                  {PRODUCT_DETAIL_TABS.map((tab) => (
+                    <div
+                      key={tab.key}
+                      ref={(el) => { tabItemRefs.current[tab.key] = el; }}
+                      className={`detail-tab-item ${activeTab === tab.key ? "active" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className={activeTab === tab.key ? "active" : ""}
+                        onClick={() => {
+                          setActiveTab(tab.key);
+                          scrollTabIntoView(tab.key);
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                      <div className="detail-tab-accordion">
+                        {activeTab === tab.key && activePanelContent}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+
+            return (
+              <>
+                <div className="detail-tabs">
+                  {PRODUCT_DETAIL_TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      className={activeTab === tab.key ? "active" : ""}
+                      onClick={() => setActiveTab(tab.key)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="detail-tab-panels">{activePanelContent}</div>
+              </>
+            );
+          })()}
         </div>
       </section>
 
