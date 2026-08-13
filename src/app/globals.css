@@ -15262,3 +15262,35 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   }
 }
 
+/* Ürün galerisi masaüstünde/tablette: ana görsel 4/3'e sabitlenince
+   (bkz. yukarıdaki not) galeri kutusu, sağdaki fiyat kartıyla aynı
+   yükseklikte kalmaya devam ettiği için küçük resimlerin ve rozetlerin
+   ALTINDA boş bir alan kalıyordu. Görseli tekrar büyütüp orantısını
+   bozmak yerine küçük resimleri ve rozetleri büyütüp o boşluğu
+   dolduruyoruz. */
+/* Not: sabit piksel büyütme (110px küçük resim vb.) sadece TEK bir pencere
+   genişliğinde işe yarıyordu — pencere küçülünce/genişleyince ana görselin
+   yüksekliği (4/3 oranı yüzünden) değişiyor ama sağdaki fiyat kartının
+   yüksekliği neredeyse sabit kalıyor, aradaki fark her genişlikte farklı
+   oluyor. Sabit değer yerine kalan boşluğu HER genişlikte otomatik
+   dağıtan justify-content:space-between kullanıyoruz — üç öğe (görsel,
+   küçük resimler, rozetler) arasındaki boşluk, ne kadar yer kaldığına
+   göre kendini ayarlıyor, rozetler her zaman kartın alt kenarına yapışık
+   kalıyor. */
+@media (min-width: 761px) {
+  .gallery-panel.detail-clean {
+    justify-content: space-between !important;
+  }
+  .thumb-row.clean span {
+    height: 90px !important;
+  }
+  .thumb-row.clean img {
+    max-width: 72px !important;
+    max-height: 72px !important;
+  }
+  .detail-premium-strip span {
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+  }
+}
+
