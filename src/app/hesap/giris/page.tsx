@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { ArrowLeft, Check, Clock3, Heart, PackageCheck, ShieldAlert, ShieldCheck, Sparkles } from "lucide-react";
 import { requestMfaCode } from "./actions";
 
@@ -80,7 +80,20 @@ function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    // callbackUrl açıkça verilmemişse (örn. /destek veya /admin'den
+    // yönlendirilmemişse), rolüne göre kullanıcıyı doğrudan kendi paneline gönder.
+    let target = callbackUrl;
+    if (callbackUrl === "/") {
+      const session = await getSession();
+      const role = session?.user?.role;
+      if (role === "ADMIN") {
+        target = "/admin";
+      } else if (role === "SUPPORT") {
+        target = "/destek";
+      }
+    }
+
+    router.push(target);
     router.refresh();
   };
 
