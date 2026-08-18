@@ -258,8 +258,14 @@ model StoreProfile {
 
 model SupportTicket {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Kayıtlı müşteri talebi ise dolu; canlı destek widget'ından giriş
+  // yapmadan yazan ziyaretçi talebiyse null (bkz. guestSessionId).
+  userId      String?  @db.ObjectId
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Misafir (giriş yapmamış) ziyaretçiyi tanımlamak için — iron-session
+  // ile tarayıcıya yazılan imzalı, kalıcı bir kimlik (bkz. lib/guest-session.ts).
+  guestSessionId String?
+  guestName      String?
   subject     String
   description String
   status      String   @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
@@ -277,11 +283,16 @@ model SupportTicket {
   reasonLabel  String?
 
   @@index([userId])
+  @@index([guestSessionId])
 }
 
 type TicketMessage {
-  senderId   String   @db.ObjectId
+  // Kayıtlı kullanıcı ise gerçek User id'si, misafir/temsilci mesajı ise
+  // "guest" / "agent" gibi sabit bir işaretleyici — bu yüzden artık
+  // katı ObjectId formatı zorunlu değil.
+  senderId   String
   senderName String
+  senderRole String   @default("CUSTOMER") // CUSTOMER, GUEST, AGENT
   message    String
   createdAt  DateTime @default(now())
 }

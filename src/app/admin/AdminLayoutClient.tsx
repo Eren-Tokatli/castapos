@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
   BarChart3, FileText, CalendarClock, Package, CreditCard, ShoppingBag,
-  FolderTree, Users, Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Sun, Moon
+  FolderTree, Users, Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Sun, Moon,
+  MessageCircle
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -35,6 +36,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { label: "Kategoriler", icon: FolderTree, href: "/admin/categories" },
     { label: "Kullanıcılar", icon: Users, href: "/admin/users" },
     { label: "Ödeme Kayıtları", icon: CreditCard, href: "/admin/payments" },
+    { label: "Canlı Destek", icon: MessageCircle, href: "/admin/canli-destek" },
   ];
 
   const isActive = (href: string) => {

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { getProduct, monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/products-data";
 import { createStorefrontOrder } from "./actions";
 import { IyzicoCheckoutFrame } from "@/components/IyzicoCheckoutFrame";
+import { isValidTcKimlikNo } from "@/lib/tc-kimlik";
 
 const VAT_RATE = 0.20;
 
@@ -46,6 +47,16 @@ export default function SepetPage() {
   // Real Checkout Integration States
   const [orderId, setOrderId] = useState<string | null>(null);
   const [orderError, setOrderError] = useState("");
+  const [tcError, setTcError] = useState("");
+  const [distanceSaleAccepted, setDistanceSaleAccepted] = useState(false);
+  const [rentalTermsAccepted, setRentalTermsAccepted] = useState(false);
+  const agreementsAccepted = distanceSaleAccepted && rentalTermsAccepted;
+
+  // Modal dışına tıklayınca kapatma — ama Adres/Sipariş notu gibi metin
+  // alanlarında seçim yaparken mouse modalin dışına taşarsa (mousedown içeride,
+  // mouseup dışarıda) kapanmasın. Sadece hem mousedown hem click backdrop'un
+  // kendisinde başlarsa kapat.
+  const backdropMouseDownOnSelf = useRef(false);
 
   // Checkout Form State
   const [shippingForm, setShippingForm] = useState({
@@ -127,8 +138,9 @@ export default function SepetPage() {
       return;
     }
 
-    if (shippingForm.taxOrNationalId.length !== 11) {
-      showToast("T.C. kimlik numarası 11 haneli olmalıdır.");
+    if (!isValidTcKimlikNo(shippingForm.taxOrNationalId)) {
+      setTcError("Girdiğiniz T.C. kimlik numarası geçerli değil.");
+      showToast("T.C. kimlik numarası geçerli değil.");
       return;
     }
 
@@ -420,7 +432,17 @@ export default function SepetPage() {
 
       {/* CHECKOUT MODAL FLOW */}
       {checkoutStep !== null && (
-        <div className="checkout-flow-backdrop open" onClick={() => setCheckoutStep(null)}>
+        <div
+          className="checkout-flow-backdrop open"
+          onMouseDown={(e) => {
+            backdropMouseDownOnSelf.current = e.target === e.currentTarget;
+          }}
+          onClick={(e) => {
+            if (backdropMouseDownOnSelf.current && e.target === e.currentTarget) {
+              setCheckoutStep(null);
+            }
+          }}
+        >
           <div className="checkout-flow-modal" onClick={(e) => e.stopPropagation()}>
             <div className="checkout-flow-head">
               <div>
@@ -446,20 +468,29 @@ export default function SepetPage() {
                 <div className="checkout-grid">
                   <section className="checkout-card">
                     <h3>Teslimat bilgileri</h3>
-                    <div className="form-grid">
+                    <form
+                      id="checkout-address-form"
+                      className="form-grid"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleProceedToPayment();
+                      }}
+                    >
                       <label>
-                        Ad
+                        <span>Ad <span className="required-star">*</span></span>
                         <input
                           type="text"
+                          required
                           placeholder="Adınız"
                           value={shippingForm.firstName}
                           onChange={(e) => setShippingForm({ ...shippingForm, firstName: e.target.value })}
                         />
                       </label>
                       <label>
-                        Soyad
+                        <span>Soyad <span className="required-star">*</span></span>
                         <input
                           type="text"
+                          required
                           placeholder="Soyadınız"
                           value={shippingForm.lastName}
                           onChange={(e) => setShippingForm({ ...shippingForm, lastName: e.target.value })}
@@ -475,7 +506,7 @@ export default function SepetPage() {
                         />
                       </label>
                       <label>
-                        Telefon
+                        <span>Telefon <span className="required-star">*</span></span>
                         <div className="phone-field">
                           <select className="country-code-select" data-country-code>
                             <option value="+90">TR +90</option>
@@ -485,6 +516,7 @@ export default function SepetPage() {
                           </select>
                           <input
                             type="tel"
+                            required
                             placeholder="Telefon numaranız"
                             value={shippingForm.phone}
                             onChange={(e) => handlePhoneInput(e.target.value)}
@@ -492,20 +524,26 @@ export default function SepetPage() {
                         </div>
                       </label>
                       <label>
-                        T.C. Kimlik No
+                        <span>T.C. Kimlik No <span className="required-star">*</span></span>
                         <input
                           type="text"
+                          required
                           inputMode="numeric"
                           placeholder="11 haneli T.C. kimlik numaranız"
                           maxLength={11}
+                          className={tcError ? "field-invalid" : undefined}
                           value={shippingForm.taxOrNationalId}
-                          onChange={(e) =>
-                            setShippingForm({
-                              ...shippingForm,
-                              taxOrNationalId: e.target.value.replace(/[^0-9]/g, ""),
-                            })
-                          }
+                          onChange={(e) => {
+                            const digits = e.target.value.replace(/[^0-9]/g, "");
+                            setShippingForm({ ...shippingForm, taxOrNationalId: digits });
+                            if (digits.length < 11) {
+                              setTcError("");
+                            } else {
+                              setTcError(isValidTcKimlikNo(digits) ? "" : "Girdiğiniz T.C. kimlik numarası geçerli değil.");
+                            }
+                          }}
                         />
+                        {tcError && <small className="field-error-text">{tcError}</small>}
                       </label>
                       <label>
                         İl
@@ -548,8 +586,9 @@ export default function SepetPage() {
                         )}
                       </label>
                       <label style={{ gridColumn: "1/-1" }}>
-                        Adres
+                        <span>Adres <span className="required-star">*</span></span>
                         <textarea
+                          required
                           placeholder="Mahalle, sokak, bina ve daire bilgilerini yazın."
                           value={shippingForm.address}
                           onChange={(e) => setShippingForm({ ...shippingForm, address: e.target.value })}
@@ -563,7 +602,7 @@ export default function SepetPage() {
                           onChange={(e) => setShippingForm({ ...shippingForm, orderNote: e.target.value })}
                         />
                       </label>
-                    </div>
+                    </form>
                     <p className="checkout-note" style={{ color: "#db4724", marginTop: "12px", fontSize: "13px" }}>
                       {hasSportsItems &&
                         "Spor aletleri siparişlerinde şu an yalnızca İstanbul içi kiralama desteklenmektedir."}
@@ -580,29 +619,45 @@ export default function SepetPage() {
                 <div className="checkout-grid">
                   <section className="checkout-card">
                     <h3>Güvenli Ödeme (Iyzico 3D Secure)</h3>
-                    
-                    {orderId && <IyzicoCheckoutFrame kind="ORDER" referenceId={orderId} />}
 
-                    <div className="mt-4 space-y-2 border-t pt-4">
-                      <label className="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
-                        <input type="checkbox" required defaultChecked className="mt-1" />
+                    <div className="agreement-check-list">
+                      <label className="agreement-check-row">
+                        <input
+                          type="checkbox"
+                          required
+                          checked={distanceSaleAccepted}
+                          onChange={(e) => setDistanceSaleAccepted(e.target.checked)}
+                        />
                         <span>
-                          <a href="/sozlesmeler/mesafeli-sozlesme" target="_blank" className="text-orange-500 hover:underline">
+                          <a href="/sozlesmeler/mesafeli-sozlesme" target="_blank">
                             Mesafeli Satış Sözleşmesi
                           </a>
-                          &apos;ni okudum ve kabul ediyorum.
+                          &apos;ni okudum ve kabul ediyorum. <span className="required-star">*</span>
                         </span>
                       </label>
-                      <label className="flex items-start gap-2 text-xs text-slate-600 cursor-pointer">
-                        <input type="checkbox" required defaultChecked className="mt-1" />
+                      <label className="agreement-check-row">
+                        <input
+                          type="checkbox"
+                          required
+                          checked={rentalTermsAccepted}
+                          onChange={(e) => setRentalTermsAccepted(e.target.checked)}
+                        />
                         <span>
-                          <a href="/sozlesmeler/kiralama-kosullari" target="_blank" className="text-orange-500 hover:underline">
+                          <a href="/sozlesmeler/kiralama-kosullari" target="_blank">
                             Kiralama Koşulları Sözleşmesi
                           </a>
-                          &apos;ni okudum ve kabul ediyorum.
+                          &apos;ni okudum ve kabul ediyorum. <span className="required-star">*</span>
                         </span>
                       </label>
                     </div>
+
+                    {orderId && agreementsAccepted ? (
+                      <IyzicoCheckoutFrame kind="ORDER" referenceId={orderId} />
+                    ) : (
+                      <p className="checkout-note" style={{ marginTop: "16px" }}>
+                        Ödeme formunu görüntülemek için yukarıdaki sözleşmeleri onaylaman gerekiyor.
+                      </p>
+                    )}
                   </section>
                   
                   <aside className="checkout-card">
@@ -619,9 +674,9 @@ export default function SepetPage() {
                       Kapat
                     </button>
                     <button
-                      type="button"
+                      type="submit"
+                      form="checkout-address-form"
                       className="btn btn-primary"
-                      onClick={handleProceedToPayment}
                     >
                       Ödemeye geç
                     </button>

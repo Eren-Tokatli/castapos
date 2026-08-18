@@ -18,6 +18,7 @@ export default async function AdminUsersPage() {
   }
   const ticketCountByUser = new Map<string, number>();
   for (const t of tickets) {
+    if (!t.userId) continue; // canlı destek widget'ından gelen misafir talepleri
     ticketCountByUser.set(t.userId, (ticketCountByUser.get(t.userId) || 0) + 1);
   }
 

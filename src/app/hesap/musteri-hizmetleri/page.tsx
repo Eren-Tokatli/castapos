@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Bot, Clock3, Mail, MapPin, MessageCircle, PhoneCall, ShieldCheck } from "lucide-react";
+import { Bot, Clock3, Headphones, Mail, MapPin, MessageCircle, PhoneCall, ShieldCheck } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AccountShell } from "@/components/AccountShell";
+import { LiveChatActionButton } from "@/components/LiveChatActionButton";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,13 @@ const supportActions = [
     href: whatsappUrl,
     external: true,
     featured: true,
+  },
+  {
+    icon: Headphones,
+    title: "Canlı Destek",
+    text: "Ekibimizle site üzerinden anında yazış, giriş yapmana gerek yok.",
+    value: "Sohbeti başlat",
+    isLiveChat: true,
   },
   {
     icon: PhoneCall,
@@ -84,6 +92,19 @@ export default async function MusteriHizmetleriPage() {
               </>
             );
 
+            if (action.isLiveChat) {
+              return (
+                <LiveChatActionButton
+                  key={action.title}
+                  icon={<Icon size={22} />}
+                  title={action.title}
+                  text={action.text}
+                  value={action.value}
+                  featured={action.featured}
+                />
+              );
+            }
+
             return action.external ? (
               <a
                 key={action.title}
@@ -98,7 +119,7 @@ export default async function MusteriHizmetleriPage() {
               <Link
                 key={action.title}
                 className={`live-support-action ${action.featured ? "featured" : ""}`}
-                href={action.href}
+                href={action.href!}
               >
                 {content}
               </Link>

@@ -1761,12 +1761,20 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .checkout-card label{display:grid;gap:8px;font-size:14px;font-weight:700;color:#344054}
 .checkout-card input,.checkout-card textarea,.checkout-card select{width:100%;min-height:46px;border:1px solid #d8dde7;border-radius:14px;padding:12px 14px;font:inherit;outline:0;background:#fff}
 .checkout-card textarea{min-height:110px;resize:vertical}
+.required-star{color:#e11d48;font-weight:800}
+.checkout-card input.field-invalid,.checkout-card textarea.field-invalid{border-color:#e11d48}
+.field-error-text{display:block;margin-top:-2px;color:#e11d48;font-size:12px;font-weight:600}
 .checkout-summary-list{display:grid;gap:10px}
 .checkout-summary-list div{display:flex;justify-content:space-between;gap:16px;color:#475467}
 .checkout-summary-list strong{color:#101828}
 .checkout-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .checkout-actions .btn{min-width:180px}
 .checkout-note{font-size:13px;color:#667085;margin:0}
+.agreement-check-list{display:grid;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid #e5e7ee}
+.checkout-card .agreement-check-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:400;color:#667085;cursor:pointer}
+.checkout-card .agreement-check-row input[type="checkbox"]{width:16px;height:16px;min-height:0;flex:0 0 16px;margin-top:2px;padding:0;border-radius:4px}
+.agreement-check-row a{color:var(--brand);font-weight:700}
+.agreement-check-row a:hover{text-decoration:underline}
 .checkout-success{padding:12px 0 4px}
 .checkout-success .success-box{border:1px solid #d1fadf;background:#ecfdf3;border-radius:18px;padding:18px;color:#067647}
 .detail-top-row{align-items:flex-start;gap:16px}
@@ -4584,12 +4592,18 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
 }
 
 .auth-login-layout {
-  width: min(1120px, 100%) !important;
-  grid-template-columns: 1fr .96fr !important;
+  width: min(480px, 100%) !important;
+  grid-template-columns: 1fr !important;
   border-color: rgba(243, 95, 54, .24) !important;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, .94), rgba(255, 251, 245, .88)) !important;
   box-shadow: 0 28px 90px rgba(16, 24, 40, .12), 0 1px 0 rgba(255, 255, 255, .9) inset !important;
+}
+
+/* Sol taraftaki tanıtım paneli sadece giriş sayfasında kaldırıldı —
+   kayıt sayfası (.auth-layout, .auth-visual-panel) etkilenmiyor. */
+.auth-login-layout .auth-visual-panel {
+  display: none !important;
 }
 
 .auth-login-layout .auth-visual-panel {
@@ -13620,7 +13634,7 @@ body.mobile-categories-open .live-support-widget {
 }
 
 .live-support-panel {
-  width: min(360px, calc(100vw - 24px));
+  width: min(420px, calc(100vw - 24px));
   overflow: hidden;
   border: 1px solid rgba(16, 24, 40, .1);
   border-radius: 24px;
@@ -13684,28 +13698,35 @@ body.mobile-categories-open .live-support-widget {
   background: linear-gradient(180deg, #fff, #f8fafc);
 }
 
-.live-support-options a {
+.live-support-options a,
+.live-support-options button {
   display: grid;
   grid-template-columns: 40px 1fr;
   gap: 11px;
   align-items: center;
+  width: 100%;
   min-height: 74px;
   padding: 12px;
   border: 1px solid rgba(16, 24, 40, .07);
   border-radius: 18px;
   background: #f3f5f8;
   color: #101828;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   transition: .18s ease;
 }
 
-.live-support-options a:hover {
+.live-support-options a:hover,
+.live-support-options button:hover {
   transform: translateY(-2px);
   border-color: rgba(243, 95, 54, .22);
   background: #fff;
   box-shadow: 0 18px 36px rgba(16, 24, 40, .08);
 }
 
-.live-support-options a > span {
+.live-support-options a > span,
+.live-support-options button > span {
   display: grid;
   place-items: center;
   width: 40px;
@@ -13728,6 +13749,119 @@ body.mobile-categories-open .live-support-widget {
   color: #667085;
   font-size: 12px;
   line-height: 1.45;
+}
+
+/* Canlı destek — gerçek sohbet paneli */
+.live-support-back {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  cursor: pointer;
+  grid-column: 1;
+}
+
+.live-support-chat {
+  display: flex;
+  flex-direction: column;
+  height: min(560px, calc(100vh - 160px));
+  background: #f8fafc;
+}
+
+.live-support-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.live-support-chat-empty {
+  margin: auto;
+  text-align: center;
+  color: #98a2b3;
+  font-size: 13px;
+  max-width: 220px;
+  line-height: 1.5;
+}
+
+.live-support-chat-bubble {
+  max-width: 82%;
+  padding: 10px 13px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.live-support-chat-bubble small {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  margin-bottom: 3px;
+  opacity: .7;
+}
+
+.live-support-chat-bubble.mine {
+  align-self: flex-end;
+  background: var(--brand);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.live-support-chat-bubble.theirs {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #e5e7ee;
+  color: #101828;
+  border-bottom-left-radius: 4px;
+}
+
+.live-support-chat-composer {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #e5e7ee;
+  background: #fff;
+}
+
+.live-support-chat-composer input {
+  flex: 1;
+  height: 42px;
+  border: 1px solid #d8dde7;
+  border-radius: 12px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.live-support-chat-composer button {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.live-support-chat-composer button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.live-support-chat-closed {
+  text-align: center;
+  padding: 10px 14px;
+  color: #98a2b3;
+  font-size: 12px;
+  border-top: 1px solid #e5e7ee;
+  background: #fff;
 }
 
 .live-support-page,
@@ -13814,6 +13948,10 @@ body.mobile-categories-open .live-support-widget {
   border-radius: 24px;
   background: #f4f6f8;
   color: #101828;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
 }
 
 .live-support-action.featured {
@@ -14402,6 +14540,7 @@ body.page-canli-destek .live-support-page-note div {
 :root[data-theme="dark"] .live-support-panel,
 :root[data-theme="dark"] .live-support-options,
 :root[data-theme="dark"] .live-support-options a,
+:root[data-theme="dark"] .live-support-options button,
 :root[data-theme="dark"] .live-support-page-card,
 :root[data-theme="dark"] .live-support-action-list,
 :root[data-theme="dark"] .live-support-action:not(.featured),
@@ -14436,6 +14575,28 @@ body.page-canli-destek .live-support-page-note div {
 :root[data-theme="dark"] .ai-chat-side-note,
 :root[data-theme="dark"] .ai-chat-message p {
   color: #cbd3df;
+}
+
+:root[data-theme="dark"] .live-support-chat {
+  background: rgba(13, 20, 34, .96);
+}
+
+:root[data-theme="dark"] .live-support-chat-bubble.theirs {
+  background: rgba(16, 26, 43, .94);
+  border-color: rgba(255, 255, 255, .1);
+  color: #e9ecf3;
+}
+
+:root[data-theme="dark"] .live-support-chat-composer,
+:root[data-theme="dark"] .live-support-chat-closed {
+  background: rgba(16, 26, 43, .94);
+  border-color: rgba(255, 255, 255, .1);
+}
+
+:root[data-theme="dark"] .live-support-chat-composer input {
+  border-color: rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .05);
+  color: #fff;
 }
 
 :root[data-theme="dark"] .ai-chat-form input {
@@ -14478,7 +14639,7 @@ body.page-canli-destek .live-support-page-note div {
 
   .live-support-panel {
     width: calc(100vw - 24px);
-    max-width: 360px;
+    max-width: 420px;
     border-radius: 22px;
   }
 
@@ -14514,14 +14675,16 @@ body.page-canli-destek .live-support-page-note div {
     padding: 12px;
   }
 
-  .live-support-options a {
+  .live-support-options a,
+  .live-support-options button {
     grid-template-columns: 38px 1fr;
     min-height: 68px;
     padding: 11px;
     border-radius: 16px;
   }
 
-  .live-support-options a > span {
+  .live-support-options a > span,
+  .live-support-options button > span {
     width: 38px;
     height: 38px;
     border-radius: 13px;

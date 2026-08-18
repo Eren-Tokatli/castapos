@@ -183,17 +183,17 @@ export default function StorefrontLayout({
               <small>Favorilerim</small>
             </button>
 
-            <button
-              onClick={() => setIsCartOpen(true)}
+            <Link
+              href="/sepet"
               className={`action-link cart-action ${cartCount > 0 ? "has-items" : ""}`}
-              style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+              style={{ background: "none", border: "none" }}
             >
               <span className="action-icon"><ShoppingCart size={22} /></span>
               <small>Sepetim</small>
               <b data-cart-count className="cart-count-pill">
                 {cartCount} Ürün
               </b>
-            </button>
+            </Link>
 
             <div className="account-wrap">
               <Link href={accountLinkHref} className="action-link account-link">

@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
-import { MessageSquare, Send, CheckCircle2, Clock, Mail, Phone, User, Filter, ShieldAlert } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { MessageSquare, Send, CheckCircle2, Clock, Mail, Phone, User, Filter, ShieldAlert, UserRound } from "lucide-react";
 import { addMessageToTicket } from "../hesap/destek/actions";
-import { closeTicket } from "./actions";
+import { closeTicket, getAllTickets } from "./actions";
 
 interface Message {
   senderId: string;
   senderName: string;
+  senderRole?: "CUSTOMER" | "GUEST" | "AGENT" | string;
   message: string;
   createdAt: string;
 }
@@ -22,14 +23,28 @@ interface UserDetail {
 
 interface Ticket {
   id: string;
-  userId: string;
+  userId: string | null;
+  guestName?: string | null;
+  reasonCode?: string | null;
+  reasonLabel?: string | null;
   subject: string;
   description: string;
   status: "OPEN" | "IN_PROGRESS" | "CLOSED" | string;
   createdAt: string;
   updatedAt: string;
   messages: Message[];
-  user: UserDetail;
+  user: UserDetail | null;
+}
+
+function isAgentMessage(msg: Message) {
+  if (msg.senderRole) return msg.senderRole === "AGENT";
+  // Eski kayıtlar (senderRole eklenmeden önce) için geriye dönük uyumluluk
+  return msg.senderId === "agent" || msg.senderId === "support" || msg.senderId === "admin";
+}
+
+function ticketDisplayName(t: Ticket) {
+  if (t.user) return `${t.user.firstName} ${t.user.lastName}`;
+  return t.guestName || "Ziyaretçi";
 }
 
 export function AgentTicketListClient({ initialTickets }: { initialTickets: Ticket[] }) {
@@ -48,6 +63,20 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
 
   const selectedTicket = tickets.find((t) => t.id === selectedTicketId);
 
+  // ~5sn'de bir yeni mesaj/talep var mı diye sessizce kontrol eder — sayfa
+  // yenilenmeden "canlı" hissi verir. Kullanıcı bir şey yazarken üzerine
+  // yazmaması için input'a odaklıyken atlanır.
+  const replyMessageRef = useRef(replyMessage);
+  replyMessageRef.current = replyMessage;
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (replyMessageRef.current.trim()) return;
+      const fresh = await getAllTickets();
+      if (fresh.length > 0) setTickets(fresh);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Filtered tickets logic
   const filteredTickets = tickets.filter((t) => {
     if (filterStatus === "ALL") return true;
@@ -65,8 +94,10 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
     setReplyLoading(false);
 
     if (res.success) {
+      const sentMessage = replyMessage.trim();
       setReplyMessage("");
-      // Update state locally
+      // Update state locally (optimistic) — bir sonraki polling turu gerçek
+      // veriyle (doğru senderId dahil) üzerine yazacak.
       const updatedTickets = tickets.map((t) => {
         if (t.id === selectedTicketId) {
           return {
@@ -77,7 +108,8 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
               {
                 senderId: "agent",
                 senderName: "Destek Temsilcisi (Siz)",
-                message: replyMessage.trim(),
+                senderRole: "AGENT" as const,
+                message: sentMessage,
                 createdAt: new Date().toISOString(),
               },
             ],
@@ -86,10 +118,6 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
         return t;
       });
       setTickets(updatedTickets);
-      // Brief sync with backend
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     }
   };
 
@@ -108,9 +136,6 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
         return t;
       });
       setTickets(updatedTickets);
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     }
   };
 
@@ -179,8 +204,14 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
                       {t.status === "OPEN" ? "AÇIK" : t.status === "IN_PROGRESS" ? "İŞLEMDE" : "KAPANDI"}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-semibold truncate">
-                    {t.user.firstName} {t.user.lastName}
+                  <span className="text-[10px] text-slate-500 font-semibold truncate flex items-center gap-1">
+                    {!t.user && <UserRound size={10} className="text-slate-400" />}
+                    {ticketDisplayName(t)}
+                    {t.reasonCode === "CANLI_DESTEK" && (
+                      <span className="text-[8px] font-extrabold px-1 py-0.5 rounded bg-purple-50 text-purple-600 border border-purple-200">
+                        CANLI
+                      </span>
+                    )}
                   </span>
                   <span className="text-[9px] text-slate-400 font-medium">
                     {new Date(t.createdAt).toLocaleDateString("tr-TR")}
@@ -235,7 +266,7 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
 
                 {/* Replies */}
                 {selectedTicket.messages?.map((msg, index) => {
-                  const isAgent = msg.senderId === "agent" || msg.senderId === "support" || msg.senderId === "admin";
+                  const isAgent = isAgentMessage(msg);
                   return (
                     <div
                       key={index}
@@ -309,13 +340,23 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
                   <User size={16} />
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[10px] text-slate-400 font-bold">MÜŞTERİ</p>
+                  <p className="text-[10px] text-slate-400 font-bold">
+                    {selectedTicket.user ? "MÜŞTERİ" : "ZİYARETÇİ (GİRİŞ YAPMAMIŞ)"}
+                  </p>
                   <p className="text-xs font-bold text-slate-800 truncate">
-                    {selectedTicket.user.firstName} {selectedTicket.user.lastName}
+                    {ticketDisplayName(selectedTicket)}
                   </p>
                 </div>
               </div>
 
+              {!selectedTicket.user && (
+                <div className="bg-purple-50 border border-purple-200 p-2.5 rounded-xl text-purple-700 text-[10px] leading-relaxed flex gap-1.5 items-start">
+                  <ShieldAlert size={12} className="mt-0.5 flex-shrink-0" />
+                  Bu kişi giriş yapmadan canlı destek üzerinden yazdı; e-posta/telefon bilgisi ve sipariş geçmişi yok.
+                </div>
+              )}
+
+              {selectedTicket.user && (
               <div className="flex items-center gap-3">
                 <span className="w-9 h-9 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center shadow-xs">
                   <Mail size={16} />
@@ -325,7 +366,9 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
                   <p className="text-xs font-bold text-slate-800 truncate">{selectedTicket.user.email}</p>
                 </div>
               </div>
+              )}
 
+              {selectedTicket.user && (
               <div className="flex items-center gap-3">
                 <span className="w-9 h-9 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center shadow-xs">
                   <Phone size={16} />
@@ -337,6 +380,7 @@ export function AgentTicketListClient({ initialTickets }: { initialTickets: Tick
                   </p>
                 </div>
               </div>
+              )}
 
               <div className="pt-2 border-t border-slate-100">
                 <span className="text-[10px] font-bold text-slate-400">YETKİLENDİRME</span>
