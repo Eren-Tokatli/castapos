@@ -209,7 +209,7 @@ export default function HomePage() {
             >
               ‹
             </button>
-            <div className="product-rail flash-sale-rail" ref={flashSaleRailRef}>
+            <div className="product-rail flash-sale-rail five-up" ref={flashSaleRailRef}>
               {flashSaleProducts.map((p) => (
                 <ProductCard key={p.id} p={p} />
               ))}

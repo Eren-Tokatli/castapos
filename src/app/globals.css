@@ -15362,3 +15362,14 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   }
 }
 
+/* Ana sayfa "İndirimli Ürünler": ızgaraya sarmak (2 satıra bölünmek)
+   yerine, ekranda her zaman TAM 5 kart görünen kaydırmalı bir şerit —
+   6+ ürün varsa fazlası sağa/sola kaydırarak açığa çıkıyor, satıra
+   düşmüyor. Diğer şeritleri (Popüler Ürünler, Yeni Gelenler) etkilememesi
+   için sadece bu section + .five-up sınıfına özel, masaüstünde. */
+@media (min-width: 761px) {
+  .home-shell .flash-sale-section .product-rail.five-up {
+    grid-auto-columns: calc((100% - 4 * 14px) / 5) !important;
+  }
+}
+
