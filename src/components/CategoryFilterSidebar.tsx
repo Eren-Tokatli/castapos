@@ -6,6 +6,9 @@ export interface RentalAdvantages {
 }
 
 interface CategoryFilterSidebarProps {
+  categories?: string[];
+  selectedCategory?: string;
+  onCategoryChange?: (category: string) => void;
   brands: string[];
   selectedBrand: string;
   onBrandChange: (brand: string) => void;
@@ -28,6 +31,9 @@ const advantageLabels: { key: keyof RentalAdvantages; label: string }[] = [
 ];
 
 export function CategoryFilterSidebar({
+  categories,
+  selectedCategory,
+  onCategoryChange,
   brands,
   selectedBrand,
   onBrandChange,
@@ -44,6 +50,24 @@ export function CategoryFilterSidebar({
   return (
     <aside className="filter-sidebar">
       <div className="filter-title">Filtrele</div>
+
+      {categories && categories.length > 0 && onCategoryChange && (
+        <div className="filter-block">
+          <h3>Kategori</h3>
+          <div className="check-list">
+            {categories.map((category) => (
+              <label key={category} className="fake-check">
+                <input
+                  type="checkbox"
+                  checked={selectedCategory === category}
+                  onChange={() => onCategoryChange(category)}
+                />
+                <span>{category}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="filter-block">
         <h3>Marka</h3>

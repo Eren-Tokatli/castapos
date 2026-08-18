@@ -4,7 +4,7 @@ import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { notFound, useSearchParams } from "next/navigation";
-import { PRODUCTS, uniqueBrands, ratingCount } from "@/lib/products-data";
+import { PRODUCTS, uniqueBrands, uniqueCollections, ratingCount } from "@/lib/products-data";
 import { ProductCard } from "@/components/ProductCard";
 import { CategoryFilterSidebar, RentalAdvantages } from "@/components/CategoryFilterSidebar";
 import { PremiumSortDropdown, SortOption } from "@/components/PremiumSortDropdown";
@@ -31,6 +31,7 @@ function KategoriPageContent() {
   // Sidebar'daki seçimler ("taslak") — "Uygula" butonuna basılana kadar
   // ürün listesini etkilemez. Uygulanan (applied) state'ler asıl filtrelemeyi
   // yapar; aktif filtre etiketleri de bunlardan türetilir.
+  const [draftCategory, setDraftCategory] = useState("");
   const [draftBrand, setDraftBrand] = useState("");
   const [draftMinPrice, setDraftMinPrice] = useState("");
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
@@ -40,6 +41,7 @@ function KategoriPageContent() {
     fastDelivery: false,
   });
 
+  const [appliedCategory, setAppliedCategory] = useState("");
   const [appliedBrand, setAppliedBrand] = useState("");
   const [appliedMinPrice, setAppliedMinPrice] = useState("");
   const [appliedMaxPrice, setAppliedMaxPrice] = useState("");
@@ -59,6 +61,11 @@ function KategoriPageContent() {
     notFound();
   }
 
+  // Handle Category checkbox change (only one selected at a time)
+  const handleCategoryChange = (category: string) => {
+    setDraftCategory((prev) => (prev === category ? "" : category));
+  };
+
   // Handle Brand checkbox change (only one selected at a time, like static js)
   const handleBrandChange = (brand: string) => {
     setDraftBrand((prev) => (prev === brand ? "" : brand));
@@ -76,6 +83,7 @@ function KategoriPageContent() {
   };
 
   const handleApplyFilters = () => {
+    setAppliedCategory(draftCategory);
     setAppliedBrand(draftBrand);
     setAppliedMinPrice(draftMinPrice);
     setAppliedMaxPrice(draftMaxPrice);
@@ -85,6 +93,10 @@ function KategoriPageContent() {
 
   // Aktif filtre etiketindeki "x" butonuna basınca hem taslağı hem
   // uygulanmış filtreyi temizler — bu her zaman anında etkilidir.
+  const clearCategoryFilter = () => {
+    setDraftCategory("");
+    setAppliedCategory("");
+  };
   const clearBrandFilter = () => {
     setDraftBrand("");
     setAppliedBrand("");
@@ -121,6 +133,12 @@ function KategoriPageContent() {
     filteredProducts = filteredProducts.filter((p) =>
       ["Bisiklet", "Fitness", "Yürüyüş Bantları"].includes(p.collection)
     );
+  }
+
+  // 1b. "Tüm Ürünler" görünümünde (URL'de kategori yokken) sidebar'daki
+  // Kategori filtresi uygulanır.
+  if (!activeCategory && appliedCategory) {
+    filteredProducts = filteredProducts.filter((p) => p.collection === appliedCategory);
   }
 
   // 2. Filter by search query
@@ -167,6 +185,9 @@ function KategoriPageContent() {
   // Aktif filtre etiketleri (toolbar'da gösterilir, her birinde "x" ile
   // kaldırma var)
   const activeFilterChips: { key: string; label: string; onRemove: () => void }[] = [];
+  if (!activeCategory && appliedCategory) {
+    activeFilterChips.push({ key: "category", label: appliedCategory, onRemove: clearCategoryFilter });
+  }
   if (appliedBrand) {
     activeFilterChips.push({ key: "brand", label: appliedBrand, onRemove: clearBrandFilter });
   }
@@ -210,6 +231,7 @@ function KategoriPageContent() {
   const isNewListing = sortBy === "new" && !activeCategory && !searchQuery;
   const categoryLabel = isNewListing ? "Yeni Gelenler" : activeCategory || "Tüm Ürünler";
   const brands = uniqueBrands();
+  const collections = uniqueCollections();
 
   return (
     <div
@@ -222,15 +244,15 @@ function KategoriPageContent() {
           <nav className="breadcrumb">
             <Link href="/">Ana Sayfa</Link> › <span>{categoryLabel}</span>
           </nav>
-          <div className="listing-line count-only">
-            <span>{filteredProducts.length} ürün</span>
-          </div>
         </div>
       </section>
 
       <section className="listing-section">
         <div className="container listing-layout">
           <CategoryFilterSidebar
+            categories={!activeCategory ? collections : undefined}
+            selectedCategory={draftCategory}
+            onCategoryChange={handleCategoryChange}
             brands={brands}
             selectedBrand={draftBrand}
             onBrandChange={handleBrandChange}

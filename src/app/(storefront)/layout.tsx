@@ -264,6 +264,9 @@ export default function StorefrontLayout({
         {/* NAVIGATION BAR */}
         <nav className="category-bar" aria-label="Kategori menüsü">
           <div className={`container category-scroll ${navPanelSuppressed ? "nav-panel-suppressed" : ""}`} data-nav-categories>
+            <div className="nav-category">
+              <Link href="/kategori">Tüm Ürünler</Link>
+            </div>
             {NAV_CATEGORIES.map((cat, idx) => {
               const columns = cat.groups.map((group, gIdx) => {
                 const links = group[1];

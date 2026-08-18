@@ -662,6 +662,12 @@ export function uniqueBrands(): string[] {
   );
 }
 
+export function uniqueCollections(): string[] {
+  return [...new Set(PRODUCTS.map((p) => p.collection))].sort((a, b) =>
+    a.localeCompare(b, "tr")
+  );
+}
+
 export const TYPE_FILTERS: Record<string, string[]> = {
   "Tüm Kategoriler": [
     "Tüm ürünler",

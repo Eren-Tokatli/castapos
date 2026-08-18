@@ -4082,7 +4082,7 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
   background: linear-gradient(180deg, transparent 0%, rgba(243, 95, 54, 0.045) 100%);
 }
 :root[data-theme="dark"] .easy-step-card {
-  border-color: rgba(243, 95, 54, 0.24) !important;
+  border-color: rgba(243, 95, 54, .35) !important;
 }
 :root[data-theme="dark"] .easy-step-card:hover,
 :root[data-theme="dark"] .easy-step-card:focus-visible,
@@ -4107,7 +4107,7 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
 }
 :root[data-theme="dark"] .easy-preview-window {
   background: linear-gradient(135deg, rgba(18, 27, 44, .98) 0%, rgba(12, 18, 30, .98) 62%, rgba(45, 36, 24, .96) 100%);
-  border-color: rgba(243, 95, 54, .28);
+  border-color: rgba(243, 95, 54, .35);
 }
 :root[data-theme="dark"] .easy-preview-browser {
   background: rgba(8, 13, 23, .58);
@@ -4115,7 +4115,7 @@ body.mega-menu-open::before{background:rgba(0,0,0,.46)!important}
 }
 :root[data-theme="dark"] .easy-preview-badge {
   background: rgba(12, 18, 30, .9);
-  border-color: rgba(243, 95, 54, .25);
+  border-color: rgba(243, 95, 54, .35);
 }
 .section-title-row h1,.section-title-row h2{
   font-family:var(--font-display),Georgia,serif;
@@ -7891,6 +7891,16 @@ body.page-urun-detay .review-form-box .btn {
   box-shadow: 0 14px 32px rgba(16, 24, 40, .075) !important;
 }
 
+/* Yukarıdaki kural ID içerdiği için (#popular-products/#new-products)
+   genel ".home-shell .modern-rental-card" gece modu kuralından daha
+   spesifik kalıyor ve turuncu çerçeveyi eziyordu — bu iki şeritte
+   çerçeve hiç görünmüyordu. Aynı ID'li seçiciyle gece moduna özel
+   override. */
+:root[data-theme="dark"] .home-shell #popular-products .modern-rental-card,
+:root[data-theme="dark"] .home-shell #new-products .modern-rental-card {
+  border-color: rgba(243, 95, 54, .35) !important;
+}
+
 .home-shell .campaign-strip-section {
   padding: 34px 0 12px !important;
   background: #f4f6fa;
@@ -7956,7 +7966,7 @@ body.page-urun-detay .review-form-box .btn {
 
 :root[data-theme="dark"] .home-shell .modern-rental-card,
 :root[data-theme="dark"] .home-shell .testimonial-card {
-  border-color: rgba(243, 95, 54, .18) !important;
+  border-color: rgba(243, 95, 54, .35) !important;
 }
 
 @media (max-width: 760px) {
