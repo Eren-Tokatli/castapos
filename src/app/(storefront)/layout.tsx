@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
@@ -18,6 +18,7 @@ export default function StorefrontLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
   const userFirstName = session?.user?.name ? session.user.name.trim().split(" ")[0] : "";
@@ -57,8 +58,24 @@ export default function StorefrontLayout({
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [mobileAccountOpen, setMobileAccountOpen] = useState(false);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState<Record<number, boolean>>({});
+  const [navPanelSuppressed, setNavPanelSuppressed] = useState(false);
 
   const searchRef = useRef<HTMLFormElement>(null);
+
+  // Kategori linkine tıklayınca header yeniden mount olmadığı için (aynı
+  // layout kalıyor) mega panel açık kalabiliyordu: fare hareket etmeden
+  // tıklanan linkte :hover kalmaya devam ediyor, sayfa değişse bile panel
+  // ekranda asılı duruyordu — tam da "başka bir yere gelmezsen açık kalıyor"
+  // dediğin durum. Sabit bir süre yerine, route değiştiğinde paneli
+  // bastırıp fare gerçekten hareket edene kadar (nereye gittiği önemli
+  // değil) öyle tutuyoruz; ilk hareket görülünce normal hover/focus
+  // davranışına geri dönüyor.
+  useEffect(() => {
+    setNavPanelSuppressed(true);
+    const clear = () => setNavPanelSuppressed(false);
+    window.addEventListener("mousemove", clear, { once: true });
+    return () => window.removeEventListener("mousemove", clear);
+  }, [pathname]);
 
   // Suggestions search list
   const suggestedProducts = searchQuery.trim()
@@ -246,7 +263,7 @@ export default function StorefrontLayout({
 
         {/* NAVIGATION BAR */}
         <nav className="category-bar" aria-label="Kategori menüsü">
-          <div className="container category-scroll" data-nav-categories>
+          <div className={`container category-scroll ${navPanelSuppressed ? "nav-panel-suppressed" : ""}`} data-nav-categories>
             {NAV_CATEGORIES.map((cat, idx) => {
               const columns = cat.groups.map((group, gIdx) => {
                 const links = group[1];
@@ -268,7 +285,7 @@ export default function StorefrontLayout({
 
               return (
                 <div key={idx} className={`nav-category nav-category-${idx} ${cat.highlight ? "highlight" : ""}`}>
-                  <Link href={cat.href}>{cat.name}</Link>
+                  <Link href={cat.href} onClick={(e) => e.currentTarget.blur()}>{cat.name}</Link>
                   <div className={`mega-panel ${cat.groups.length === 1 ? "single-column" : ""}`}>
                     {columns}
                   </div>

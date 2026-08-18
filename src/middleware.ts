@@ -17,7 +17,7 @@ export default auth((req) => {
     !isAuthPage;
 
   if (isAuthPage && isLoggedIn) {
-    return Response.redirect(new URL("/hesap/panel", req.nextUrl));
+    return Response.redirect(new URL("/", req.nextUrl));
   }
 
   if (isAdminRoute) {

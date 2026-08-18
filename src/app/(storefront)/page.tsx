@@ -113,6 +113,7 @@ export default function HomePage() {
 
   const popularRailRef = useRef<HTMLDivElement>(null);
   const newRailRef = useRef<HTMLDivElement>(null);
+  const flashSaleRailRef = useRef<HTMLDivElement>(null);
 
   const scrollRail = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
     if (ref.current) {
@@ -123,7 +124,7 @@ export default function HomePage() {
 
   const popularProducts = PRODUCTS.slice(0, 8);
   const newProducts = [...PRODUCTS].reverse().slice(0, 8);
-  const flashSaleProducts = PRODUCTS.filter((p) => p.discount).slice(0, 5);
+  const flashSaleProducts = PRODUCTS.filter((p) => p.discount);
 
   return (
     <div className="home-shell">
@@ -191,8 +192,7 @@ export default function HomePage() {
         <section className="section compact-section flash-sale-section" id="flash-sale">
           <div className="container flash-sale-head">
             <div className="flash-sale-title">
-              <span className="section-kicker">Bugüne Özel</span>
-              <h2>Flaş İndirim</h2>
+              <h2>İndirimli Ürünler</h2>
               <p>Popüler ürünlerde sınırlı süreli kiralama avantajları.</p>
             </div>
             <div className="flash-sale-countdown">
@@ -200,22 +200,28 @@ export default function HomePage() {
               <CountdownTimer />
             </div>
           </div>
-          <div className="container flash-sale-showcase">
-            <aside className="flash-sale-feature">
-              <span>Sınırlı dönem</span>
-              <h3>Az seçenek, daha net karar</h3>
-              <p>Satın almadan denemek istediğin popüler modelleri avantajlı dönemlerle bir araya getirdik.</p>
-              <Link href="/kategori" className="flash-sale-feature-link">
-                Kampanyaları Gör →
-              </Link>
-            </aside>
-            <div className="flash-sale-rail-shell">
-              <div className="product-rail flash-sale-rail">
-                {flashSaleProducts.map((p) => (
-                  <ProductCard key={p.id} p={p} />
-                ))}
-              </div>
+          <div className="container carousel-shell">
+            <button
+              className="rail-btn left"
+              type="button"
+              onClick={() => scrollRail(flashSaleRailRef, "left")}
+              aria-label="Sola kaydır"
+            >
+              ‹
+            </button>
+            <div className="product-rail flash-sale-rail" ref={flashSaleRailRef}>
+              {flashSaleProducts.map((p) => (
+                <ProductCard key={p.id} p={p} />
+              ))}
             </div>
+            <button
+              className="rail-btn right"
+              type="button"
+              onClick={() => scrollRail(flashSaleRailRef, "right")}
+              aria-label="Sağa kaydır"
+            >
+              ›
+            </button>
           </div>
         </section>
       )}
@@ -224,7 +230,6 @@ export default function HomePage() {
       <section className="section easy-rent-section">
         <div className="container section-title-row easy-title-row">
           <div>
-            <span className="section-kicker">Nasıl işler?</span>
             <h2>Tek tıkla kiralamanın en basit yolu</h2>
             <p className="section-subtitle">Her adımda ne olacağını gör, kiralama kararını daha güvenle ver.</p>
           </div>
@@ -293,7 +298,6 @@ export default function HomePage() {
       <section className="section compact-section" id="popular-products">
         <div className="container section-title-row">
           <div>
-            <span className="section-kicker">Popüler Ürünler</span>
             <h1>Öne çıkan kiralama ürünleri</h1>
             <p className="section-subtitle">Daha az seçenek, daha net karar: en çok tercih edilen modelleri senin için derledik.</p>
           </div>
@@ -357,7 +361,6 @@ export default function HomePage() {
       <section className="section testimonials-section" id="sizden-gelenler">
         <div className="container section-title-row testimonials-title-row">
           <div className="testimonial-heading">
-            <span className="section-kicker">Gerçek deneyimler</span>
             <h2>Sizden Gelenler</h2>
             <div className="testimonial-summary">
               <span className="gold-stars"><StarRating rating={5} /></span>
@@ -401,7 +404,6 @@ export default function HomePage() {
       <section className="section compact-section" id="new-products">
         <div className="container section-title-row">
           <div>
-            <span className="section-kicker">Yeni Eklenenler</span>
             <h2>Yeni gelen kiralama ürünleri</h2>
             <p className="section-subtitle">Katalogdaki en yeni seçenekleri ilk deneyenlerden ol.</p>
           </div>
