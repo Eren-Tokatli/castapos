@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, Check, BadgeCheck, ChevronLeft, ChevronRight, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldAlert, ShieldCheck, Sparkles, Truck, Wallet, X, ZoomIn } from "lucide-react";
+import { Star, Check, BadgeCheck, ChevronLeft, ChevronRight, ShieldAlert, ShieldCheck, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
   CatalogProduct,
@@ -429,7 +429,6 @@ export function ProductDetailClient({
             {activeTab === "description" && (
               <section className="detail-tab-panel active">
                 <div className="premium-tab-head">
-                  <span><Sparkles size={15} /> Ürün deneyimi</span>
                   <h3>Ürün Hakkında</h3>
                   <p>Satın almadan önce ürünün günlük kullanımına uygunluğunu daha net gör.</p>
                 </div>
@@ -460,7 +459,6 @@ export function ProductDetailClient({
             {activeTab === "specs" && (
               <section className="detail-tab-panel active">
                 <div className="premium-tab-head">
-                  <span><Settings2 size={15} /> Teknik profil</span>
                   <h3>Teknik Özellikler</h3>
                   <p>Kiralama kararını etkileyen temel özellikleri sade ve okunabilir şekilde incele.</p>
                 </div>
@@ -483,7 +481,6 @@ export function ProductDetailClient({
             {activeTab === "reviews" && (
               <section className="detail-tab-panel active">
                 <div className="premium-tab-head">
-                  <span><MessageSquareText size={15} /> Kullanıcı deneyimi</span>
                   <h3>Değerlendirmeler</h3>
                   <p>Ürünü deneyen kullanıcıların puanlarını ve kısa yorumlarını burada takip et.</p>
                 </div>
@@ -574,7 +571,6 @@ export function ProductDetailClient({
             {activeTab === "qa" && (
               <section className="detail-tab-panel active">
                 <div className="premium-tab-head">
-                  <span><ClipboardCheck size={15} /> Destek yanıtları</span>
                   <h3>Soru & Cevap</h3>
                   <p>Teslimat, kurulum ve uzatma gibi konularda hızlı bilgi al.</p>
                 </div>
@@ -611,7 +607,6 @@ export function ProductDetailClient({
             {activeTab === "return" && (
               <section className="detail-tab-panel active">
                 <div className="premium-tab-head">
-                  <span><RotateCcw size={15} /> Esnek süreç</span>
                   <h3>İptal & İade Koşulları</h3>
                   <p>Kiralama sürecinde teslimat öncesi iptal, dönem sonu iade ve kontrol adımları şeffaf ilerler.</p>
                 </div>
