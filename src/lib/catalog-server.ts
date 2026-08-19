@@ -13,6 +13,32 @@ import {
 
 type ProductWithRelations = Awaited<ReturnType<typeof prisma.product.findMany>>[number];
 
+// Liste görünümlerinde (kart, sepet, header arama/sepet çekmecesi) hiçbir
+// zaman kullanılmayan ama tek bir ürün ortalama ~5KB olan description
+// alanı — 70+ ürünlük listede bu tek başına ~380KB gereksiz veri demek
+// (hem Mongo'dan çekilir hem her sayfa yüklemesinde tarayıcıya gönderilir).
+// Liste sorguları bu alanları hiç seçmez; sadece ürün detay sayfası
+// (getProductBySlug, tek kayıt) tam veriyi çeker.
+const LIST_SELECT = {
+  id: true,
+  sku: true,
+  slug: true,
+  name: true,
+  images: true,
+  brand: true,
+  badge: true,
+  collection: true,
+  saleMode: true,
+  rentalTiers: true,
+  categoryIds: true,
+  quantity: true,
+  stockStatus: true,
+  status: true,
+  createdAt: true,
+} as const;
+
+type ProductListRow = Awaited<ReturnType<typeof prisma.product.findMany<{ select: typeof LIST_SELECT }>>>[number];
+
 function resolveCategoryName(
   categoryIds: string[],
   categoryMap: Map<string, string>
@@ -25,7 +51,7 @@ function resolveCategoryName(
 }
 
 function toCatalogProduct(
-  product: ProductWithRelations,
+  product: ProductWithRelations | ProductListRow,
   categoryMap: Map<string, string>
 ): CatalogProduct {
   const images = product.images.map((img) => img.url).filter(Boolean);
@@ -53,10 +79,12 @@ function toCatalogProduct(
     premium: product.badge === "Premium",
     image: images[0] || "/assets/products/voit-super-fit.svg",
     images: images.length > 0 ? images : ["/assets/products/voit-super-fit.svg"],
-    description: product.description ? decodeHtmlEntities(product.description) : "",
-    metaTitle: product.metaTitle?.trim() || null,
-    metaDescription: product.metaDescription?.trim() || null,
-    specs: product.specs.map((s) => ({ label: s.label, value: s.value })),
+    // Liste sorgularında (LIST_SELECT) bu alanlar hiç çekilmiyor — sadece
+    // getProductBySlug'ın tam kaydında var.
+    description: "description" in product && product.description ? decodeHtmlEntities(product.description) : "",
+    metaTitle: "metaTitle" in product ? product.metaTitle?.trim() || null : null,
+    metaDescription: "metaDescription" in product ? product.metaDescription?.trim() || null : null,
+    specs: "specs" in product ? product.specs.map((s) => ({ label: s.label, value: s.value })) : [],
     rentalTiers,
     periods,
   };
@@ -75,6 +103,7 @@ export const getActiveProducts = cache(async (): Promise<CatalogProduct[]> => {
     prisma.product.findMany({
       where: { status: true, rentalTiers: { isEmpty: false } },
       orderBy: { createdAt: "desc" },
+      select: LIST_SELECT,
     }),
     buildCategoryMap(),
   ]);

@@ -9,10 +9,17 @@ import { getActiveProducts } from "@/lib/catalog-server";
 // Header'daki sepet/favori/arama widget'ları ve anasayfa/kategori sayfaları
 // admin panelden yönetilen canlı ürün kataloğunu okuyor — bu sayfalar build
 // anında statik olarak dondurulursa admin'de yapılan değişiklikler yeni bir
-// deploy yapılana kadar sitede görünmez. Kök layout'u dynamic işaretlemek,
-// altındaki tüm rotaların her istekte taze veriyle render edilmesini
-// garantiler (zaten çoğu rota oturum/cookie nedeniyle dinamikti).
-export const dynamic = "force-dynamic";
+// deploy yapılana kadar sitede görünmez.
+//
+// Önce bunu force-dynamic yaptık (her istekte DB'ye git) ama bu, tüm site
+// genelinde (sözleşmeler/iletişim gibi ürünle ilgisi olmayan sayfalar dahil)
+// her sayfa yüklemesinde ~100-500KB'lık katalog verisini yeniden çekip
+// yeniden gönderiyordu — gözle görülür performans düşüşüne yol açtı.
+// 60 saniyelik ISR önbelleği aynı tazeliği (admin değişikliği ~1 dk içinde
+// yansır) çok daha düşük maliyetle sağlıyor. Oturum/cookie gerektiren
+// rotalar (admin, hesap sayfaları) zaten kendi içlerinde otomatik dynamic
+// olur, bu ayardan etkilenmez.
+export const revalidate = 60;
 
 const THEME_INIT_SCRIPT = `
 (function () {
