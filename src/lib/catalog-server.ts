@@ -54,6 +54,8 @@ function toCatalogProduct(
     image: images[0] || "/assets/products/voit-super-fit.svg",
     images: images.length > 0 ? images : ["/assets/products/voit-super-fit.svg"],
     description: product.description ? decodeHtmlEntities(product.description) : "",
+    metaTitle: product.metaTitle?.trim() || null,
+    metaDescription: product.metaDescription?.trim() || null,
     specs: product.specs.map((s) => ({ label: s.label, value: s.value })),
     rentalTiers,
     periods,

@@ -210,6 +210,11 @@ model Product {
   collection String?
   specs      ProductSpec[]
 
+  // Google arama sonucunda görünen başlık/özet — boşsa ürün adı ve
+  // açıklamasından otomatik üretilir (bkz. urun/[slug]/page.tsx generateMetadata).
+  metaTitle       String?
+  metaDescription String?
+
   saleMode        SaleMode
   buyPrice        Float?
   buySpecialPrice Float?

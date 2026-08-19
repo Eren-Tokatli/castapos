@@ -28,6 +28,8 @@ export interface CatalogProduct {
   image: string;
   images: string[];
   description: string; // ham (decode edilmiş) HTML açıklama
+  metaTitle: string | null;
+  metaDescription: string | null;
   specs: CatalogSpec[];
   rentalTiers: CatalogRentalTier[];
   periods: number[]; // rentalTiers'tan türetilen, sıralı, tekil ay listesi
@@ -51,6 +53,14 @@ function findTier(p: CatalogProduct, period: number): CatalogRentalTier | undefi
 // gerçek tutarı döner.
 export function monthlyPrice(p: CatalogProduct, period: number): number {
   return findTier(p, period)?.price ?? 0;
+}
+
+// Seçili süredeki gerçek indirim varsa "eski" (indirim öncesi) aylık fiyatı
+// döner; yoksa null. Kartta üstü çizili fiyat göstermek için kullanılır.
+export function originalMonthlyPrice(p: CatalogProduct, period: number): number | null {
+  const tier = findTier(p, period);
+  if (!tier || !tier.originalPrice || tier.originalPrice <= tier.price) return null;
+  return tier.originalPrice;
 }
 
 export function dailyPrice(p: CatalogProduct, period: number): number {

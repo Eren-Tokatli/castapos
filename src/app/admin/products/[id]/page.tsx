@@ -21,6 +21,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     sku: product.sku,
     slug: product.slug,
     description: product.description ?? "",
+    metaTitle: product.metaTitle ?? "",
+    metaDescription: product.metaDescription ?? "",
     quantity: product.quantity.toString(),
     stockStatus: product.stockStatus,
     status: product.status ? "ACTIVE" : "INACTIVE",

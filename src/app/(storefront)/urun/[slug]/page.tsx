@@ -11,8 +11,8 @@ export async function generateMetadata({
   const p = await getProductBySlug(slug);
   if (!p) return { title: "Ürün Bulunamadı | Castapos" };
   return {
-    title: `${p.name} | Castapos`,
-    description: p.description.replace(/<[^>]+>/g, " ").trim().slice(0, 160),
+    title: p.metaTitle || `${p.name} | Castapos`,
+    description: p.metaDescription || p.description.replace(/<[^>]+>/g, " ").trim().slice(0, 160),
   };
 }
 

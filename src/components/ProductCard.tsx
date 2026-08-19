@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { CatalogProduct, defaultPeriod, monthlyPrice, dailyPrice, discountLabel, ratingCount, formatPrice } from "@/lib/catalog-shared";
+import { CatalogProduct, defaultPeriod, monthlyPrice, dailyPrice, discountLabel, originalMonthlyPrice, ratingCount, formatPrice } from "@/lib/catalog-shared";
 
 export function ProductCard({ p }: { p: CatalogProduct }) {
   const { addToCart, toggleFavorite, isFavorite } = useStore();
@@ -15,6 +15,7 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
   const reviewsCount = ratingCount(p);
   const favorited = isFavorite(p.id);
   const discount = discountLabel(p, selectedPeriod);
+  const oldMonthly = originalMonthlyPrice(p, selectedPeriod);
 
   const badge = discount ? (
     <span className="discount-badge accent-badge">{discount}</span>
@@ -86,6 +87,9 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
           <div className="monthly-primary">
             <strong>{formatPrice(currentMonthly).replace(" TL", " ₺")}</strong>
             <span>/ Aylık</span>
+            {oldMonthly && (
+              <s className="old-monthly-price">{formatPrice(oldMonthly).replace(" TL", " ₺")}</s>
+            )}
           </div>
         </div>
 

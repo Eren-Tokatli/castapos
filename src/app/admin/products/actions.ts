@@ -16,6 +16,8 @@ export interface ProductFormData {
   categoryIds: string[];
   images: { url: string; alt: string }[];
   specs: { label: string; value: string }[];
+  metaTitle: string;
+  metaDescription: string;
   rentalTiers: { label: string; durationMonths: string; price: string; originalPrice: string }[];
   options: {
     name: string;
@@ -38,6 +40,8 @@ function buildProductData(data: ProductFormData) {
     sku: data.sku.trim(),
     slug: data.slug.trim(),
     description: data.description.trim() || undefined,
+    metaTitle: data.metaTitle.trim() || undefined,
+    metaDescription: data.metaDescription.trim() || undefined,
     saleMode: "RENT" as const,
     buyPrice: null,
     buySpecialPrice: null,

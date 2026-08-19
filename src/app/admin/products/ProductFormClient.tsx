@@ -32,7 +32,22 @@ const emptyForm: ProductFormData = {
   specs: [],
   rentalTiers: [],
   options: [],
+  metaTitle: "",
+  metaDescription: "",
 };
+
+const DURATION_OPTIONS = [1, 3, 6, 9, 12];
+
+// Kiralama süresi kutucukları hangi sırayla seçilirse seçilsin, liste her
+// zaman aya göre küçükten büyüğe sıralı kalır (1 Ay hep en üstte). Henüz
+// süresi seçilmemiş yeni satırlar en sona düşer.
+function sortTiersByDuration<T extends { durationMonths: string }>(tiers: T[]): T[] {
+  return [...tiers].sort((a, b) => {
+    const am = a.durationMonths === "" ? Infinity : Number(a.durationMonths);
+    const bm = b.durationMonths === "" ? Infinity : Number(b.durationMonths);
+    return am - bm;
+  });
+}
 
 function slugify(input: string): string {
   const map: Record<string, string> = {
@@ -201,6 +216,58 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <div>
+          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">SEO (Google Görünümü)</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Boş bırakılırsa ürün adı ve açıklamasından otomatik oluşturulur.</p>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Başlığı</label>
+            <span className={`text-[11px] font-semibold ${form.metaTitle.length > 60 ? "text-red-500" : "text-slate-400"}`}>
+              {form.metaTitle.length}/60
+            </span>
+          </div>
+          <input
+            type="text"
+            placeholder={form.name ? `${form.name} | Castapos` : "Otomatik oluşturulacak"}
+            value={form.metaTitle}
+            onChange={(e) => setForm({ ...form, metaTitle: e.target.value })}
+            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Açıklaması</label>
+            <span className={`text-[11px] font-semibold ${form.metaDescription.length > 160 ? "text-red-500" : "text-slate-400"}`}>
+              {form.metaDescription.length}/160
+            </span>
+          </div>
+          <textarea
+            rows={2}
+            placeholder="Otomatik oluşturulacak (açıklamanın ilk 160 karakteri)"
+            value={form.metaDescription}
+            onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+          />
+        </div>
+
+        {(form.metaTitle || form.name) && (
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Google önizlemesi</p>
+            <p className="text-[13px] text-[#1a0dab] leading-tight truncate">
+              {form.metaTitle || (form.name ? `${form.name} | Castapos` : "Ürün Adı | Castapos")}
+            </p>
+            <p className="text-[11px] text-[#006621] leading-tight mt-0.5">castapos.com/urun/{form.slug || "urun-slug"}</p>
+            <p className="text-xs text-slate-600 leading-snug mt-0.5 line-clamp-2">
+              {form.metaDescription || "Ürün açıklamasından otomatik özetlenecek."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
         <div className="flex justify-between items-center">
           <div>
             <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Teknik Özellikler</h3>
@@ -270,63 +337,112 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
               + Süre Ekle
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {form.rentalTiers.map((tier, i) => (
-              <div key={i} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 items-center">
-                <input
-                  placeholder="Etiket (ör. 3 Ay)"
-                  value={tier.label}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, label: e.target.value } : t)),
-                    }))
-                  }
-                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                />
-                <input
-                  placeholder="Ay"
-                  type="number"
-                  value={tier.durationMonths}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, durationMonths: e.target.value } : t)),
-                    }))
-                  }
-                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                />
-                <input
-                  placeholder="Fiyat"
-                  type="number"
-                  value={tier.price}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, price: e.target.value } : t)),
-                    }))
-                  }
-                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                />
-                <input
-                  placeholder="Eski Fiyat"
-                  type="number"
-                  value={tier.originalPrice}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, originalPrice: e.target.value } : t)),
-                    }))
-                  }
-                  className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, rentalTiers: f.rentalTiers.filter((_, idx) => idx !== i) }))}
-                  className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
-                >
-                  ×
-                </button>
+              <div key={i} className="border border-slate-200 rounded-xl p-3 bg-slate-50/50 space-y-2">
+                <div className="flex flex-wrap gap-1.5">
+                  {DURATION_OPTIONS.map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() =>
+                        setForm((f) => ({
+                          ...f,
+                          rentalTiers: sortTiersByDuration(
+                            f.rentalTiers.map((t, idx) =>
+                              idx === i ? { ...t, durationMonths: String(m), label: `${m} Ay` } : t
+                            )
+                          ),
+                        }))
+                      }
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                        Number(tier.durationMonths) === m
+                          ? "bg-orange-500 border-orange-500 text-white"
+                          : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {m} Ay
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+                  <input
+                    placeholder="Aylık Fiyat"
+                    type="number"
+                    value={tier.price}
+                    onChange={(e) => {
+                      const price = e.target.value;
+                      setForm((f) => ({
+                        ...f,
+                        rentalTiers: f.rentalTiers.map((t, idx) => {
+                          if (idx !== i) return t;
+                          // İndirim açıksa, fiyat değişince aynı yüzdeyi eski
+                          // fiyata yansıt (yüzde değişmesin, tutarlar taze kalsın).
+                          if (!t.originalPrice) return { ...t, price };
+                          const pct = t.price ? 1 - Number(t.price) / Number(t.originalPrice) : 0;
+                          if (pct >= 1) return { ...t, price };
+                          const newOriginal = Number(price) / (1 - pct);
+                          return { ...t, price, originalPrice: String(Math.round(newOriginal)) };
+                        }),
+                      }));
+                    }}
+                    className="h-9 px-2 border border-slate-200 rounded-lg text-xs bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, rentalTiers: f.rentalTiers.filter((_, idx) => idx !== i) }))}
+                    className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <label className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
+                  <input
+                    type="checkbox"
+                    checked={!!tier.originalPrice}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        rentalTiers: f.rentalTiers.map((t, idx) =>
+                          idx === i ? { ...t, originalPrice: e.target.checked ? t.price || "0" : "" } : t
+                        ),
+                      }))
+                    }
+                  />
+                  İndirimli
+                </label>
+
+                {tier.originalPrice && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      placeholder="İndirim %"
+                      type="number"
+                      min={0}
+                      max={99}
+                      value={
+                        tier.price && tier.originalPrice
+                          ? Math.max(0, Math.round((1 - Number(tier.price) / Number(tier.originalPrice)) * 100))
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const pct = Math.min(99, Math.max(0, Number(e.target.value) || 0));
+                        setForm((f) => ({
+                          ...f,
+                          rentalTiers: f.rentalTiers.map((t, idx) => {
+                            if (idx !== i || !t.price) return t;
+                            const original = Number(t.price) / (1 - pct / 100);
+                            return { ...t, originalPrice: String(Math.round(original)) };
+                          }),
+                        }));
+                      }}
+                      className="h-8 w-24 px-2 border border-slate-200 rounded-lg text-xs bg-white"
+                    />
+                    <span className="text-[11px] text-slate-400">
+                      Eski fiyat: {tier.originalPrice ? `${tier.originalPrice} TL` : "—"}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
