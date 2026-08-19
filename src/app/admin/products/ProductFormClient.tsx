@@ -365,27 +365,19 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
                     </button>
                   ))}
                 </div>
-                <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase">Aylık Fiyat</label>
+                  <div className="grid grid-cols-[1fr_auto] gap-2 items-center">
                   <input
                     placeholder="Aylık Fiyat"
                     type="number"
                     value={tier.price}
-                    onChange={(e) => {
-                      const price = e.target.value;
+                    onChange={(e) =>
                       setForm((f) => ({
                         ...f,
-                        rentalTiers: f.rentalTiers.map((t, idx) => {
-                          if (idx !== i) return t;
-                          // İndirim açıksa, fiyat değişince aynı yüzdeyi eski
-                          // fiyata yansıt (yüzde değişmesin, tutarlar taze kalsın).
-                          if (!t.originalPrice) return { ...t, price };
-                          const pct = t.price ? 1 - Number(t.price) / Number(t.originalPrice) : 0;
-                          if (pct >= 1) return { ...t, price };
-                          const newOriginal = Number(price) / (1 - pct);
-                          return { ...t, price, originalPrice: String(Math.round(newOriginal)) };
-                        }),
-                      }));
-                    }}
+                        rentalTiers: f.rentalTiers.map((t, idx) => (idx === i ? { ...t, price: e.target.value } : t)),
+                      }))
+                    }
                     className="h-9 px-2 border border-slate-200 rounded-lg text-xs bg-white"
                   />
                   <button
@@ -395,6 +387,7 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
                   >
                     ×
                   </button>
+                  </div>
                 </div>
 
                 <label className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
@@ -414,33 +407,29 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
                 </label>
 
                 {tier.originalPrice && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      placeholder="İndirim %"
-                      type="number"
-                      min={0}
-                      max={99}
-                      value={
-                        tier.price && tier.originalPrice
-                          ? Math.max(0, Math.round((1 - Number(tier.price) / Number(tier.originalPrice)) * 100))
-                          : ""
-                      }
-                      onChange={(e) => {
-                        const pct = Math.min(99, Math.max(0, Number(e.target.value) || 0));
-                        setForm((f) => ({
-                          ...f,
-                          rentalTiers: f.rentalTiers.map((t, idx) => {
-                            if (idx !== i || !t.price) return t;
-                            const original = Number(t.price) / (1 - pct / 100);
-                            return { ...t, originalPrice: String(Math.round(original)) };
-                          }),
-                        }));
-                      }}
-                      className="h-8 w-24 px-2 border border-slate-200 rounded-lg text-xs bg-white"
-                    />
-                    <span className="text-[11px] text-slate-400">
-                      Eski fiyat: {tier.originalPrice ? `${tier.originalPrice} TL` : "—"}
-                    </span>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase">Eski Fiyat</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        placeholder="Eski Fiyat"
+                        type="number"
+                        value={tier.originalPrice}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            rentalTiers: f.rentalTiers.map((t, idx) =>
+                              idx === i ? { ...t, originalPrice: e.target.value } : t
+                            ),
+                          }))
+                        }
+                        className="h-8 w-28 px-2 border border-slate-200 rounded-lg text-xs bg-white"
+                      />
+                      <span className="text-[11px] text-slate-400">
+                        {tier.price && tier.originalPrice && Number(tier.originalPrice) > Number(tier.price)
+                          ? `İndirim: %${Math.round((1 - Number(tier.price) / Number(tier.originalPrice)) * 100)}`
+                          : "Eski fiyat, mevcut fiyattan yüksek olmalı"}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
