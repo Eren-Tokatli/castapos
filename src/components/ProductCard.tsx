@@ -66,7 +66,7 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
           <small>({reviewsCount})</small>
         </div>
 
-        <div className="card-periods" style={{ gridTemplateColumns: `repeat(${p.periods.length}, 1fr)` }}>
+        <div className="card-periods">
           {p.periods.map((m) => (
             <button
               key={m}

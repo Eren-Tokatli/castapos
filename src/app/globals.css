@@ -713,6 +713,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 /* V19 compact price box + aligned card spacing */
 .modern-rental-card .product-info{
   display:grid;
+  grid-template-columns:minmax(0,1fr);
   grid-template-rows:42px 18px 34px 72px 40px;
   row-gap:8px;
   min-height:auto;
@@ -720,12 +721,14 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 }
 .modern-rental-card .product-name{margin:0;min-height:42px}
 .modern-rental-card .rating-row{margin:0}
-/* Kaç kiralama süresi eklenmişse hepsi TEK satırda görünsün — sütun sayısı
-   ProductCard.tsx'te periods.length'e göre inline style ile veriliyor,
-   burada sadece grid'e çeviriyoruz. Süre sayısı ürüne göre değiştiği için
-   satır her zaman tek satır kalır, kartlar arası yükseklik farkı olmaz. */
-.modern-rental-card .card-periods{margin:0;display:grid!important;gap:6px}
-.modern-rental-card .card-period-btn{padding:0 4px;font-size:11px}
+/* Kaç kiralama süresi eklenmişse hepsi TEK satırda, "Ay" yazısı hiç
+   kaybolmadan görünsün. Eşit genişlikte sabit sütunlar (grid 1fr) yerine
+   içeriğe göre genişleyen (flex, content-sized) düğmeler kullanıyoruz —
+   "1 Ay" ile "12 Ay" aynı dar kutuya zorlanmadığı için "9 Ay" gibi
+   etiketler artık taşıp kesilmiyor; kartlar arası yükseklik satır sayısı
+   hep tek olduğundan (bkz. .product-info grid-template-rows) eşit kalır. */
+.modern-rental-card .card-periods{margin:0;display:flex!important;flex-wrap:nowrap;gap:3px;grid-template-columns:none!important;width:100%;min-width:0}
+.modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px;font-size:10px;letter-spacing:-.02em;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .modern-rental-card .daily-secondary{border-bottom:1px solid #e7eaf0;padding-bottom:8px;margin-bottom:1px}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
 .modern-rental-card .old-monthly-price{grid-column:1/-1;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
