@@ -2388,7 +2388,13 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
   .product-detail-grid.refined.compact-detail-grid{align-items:start!important}
   .gallery-panel.detail-clean{height:var(--v40-gallery-height,auto)!important;min-height:0!important;align-self:start!important;grid-template-rows:minmax(0,var(--v40-main-height,1fr)) auto!important}
   .main-gallery-image.clean{height:var(--v40-main-height,auto)!important;min-height:0!important}
-  .detail-panel.refined.clean.compact-panel{height:auto!important;min-height:0!important;align-self:start!important}
+  /* align-self:start burada .gallery-panel için "galeri kısayüksekliğine
+     zorlanmasın" amacıyla eklenmişti; ama .detail-panel burada bir flex
+     kolonunun (.detail-panel-column, flex-direction:column) çocuğu olduğu
+     için align-self çapraz eksende (genişlik) etki ediyor ve kartı altındaki
+     bilgi kartlarından (Ürüne zarar gelirse ne olur? vb.) dar bırakıyordu.
+     Yükseklik davranışı height:auto/min-height:0 ile zaten sağlanıyor. */
+  .detail-panel.refined.clean.compact-panel{height:auto!important;min-height:0!important;align-self:stretch!important}
 }
 
 
@@ -15252,6 +15258,14 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  align-self: stretch;
+}
+
+/* .detail-panel.compact-panel'e başka bir yerde uygulanan align-self:start,
+   fiyat kartını kendi içeriği kadar dar bırakıp altındaki bilgi kartlarından
+   (Ürüne zarar gelirse ne olur? vb.) daha kısa/dar görünmesine yol açıyordu.
+   İkisi de aynı kolonda tam genişliği paylaşmalı. */
+.detail-panel-column .detail-panel {
   align-self: stretch;
 }
 
