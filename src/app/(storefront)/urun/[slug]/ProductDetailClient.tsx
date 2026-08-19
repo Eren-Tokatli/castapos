@@ -5,14 +5,13 @@ import Link from "next/link";
 import { Star, Check, BadgeCheck, ChevronLeft, ChevronRight, ClipboardCheck, MessageSquareText, RotateCcw, Settings2, ShieldAlert, ShieldCheck, Sparkles, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
-  ProductStatic,
-  PRODUCTS,
+  CatalogProduct,
   defaultPeriod,
   monthlyPrice,
   dailyPrice,
   ratingCount,
   formatPrice,
-} from "@/lib/products-data";
+} from "@/lib/catalog-shared";
 import { ProductCard } from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
 
@@ -119,7 +118,13 @@ const INFO_PANELS = {
   }
 } as const;
 
-export function ProductDetailClient({ product: p }: { product: ProductStatic }) {
+export function ProductDetailClient({
+  product: p,
+  similarProducts,
+}: {
+  product: CatalogProduct;
+  similarProducts: CatalogProduct[];
+}) {
   const { addToCart, toggleFavorite, isFavorite } = useStore();
 
   const [period, setPeriod] = useState(defaultPeriod(p));
@@ -242,14 +247,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
     setQuestionText("");
   };
 
-  const highlightSummary = (text: string) => {
-    // Regex matching static code highlights
-    return text
-      .replace(/(\d+[\.,]?\d*\s?km\/s)/gi, "<strong>$1</strong>")
-      .replace(/(\d+[\.,]?\d*\s?HP)/gi, "<strong>$1</strong>")
-      .replace(/(Bluetooth|Wi[- ]?Fi|katlanabilir|sessiz motor|taşıma kapasitesi)/gi, "<strong>$1</strong>");
-  };
-
   const heartIcon = (active: boolean) => (
     <svg className="heart-svg" viewBox="0 0 24 24" aria-hidden="true" style={{ width: "16px", height: "16px" }}>
       <path
@@ -262,8 +259,6 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
       />
     </svg>
   );
-
-  const similarProducts = PRODUCTS.filter((x) => x.id !== p.id && x.collection === p.collection).slice(0, 4);
 
   return (
     <>
@@ -316,10 +311,10 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
             <div className="detail-top-row">
               <nav className="breadcrumb">
                 <Link href="/">Ana Sayfa</Link> /{" "}
-                <Link href={`/kategori?cat=${encodeURIComponent(p.collection)}`}>
-                  {p.collection}
+                <Link href={`/kategori?cat=${encodeURIComponent(p.category)}`}>
+                  {p.category}
                 </Link> /{" "}
-                <Link href={`/kategori?cat=${encodeURIComponent(p.collection)}&q=${encodeURIComponent(p.brand)}`}>
+                <Link href={`/kategori?cat=${encodeURIComponent(p.category)}&q=${encodeURIComponent(p.brand)}`}>
                   {p.brand}
                 </Link>
               </nav>
@@ -440,26 +435,17 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                 </div>
                 <div className="premium-description-grid">
                   <article className="premium-copy-card main">
-                    <p
-                      dangerouslySetInnerHTML={{
-                        __html: highlightSummary(p.summary),
-                      }}
-                    />
-                    <p>
-                      Bu ürün; <strong>{p.periods.join(", ")} ay</strong> kiralama seçenekleri,{" "}
-                      <strong>
-                        {p.specs[0].includes(":")
-                          ? p.specs[0].split(":").slice(1).join(":").trim()
-                          : p.specs[0]}
-                      </strong>{" "}
-                      ve{" "}
-                      <strong>
-                        {p.specs[1].includes(":")
-                          ? p.specs[1].split(":").slice(1).join(":").trim()
-                          : p.specs[1]}
-                      </strong>{" "}
-                      gibi temel verileriyle satın alma öncesi deneme ihtiyacına cevap verir.
-                    </p>
+                    {p.description ? (
+                      <div dangerouslySetInnerHTML={{ __html: p.description }} />
+                    ) : (
+                      <p>Bu ürün için henüz bir açıklama girilmemiş.</p>
+                    )}
+                    {p.periods.length > 0 && (
+                      <p>
+                        Bu ürün <strong>{p.periods.join(", ")} ay</strong> kiralama seçenekleriyle
+                        satın alma öncesi deneme ihtiyacına cevap verir.
+                      </p>
+                    )}
                   </article>
                   <aside className="premium-copy-card side">
                     <span><ShieldCheck size={16} /> Castapos kontrolü</span>
@@ -478,19 +464,18 @@ export function ProductDetailClient({ product: p }: { product: ProductStatic }) 
                   <h3>Teknik Özellikler</h3>
                   <p>Kiralama kararını etkileyen temel özellikleri sade ve okunabilir şekilde incele.</p>
                 </div>
-                <div className="spec-table">
-                  {p.specs.map((s, idx) => {
-                    const parts = s.split(":");
-                    const label = parts[0];
-                    const val = parts.slice(1).join(":").trim() || s;
-                    return (
+                {p.specs.length > 0 ? (
+                  <div className="spec-table">
+                    {p.specs.map((s, idx) => (
                       <div key={idx}>
-                        <span>{label}</span>
-                        <b>{val}</b>
+                        <span>{s.label}</span>
+                        <b>{s.value}</b>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>Bu ürünün teknik özellikleri "Ürün Açıklaması" sekmesindeki detaylarda yer almaktadır.</p>
+                )}
               </section>
             )}
 

@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getProduct } from "@/lib/products-data";
 
 interface CartItem {
   id: string;
@@ -33,16 +32,13 @@ export async function createStorefrontOrder(
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    // Map cart items with details from the products in DB.
-    // The storefront catalog (products-data.ts, static) and the admin-managed
-    // Prisma Product catalog are two separate tables with unrelated ids/slugs —
-    // ProductStatic.code is the only field that lines up with Product.sku, so
-    // that's the bridge we resolve real pricing/tier data through.
+    // item.id storefront'ta ürünün Prisma slug'ı — sepet artık doğrudan
+    // gerçek katalogdan geldiği için ayrı bir statik katalog köprüsüne
+    // gerek yok, fiyat/paket verisi doğrudan buradan çözülüyor.
     const itemsData = await Promise.all(
       cartItems.map(async (item) => {
-        const staticProduct = getProduct(item.id);
         const product = await prisma.product.findUnique({
-          where: { sku: staticProduct.code },
+          where: { slug: item.id },
         });
 
         if (!product) {

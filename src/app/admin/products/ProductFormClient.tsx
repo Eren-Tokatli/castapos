@@ -29,6 +29,7 @@ const emptyForm: ProductFormData = {
   status: "ACTIVE",
   categoryIds: [],
   images: [],
+  specs: [],
   rentalTiers: [],
   options: [],
 };
@@ -197,6 +198,57 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
             </div>
           </div>
         )}
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Teknik Özellikler</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Ürün detay sayfasındaki özellik tablosunun satırları (ör. Motor Gücü / 2.0 HP).</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, specs: [...f.specs, { label: "", value: "" }] }))}
+            className="text-xs font-bold text-orange-600 hover:text-orange-700 shrink-0"
+          >
+            + Özellik Ekle
+          </button>
+        </div>
+        <div className="space-y-2">
+          {form.specs.map((spec, i) => (
+            <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+              <input
+                placeholder="Özellik (ör. Motor Gücü)"
+                value={spec.label}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    specs: f.specs.map((s, idx) => (idx === i ? { ...s, label: e.target.value } : s)),
+                  }))
+                }
+                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+              />
+              <input
+                placeholder="Değer (ör. 2.0 HP)"
+                value={spec.value}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    specs: f.specs.map((s, idx) => (idx === i ? { ...s, value: e.target.value } : s)),
+                  }))
+                }
+                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, specs: f.specs.filter((_, idx) => idx !== i) }))}
+                className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { PRODUCTS, getProduct, defaultPeriod, monthlyPrice } from "@/lib/products-data";
+import { CatalogProduct, defaultPeriod, monthlyPrice } from "@/lib/catalog-shared";
 
 export interface CartItem {
   id: string;
@@ -21,7 +21,7 @@ interface StoreContextType {
   updateCartItemQty: (index: number, delta: number) => void;
   cartCount: number;
   monthlyTotal: number;
-  
+
   favorites: FavoriteItem[];
   isFavorite: (id: string) => boolean;
   toggleFavorite: (id: string, period?: number) => void;
@@ -35,16 +35,31 @@ interface StoreContextType {
   coupon: { code: string } | null;
   applyCoupon: (code: string) => boolean;
   removeCoupon: () => void;
+
+  // Kök layout'ta sunucu tarafında bir kere çekilip buraya prop olarak
+  // geçirilen aktif ürün kataloğu — header arama/sepet/favori çekmecesi,
+  // sepet ve favorilerim sayfaları hep buradan okur (ayrı ayrı fetch yok).
+  products: CatalogProduct[];
+  getProductById: (id: string) => CatalogProduct | undefined;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({
+  children,
+  initialProducts,
+}: {
+  children: React.ReactNode;
+  initialProducts: CatalogProduct[];
+}) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
   const [coupon, setCoupon] = useState<{ code: string } | null>(null);
+  const [products] = useState<CatalogProduct[]>(initialProducts);
+
+  const getProductById = (id: string) => products.find((p) => p.id === id);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -55,12 +70,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const savedFavorites = localStorage.getItem("castaposFavorites");
       if (savedFavorites) {
         setFavorites(JSON.parse(savedFavorites));
-      } else {
-        // Set default favorites like static site
-        const defaults = [
-          { id: "walkingpad-r2-pro", period: 3 },
-          { id: "wero-ai-bike", period: 3 }
-        ];
+      } else if (products.length > 0) {
+        // Set default favorites like static site — ilk iki gerçek ürün
+        const defaults = products.slice(0, 2).map((p) => ({
+          id: p.id,
+          period: defaultPeriod(p) || 3,
+        }));
         setFavorites(defaults);
         localStorage.setItem("castaposFavorites", JSON.stringify(defaults));
       }
@@ -70,6 +85,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error("Error loading localStorage data", e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addToCart = (id: string, period: number) => {
@@ -124,8 +140,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleFavorite = (id: string, period?: number) => {
-    const p = getProduct(id);
-    const selectedPeriod = period || p.periods[0] || 3;
+    const p = getProductById(id);
+    const selectedPeriod = period || p?.periods[0] || 3;
 
     setFavorites((prev) => {
       const index = prev.findIndex((x) => x.id === id);
@@ -185,7 +201,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const cartCount = cart.reduce((n, x) => n + x.qty, 0);
 
   const monthlyTotal = cart.reduce((sum, item) => {
-    const p = getProduct(item.id);
+    const p = getProductById(item.id);
+    if (!p) return sum;
     return sum + monthlyPrice(p, item.period) * item.qty;
   }, 0);
 
@@ -207,7 +224,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         setIsFavoritesOpen,
         coupon,
         applyCoupon,
-        removeCoupon
+        removeCoupon,
+        products,
+        getProductById,
       }}
     >
       {children}

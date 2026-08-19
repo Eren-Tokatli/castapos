@@ -26,6 +26,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     status: product.status ? "ACTIVE" : "INACTIVE",
     categoryIds: product.categoryIds,
     images: product.images.map((img) => ({ url: img.url, alt: img.alt ?? "" })),
+    specs: product.specs.map((s) => ({ label: s.label, value: s.value })),
     rentalTiers: product.rentalTiers.map((t) => ({
       label: t.label,
       durationMonths: t.durationMonths.toString(),

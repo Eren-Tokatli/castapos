@@ -4,6 +4,15 @@ import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SessionProvider } from "next-auth/react";
+import { getActiveProducts } from "@/lib/catalog-server";
+
+// Header'daki sepet/favori/arama widget'ları ve anasayfa/kategori sayfaları
+// admin panelden yönetilen canlı ürün kataloğunu okuyor — bu sayfalar build
+// anında statik olarak dondurulursa admin'de yapılan değişiklikler yeni bir
+// deploy yapılana kadar sitede görünmez. Kök layout'u dynamic işaretlemek,
+// altındaki tüm rotaların her istekte taze veriyle render edilmesini
+// garantiler (zaten çoğu rota oturum/cookie nedeniyle dinamikti).
+export const dynamic = "force-dynamic";
 
 const THEME_INIT_SCRIPT = `
 (function () {
@@ -41,11 +50,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const products = await getActiveProducts();
   return (
     <html
       lang="tr"
@@ -58,7 +68,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SessionProvider>
           <ThemeProvider>
-            <StoreProvider>
+            <StoreProvider initialProducts={products}>
               {children}
             </StoreProvider>
           </ThemeProvider>

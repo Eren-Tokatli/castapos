@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { ProductStatic, defaultPeriod, monthlyPrice, dailyPrice, ratingCount, formatPrice } from "@/lib/products-data";
+import { CatalogProduct, defaultPeriod, monthlyPrice, dailyPrice, discountLabel, ratingCount, formatPrice } from "@/lib/catalog-shared";
 
-export function ProductCard({ p }: { p: ProductStatic }) {
+export function ProductCard({ p }: { p: CatalogProduct }) {
   const { addToCart, toggleFavorite, isFavorite } = useStore();
   const [selectedPeriod, setSelectedPeriod] = useState(defaultPeriod(p));
 
@@ -14,9 +14,10 @@ export function ProductCard({ p }: { p: ProductStatic }) {
   const currentDaily = dailyPrice(p, selectedPeriod);
   const reviewsCount = ratingCount(p);
   const favorited = isFavorite(p.id);
+  const discount = discountLabel(p, selectedPeriod);
 
-  const badge = p.discount ? (
-    <span className="discount-badge accent-badge">{p.discount}</span>
+  const badge = discount ? (
+    <span className="discount-badge accent-badge">{discount}</span>
   ) : null;
 
   const heartIcon = (active: boolean) => (

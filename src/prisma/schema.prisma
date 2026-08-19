@@ -91,6 +91,16 @@ type ProductImage {
   sortOrder Int     @default(0)
 }
 
+// Ürün detay sayfasındaki "Teknik Özellikler" tablosunun satırları
+// (ör. "Motor Gücü" / "2.0 HP"). Eski (statik/legacy) ürünlerde bu bilgi
+// hâlâ description HTML'i içine gömülü tablo olarak duruyor — bu alan
+// sadece admin panelden yeni girilen/düzenlenen ürünler için kullanılır.
+type ProductSpec {
+  label     String
+  value     String
+  sortOrder Int    @default(0)
+}
+
 /// Replaces the option_id==5 hack in catalog/model/catalog/product.php:
 /// each rental duration is now a first-class tier with its own price/discount,
 /// instead of being smuggled through generic product option values.
@@ -191,6 +201,14 @@ model Product {
   name          String
   description   String?
   images        ProductImage[]
+
+  // Vitrin/katalog alanları — storefront'un statik veriden (products-data.ts)
+  // taşınmasıyla birlikte eklendi; eski statik ürünlerdeki brand/badge/
+  // collection/specs karşılıklarını taşımak için.
+  brand      String?
+  badge      String?
+  collection String?
+  specs      ProductSpec[]
 
   saleMode        SaleMode
   buyPrice        Float?

@@ -4,10 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { getProduct, monthlyPrice, dailyPrice, formatPrice } from "@/lib/products-data";
+import { monthlyPrice, dailyPrice, formatPrice } from "@/lib/catalog-shared";
 
 export default function FavorilerimPage() {
-  const { favorites, toggleFavorite } = useStore();
+  const { favorites, toggleFavorite, getProductById } = useStore();
 
   const handleRemove = (id: string, period: number) => {
     toggleFavorite(id, period);
@@ -38,7 +38,8 @@ export default function FavorilerimPage() {
           ) : (
             <div className="favorites-grid">
               {favorites.map((entry) => {
-                const p = getProduct(entry.id);
+                const p = getProductById(entry.id);
+                if (!p) return null;
                 const period = entry.period;
                 const monthly = monthlyPrice(p, period);
                 const daily = dailyPrice(p, period);
@@ -62,7 +63,7 @@ export default function FavorilerimPage() {
                     <div className="favorite-copy">
                       <Link
                         className="favorite-brand-link"
-                        href={`/kategori?cat=${encodeURIComponent(p.collection)}&q=${encodeURIComponent(p.brand)}`}
+                        href={`/kategori?cat=${encodeURIComponent(p.category)}&q=${encodeURIComponent(p.brand)}`}
                       >
                         {p.brand}
                       </Link>

@@ -7,7 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { useTheme } from "@/context/ThemeContext";
-import { NAV_CATEGORIES, PRODUCTS, getProduct, formatPrice, defaultPeriod, monthlyPrice } from "@/lib/products-data";
+import { formatPrice, defaultPeriod, monthlyPrice } from "@/lib/catalog-shared";
 import { ACCOUNT_MENU_LINKS } from "@/lib/account-menu";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CookieScripts } from "@/components/CookieScripts";
@@ -49,15 +49,27 @@ export default function StorefrontLayout({
     toggleFavorite,
     isFavoritesOpen,
     setIsFavoritesOpen,
+    products,
+    getProductById,
   } = useStore();
-  const drawerSuggestedProducts = PRODUCTS.slice(0, 3);
+  const drawerSuggestedProducts = products.slice(0, 3);
+
+  // Navigasyonda sadece içinde ürün olan gerçek kategoriler görünür — DB'deki
+  // ürün-dışı kategoriler (Blog, Hizmet, Sigorta vb.) hiç ürün taşımadığından
+  // burada kendiliğinden elenir.
+  const navCategories = React.useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of products) counts.set(p.category, (counts.get(p.category) || 0) + 1);
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => ({ name, href: `/kategori?cat=${encodeURIComponent(name)}` }));
+  }, [products]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [mobileAccountOpen, setMobileAccountOpen] = useState(false);
-  const [expandedMobileCategories, setExpandedMobileCategories] = useState<Record<number, boolean>>({});
   const [navPanelSuppressed, setNavPanelSuppressed] = useState(false);
 
   const searchRef = useRef<HTMLFormElement>(null);
@@ -79,7 +91,7 @@ export default function StorefrontLayout({
 
   // Suggestions search list
   const suggestedProducts = searchQuery.trim()
-    ? PRODUCTS.filter((p) => {
+    ? products.filter((p) => {
         const name = p.name.toLocaleLowerCase("tr-TR");
         const brand = p.brand.toLocaleLowerCase("tr-TR");
         const query = searchQuery.trim().toLocaleLowerCase("tr-TR");
@@ -107,13 +119,6 @@ export default function StorefrontLayout({
       setShowSuggestions(false);
       router.push(`/kategori?q=${encodeURIComponent(searchQuery.trim())}`);
     }
-  };
-
-  const toggleMobileCategoryExpand = (index: number) => {
-    setExpandedMobileCategories((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
   };
 
   return (
@@ -267,34 +272,11 @@ export default function StorefrontLayout({
             <div className="nav-category">
               <Link href="/kategori">Tüm Ürünler</Link>
             </div>
-            {NAV_CATEGORIES.map((cat, idx) => {
-              const columns = cat.groups.map((group, gIdx) => {
-                const links = group[1];
-                return (
-                  <div key={gIdx} className="mega-group">
-                    <h4>{group[0]}</h4>
-                    {links.map((item, lIdx) => (
-                      <Link
-                        key={lIdx}
-                        href={item.href}
-                        className={item.all ? "mega-all-link" : ""}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                );
-              });
-
-              return (
-                <div key={idx} className={`nav-category nav-category-${idx} ${cat.highlight ? "highlight" : ""}`}>
-                  <Link href={cat.href} onClick={(e) => e.currentTarget.blur()}>{cat.name}</Link>
-                  <div className={`mega-panel ${cat.groups.length === 1 ? "single-column" : ""}`}>
-                    {columns}
-                  </div>
-                </div>
-              );
-            })}
+            {navCategories.map((cat, idx) => (
+              <div key={idx} className={`nav-category nav-category-${idx}`}>
+                <Link href={cat.href} onClick={(e) => e.currentTarget.blur()}>{cat.name}</Link>
+              </div>
+            ))}
           </div>
         </nav>
       </header>
@@ -459,49 +441,15 @@ export default function StorefrontLayout({
               </button>
             </div>
             <div className="mobile-category-list">
-              {NAV_CATEGORIES.map((cat, index) => {
-                const items = cat.groups
-                  .filter((group) => !group[0].toLocaleLowerCase("tr-TR").includes("marka"))
-                  .flatMap((group) => group[1])
-                  .filter((item) => !item.all);
-                
-                // Get unique items
-                const uniqueItems = Array.from(new Map(items.map((item) => [item.label, item])).values());
-                const isExpanded = !!expandedMobileCategories[index];
-
-                return (
-                  <article key={index} className="mobile-category-row">
-                    <div className="mobile-category-main">
-                      <Link href={cat.href} onClick={() => setMobileCategoriesOpen(false)}>
-                        {cat.name}
-                      </Link>
-                      <button
-                        type="button"
-                        className={isExpanded ? "open" : ""}
-                        onClick={() => toggleMobileCategoryExpand(index)}
-                        aria-label={`${cat.name} alt kategorilerini aç`}
-                      >
-                        <span aria-hidden="true"></span>
-                      </button>
-                    </div>
-                    {isExpanded && (
-                      <div className="mobile-category-sub open">
-                        <div className="mobile-category-group">
-                          {uniqueItems.map((item, subIdx) => (
-                            <Link
-                              key={subIdx}
-                              href={item.href}
-                              onClick={() => setMobileCategoriesOpen(false)}
-                            >
-                              {item.label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
+              {navCategories.map((cat, index) => (
+                <article key={index} className="mobile-category-row">
+                  <div className="mobile-category-main">
+                    <Link href={cat.href} onClick={() => setMobileCategoriesOpen(false)}>
+                      {cat.name}
+                    </Link>
+                  </div>
+                </article>
+              ))}
             </div>
           </aside>
         </div>
@@ -546,7 +494,8 @@ export default function StorefrontLayout({
             ) : (
               <div className="drawer-items">
                 {cart.map((item, idx) => {
-                  const p = getProduct(item.id);
+                  const p = getProductById(item.id);
+                  if (!p) return null;
                   const period = Number(item.period || defaultPeriod(p));
                   const total = monthlyPrice(p, period) * item.qty * period;
 
@@ -662,7 +611,8 @@ export default function StorefrontLayout({
             ) : (
               <div className="drawer-items">
                 {favorites.map((entry) => {
-                  const p = getProduct(entry.id);
+                  const p = getProductById(entry.id);
+                  if (!p) return null;
                   const period = entry.period;
                   const monthly = monthlyPrice(p, period);
 

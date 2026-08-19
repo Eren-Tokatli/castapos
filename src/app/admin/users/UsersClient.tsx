@@ -1,13 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Users, ShieldCheck, LifeBuoy, Pencil, Trash2 } from "lucide-react";
+import { Search, Users, ShieldCheck, LifeBuoy, Trash2, X, Mail, Phone, Calendar, ShoppingBag, Package, ChevronRight, Sparkles } from "lucide-react";
 import { updateUserRole, deleteUser } from "./actions";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
 import { useAdminToast } from "../_components/ToastProvider";
 import { useTableControls } from "../_components/useTableControls";
 import { SortableTh } from "../_components/SortableTh";
 import { Pagination } from "../_components/Pagination";
+
+interface RecentOrder {
+  orderNumber: string;
+  createdAt: string;
+  status: "PENDING_PAYMENT" | "PROCESSING" | "PAID" | "CANCELLED" | "REFUNDED";
+  total: number;
+  itemCount: number;
+}
 
 interface AdminUser {
   id: string;
@@ -19,6 +27,10 @@ interface AdminUser {
   createdAt: string;
   orderCount: number;
   ticketCount: number;
+  isPremiumMember: boolean;
+  totalSpent: number;
+  itemsPurchased: number;
+  recentOrders: RecentOrder[];
 }
 
 // SELLER, mevcut eski hesapları düzgün göstermek için burada duruyor ama
@@ -29,6 +41,14 @@ const ROLE_META: Record<string, { label: string; className: string }> = {
   CUSTOMER: { label: "Müşteri", className: "bg-blue-50 text-blue-700 border-blue-200" },
   SUPPORT: { label: "Destek", className: "bg-amber-50 text-amber-700 border-amber-200" },
   SELLER: { label: "Satıcı", className: "bg-teal-50 text-teal-700 border-teal-200" },
+};
+
+const ORDER_STATUS_META: Record<RecentOrder["status"], { label: string; className: string }> = {
+  PENDING_PAYMENT: { label: "Ödeme Bekliyor", className: "bg-slate-100 text-slate-600" },
+  PROCESSING: { label: "İşleniyor", className: "bg-blue-50 text-blue-700" },
+  PAID: { label: "Ödendi", className: "bg-green-50 text-green-700" },
+  CANCELLED: { label: "İptal", className: "bg-red-50 text-red-700" },
+  REFUNDED: { label: "İade", className: "bg-orange-50 text-orange-700" },
 };
 
 const ROLE_FILTERS = [
@@ -44,15 +64,17 @@ const ASSIGNABLE_ROLES: { value: AdminUser["role"]; label: string }[] = [
   { value: "ADMIN", label: "Yönetici" },
 ];
 
+function formatMoney(v: number) {
+  return new Intl.NumberFormat("tr-TR").format(Math.round(v)) + " TL";
+}
+
 export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
   const toast = useAdminToast();
   const [users, setUsers] = useState(initialUsers);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
-  const [editing, setEditing] = useState<AdminUser | null>(null);
-  const [editRole, setEditRole] = useState<AdminUser["role"]>("CUSTOMER");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [roleSaving, setRoleSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminUser | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
@@ -75,27 +97,18 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
 
   const table = useTableControls(filtered, 10);
 
-  const openEdit = (u: AdminUser) => {
-    setEditing(u);
-    setEditRole(u.role);
-    setError("");
-  };
-
-  const handleSaveRole = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editing) return;
-    setLoading(true);
-    setError("");
-
-    const res = await updateUserRole(editing.id, editRole);
-    setLoading(false);
+  const handleRoleChange = async (role: AdminUser["role"]) => {
+    if (!selected) return;
+    setRoleSaving(true);
+    const res = await updateUserRole(selected.id, role);
+    setRoleSaving(false);
 
     if (!res.success) {
-      setError(res.error || "Rol güncellenemedi.");
+      setAlertMessage(res.error || "Rol güncellenemedi.");
       return;
     }
-    setUsers((prev) => prev.map((u) => (u.id === editing.id ? { ...u, role: editRole } : u)));
-    setEditing(null);
+    setUsers((prev) => prev.map((u) => (u.id === selected.id ? { ...u, role } : u)));
+    setSelected((prev) => (prev ? { ...prev, role } : prev));
     toast("Rol güncellendi.");
   };
 
@@ -108,6 +121,7 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
       return;
     }
     setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+    if (selected?.id === deleteTarget.id) setSelected(null);
     toast("Kullanıcı silindi.");
   };
 
@@ -115,7 +129,7 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Kullanıcılar & Müşteriler</h2>
-        <p className="text-slate-500 text-sm mt-0.5">Tüm hesapları görüntüle, rol değiştir, gerekirse hesabı sil.</p>
+        <p className="text-slate-500 text-sm mt-0.5">Bir kullanıcıya tıklayarak sipariş geçmişini ve hesap detaylarını gör.</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -175,7 +189,7 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
                 <SortableTh label="Sipariş" active={table.sortKey === "orderCount"} dir={table.sortDir} onClick={() => table.toggleSort("orderCount")} />
                 <SortableTh label="Talep" active={table.sortKey === "ticketCount"} dir={table.sortDir} onClick={() => table.toggleSort("ticketCount")} />
                 <SortableTh label="Kayıt Tarihi" active={table.sortKey === "createdAt"} dir={table.sortDir} onClick={() => table.toggleSort("createdAt")} />
-                <th className="py-3.5 px-5 text-right">Eylemler</th>
+                <th className="py-3.5 px-5 w-10" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -189,7 +203,11 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
                 table.pageItems.map((u) => {
                   const role = ROLE_META[u.role];
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr
+                      key={u.id}
+                      onClick={() => setSelected(u)}
+                      className={`hover:bg-slate-50/70 transition-colors cursor-pointer ${selected?.id === u.id ? "bg-orange-50/60" : ""}`}
+                    >
                       <td className="py-3.5 px-5">
                         <span className="font-bold text-slate-900 block">{u.firstName} {u.lastName}</span>
                         <span className="text-[11px] text-slate-400 block">{u.email}</span>
@@ -204,21 +222,8 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
                       <td className="py-3.5 px-5 text-slate-500">
                         {new Date(u.createdAt).toLocaleDateString("tr-TR")}
                       </td>
-                      <td className="py-3.5 px-5 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => openEdit(u)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition"
-                          >
-                            <Pencil size={12} /> Rol
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(u)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-xs font-bold transition"
-                          >
-                            <Trash2 size={12} /> Sil
-                          </button>
-                        </div>
+                      <td className="py-3.5 px-5 text-slate-300">
+                        <ChevronRight size={16} />
                       </td>
                     </tr>
                   );
@@ -236,64 +241,146 @@ export function UsersClient({ users: initialUsers }: { users: AdminUser[] }) {
         />
       </div>
 
-      {editing && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form
-            onSubmit={handleSaveRole}
-            className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col"
+      {/* KULLANICI DETAY PANELİ (satıra tıklayınca sağdan açılır) */}
+      {selected && (
+        <div
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-50 flex justify-end"
+          onClick={() => setSelected(null)}
+        >
+          <aside
+            className="w-full max-w-sm h-full bg-white shadow-2xl overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
-              <div>
-                <h3 className="font-bold text-slate-800">Rolü Değiştir</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{editing.firstName} {editing.lastName}</p>
-              </div>
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="font-bold text-slate-800">Kullanıcı Bilgileri</h3>
               <button
-                type="button"
-                onClick={() => setEditing(null)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 text-xl font-bold transition"
+                onClick={() => setSelected(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
               >
-                ×
+                <X size={18} />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-6">
+              {/* Kimlik */}
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
+                  {selected.firstName[0]}{selected.lastName[0]}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-slate-900 truncate">{selected.firstName} {selected.lastName}</p>
+                  <p className="text-xs text-slate-400 truncate">{selected.email}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-bold ${ROLE_META[selected.role].className}`}>
+                  {ROLE_META[selected.role].label}
+                </span>
+                {selected.isPremiumMember && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold bg-amber-50 text-amber-700 border-amber-200">
+                    <Sparkles size={11} /> Premium
+                  </span>
+                )}
+              </div>
+
+              {/* İstatistikler */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <ShoppingBag size={16} className="mx-auto text-slate-400 mb-1" />
+                  <p className="font-extrabold text-slate-900 tabular-nums">{selected.orderCount}</p>
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Sipariş</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <Package size={16} className="mx-auto text-slate-400 mb-1" />
+                  <p className="font-extrabold text-slate-900 tabular-nums">{selected.itemsPurchased}</p>
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Ürün Aldı</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3">
+                  <LifeBuoy size={16} className="mx-auto text-slate-400 mb-1" />
+                  <p className="font-extrabold text-slate-900 tabular-nums">{selected.ticketCount}</p>
+                  <p className="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Destek</p>
+                </div>
+              </div>
+
+              {/* İletişim */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Rol</label>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">İletişim</h4>
+                <div className="space-y-1.5 text-sm">
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Mail size={14} className="text-slate-400 shrink-0" />
+                    <span className="truncate">{selected.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Phone size={14} className="text-slate-400 shrink-0" />
+                    <span>{selected.phone || "—"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Calendar size={14} className="text-slate-400 shrink-0" />
+                    <span>{new Date(selected.createdAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })} tarihinde katıldı</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Toplam harcama */}
+              <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4 text-white">
+                <p className="text-[11px] font-semibold text-slate-400 uppercase">Toplam Harcama (ödenen siparişler)</p>
+                <p className="text-2xl font-extrabold mt-1">{formatMoney(selected.totalSpent)}</p>
+              </div>
+
+              {/* Son siparişler */}
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Son Siparişler</h4>
+                {selected.recentOrders.length === 0 ? (
+                  <p className="text-sm text-slate-400">Henüz sipariş yok.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {selected.recentOrders.map((o) => {
+                      const meta = ORDER_STATUS_META[o.status];
+                      return (
+                        <div key={o.orderNumber} className="flex items-center justify-between border border-slate-100 rounded-xl px-3 py-2">
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-800 truncate">{o.orderNumber}</p>
+                            <p className="text-[11px] text-slate-400">
+                              {new Date(o.createdAt).toLocaleDateString("tr-TR")} · {o.itemCount} ürün
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0 ml-2">
+                            <p className="text-xs font-bold text-slate-900">{formatMoney(o.total)}</p>
+                            <span className={`inline-block mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${meta.className}`}>
+                              {meta.label}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* İşlemler */}
+              <div>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">İşlemler</h4>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Rol Değiştir</label>
                 <select
-                  value={editRole}
-                  onChange={(e) => setEditRole(e.target.value as AdminUser["role"])}
-                  className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none bg-white transition"
+                  value={selected.role}
+                  disabled={roleSaving}
+                  onChange={(e) => handleRoleChange(e.target.value as AdminUser["role"])}
+                  className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none bg-white transition mb-3 disabled:opacity-50"
                 >
                   {ASSIGNABLE_ROLES.map((r) => (
                     <option key={r.value} value={r.value}>{r.label}</option>
                   ))}
                 </select>
+                <button
+                  onClick={() => setDeleteTarget(selected)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold transition"
+                >
+                  <Trash2 size={13} /> Kullanıcıyı Sil
+                </button>
               </div>
-
-              {error && (
-                <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs border border-red-100">
-                  {error}
-                </div>
-              )}
             </div>
-
-            <div className="p-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/80">
-              <button
-                type="button"
-                onClick={() => setEditing(null)}
-                className="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-100 text-slate-700 text-sm font-semibold transition"
-              >
-                Vazgeç
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 bg-gradient-to-b from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl text-sm shadow-lg shadow-orange-500/25 transition disabled:opacity-50"
-              >
-                {loading ? "Kaydediliyor..." : "Kaydet"}
-              </button>
-            </div>
-          </form>
+          </aside>
         </div>
       )}
 

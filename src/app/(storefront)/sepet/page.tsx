@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
-import { getProduct, monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/products-data";
+import { monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/catalog-shared";
 import { createStorefrontOrder } from "./actions";
 import { IyzicoCheckoutFrame } from "@/components/IyzicoCheckoutFrame";
 import { isValidTcKimlikNo } from "@/lib/tc-kimlik";
@@ -36,6 +36,7 @@ export default function SepetPage() {
     removeFromCart,
     updateCartItemQty,
     monthlyTotal,
+    getProductById,
     coupon,
     applyCoupon,
     removeCoupon
@@ -77,11 +78,8 @@ export default function SepetPage() {
   }, []);
 
   const hasSportsItems = cart.some((item) => {
-    const p = getProduct(item.id);
-    return (
-      ["Koşu Bantları", "Yürüyüş Bantları", "Bisiklet", "Fitness", "Spor Aletleri"].includes(p.collection) ||
-      ["Koşu Bantları", "Yürüyüş Bantları", "Bisiklet", "Fitness"].includes(p.category)
-    );
+    const p = getProductById(item.id);
+    return !!p && ["Koşu Bantları", "Yürüyüş Bantları", "Bisiklet", "Fitness", "Fitness & Kondisyon"].includes(p.category);
   });
 
   // Calculate discounts
@@ -279,7 +277,8 @@ export default function SepetPage() {
               
               <div className="rental-plan-list">
                 {cart.map((item, idx) => {
-                  const p = getProduct(item.id);
+                  const p = getProductById(item.id);
+                  if (!p) return null;
                   const period = Number(item.period || defaultPeriod(p));
                   const summaryTitle = `${period} aylık toplam ödeme`;
 
@@ -297,7 +296,7 @@ export default function SepetPage() {
                       <div className="plan-product-copy">
                         <Link
                           className="cart-product-brand"
-                          href={`/kategori?cat=${encodeURIComponent(p.collection)}&q=${encodeURIComponent(p.brand)}`}
+                          href={`/kategori?cat=${encodeURIComponent(p.category)}&q=${encodeURIComponent(p.brand)}`}
                         >
                           {p.brand}
                         </Link>

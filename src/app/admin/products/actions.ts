@@ -15,6 +15,7 @@ export interface ProductFormData {
   status: "ACTIVE" | "INACTIVE";
   categoryIds: string[];
   images: { url: string; alt: string }[];
+  specs: { label: string; value: string }[];
   rentalTiers: { label: string; durationMonths: string; price: string; originalPrice: string }[];
   options: {
     name: string;
@@ -47,6 +48,9 @@ function buildProductData(data: ProductFormData) {
     images: data.images
       .filter((img) => img.url.trim())
       .map((img, i) => ({ url: img.url.trim(), alt: img.alt.trim() || undefined, sortOrder: i })),
+    specs: data.specs
+      .filter((s) => s.label.trim())
+      .map((s, i) => ({ label: s.label.trim(), value: s.value.trim(), sortOrder: i })),
     rentalTiers: data.rentalTiers
       .filter((t) => t.label.trim())
       .map((t, i) => ({
