@@ -383,7 +383,7 @@ body.cart-open .support-widget{display:none !important}
 .modern-rental-card .product-img img{max-height:138px;width:84%}
 .modern-rental-card .fav-btn.active{color:var(--brand);border-color:#ffd3c8;background:#fff7f4}
 .modern-rental-card .product-info{display:flex;flex-direction:column;flex:1;padding:12px}
-.modern-rental-card .product-name{font-size:14px;line-height:1.35;min-height:42px}
+.modern-rental-card .product-name{font-size:14px;line-height:1.35;min-height:2lh}
 .card-periods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 .card-period-btn{height:34px;border:1px solid #e2e7ef;background:#f4f6fa;border-radius:999px;font-size:12px;font-weight:800;color:#475467;cursor:pointer;transition:.18s}
 .card-period-btn.active{background:#fff3ef;border-color:#ffc9ba;color:var(--brand)}
@@ -719,7 +719,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   min-height:auto;
   padding:12px 12px 14px;
 }
-.modern-rental-card .product-name{margin:0;min-height:42px}
+.modern-rental-card .product-name{margin:0;min-height:2lh;align-self:start}
 .modern-rental-card .rating-row{margin:0}
 /* Kaç kiralama süresi eklenmişse hepsi TEK satırda, "Ay" yazısı hiç
    kaybolmadan görünsün. Eşit genişlikte sabit sütunlar (grid 1fr) yerine
@@ -1558,7 +1558,7 @@ body{padding-bottom:0}
   .toolbar-actions input,.toolbar-actions select{width:100%}
   .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px}
   .modern-rental-card .product-info{padding:12px}
-  .modern-rental-card .product-name{font-size:15px}
+  .modern-rental-card .product-name{font-size:15px;min-height:2lh}
   .product-img{height:168px}
   .support-widget{right:12px;bottom:96px}
 }
@@ -1866,6 +1866,11 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
   body.mobile-filters-open .mobile-filter-backdrop,body.mobile-sort-open .mobile-filter-backdrop{opacity:1;pointer-events:auto}
   .filter-sidebar{position:fixed;left:0;right:0;bottom:0;max-height:82vh;border-radius:24px 24px 0 0;transform:translateY(105%);transition:.25s;overflow:auto;z-index:230}
   body.mobile-filters-open .filter-sidebar{transform:translateY(0)}
+  /* Mobilde filtre paneli tam ekran bir bottom-sheet — Uygula artık o
+     panelin İÇİNDE değil, panelin üstünde sabit bir çubuk olarak duruyor,
+     panel kapalıyken görünmüyor. */
+  .filter-apply-sticky{display:none;position:fixed;left:12px;right:12px;bottom:12px;margin-top:0;z-index:231}
+  body.mobile-filters-open .filter-apply-sticky{display:block}
   .mobile-sort-sheet{position:fixed;left:12px;right:12px;bottom:12px;background:#fff;border-radius:24px;padding:18px;box-shadow:0 30px 80px rgba(16,24,40,.22);z-index:231;transform:translateY(105%);transition:.25s;display:grid;gap:10px}
   body.mobile-sort-open .mobile-sort-sheet{transform:translateY(0)}
   .mobile-sort-sheet button{width:100%;min-height:46px;border-radius:14px;border:1px solid #e4e7ec;background:#fff;font-weight:700;color:#1d2939;cursor:pointer;text-align:left;padding:0 14px}
@@ -9273,7 +9278,7 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .home-shell .modern-rental-card .product-name {
-    min-height: 38px !important;
+    min-height: 2lh !important;
     font-size: 14px !important;
     line-height: 1.32 !important;
   }
@@ -9529,6 +9534,19 @@ body.page-urun-detay .review-form-box .btn {
 
 .filter-apply-block {
   padding: 16px 20px !important;
+}
+/* Filtrele kutusunun dışında, kendi kartında — kutu uzun listeyle
+   kaydırılsa bile Uygula her zaman görünür kalsın. */
+.filter-apply-sticky {
+  position: sticky;
+  bottom: 16px;
+  margin-top: 12px;
+  background: #fff;
+  border: 1px solid #e4e7ee;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, .12);
+  z-index: 5;
 }
 .filter-apply-btn {
   width: 100%;
@@ -10188,7 +10206,7 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 .sports-category-page .modern-rental-card .product-name {
-  min-height: 42px !important;
+  min-height: 2lh !important;
   color: #101828 !important;
   font-size: 13.5px !important;
   font-weight: 900 !important;
@@ -10444,7 +10462,7 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .sports-category-page .modern-rental-card .product-name {
-    min-height: 38px !important;
+    min-height: 2lh !important;
     font-size: 12.5px !important;
   }
 }
@@ -11557,7 +11575,7 @@ body.page-urun-detay .breadcrumb a:hover,
 }
 
 .premium-category-page:not(.sports-category-page) .modern-rental-card .product-name {
-  min-height: 42px !important;
+  min-height: 2lh !important;
   color: #101828 !important;
   font-size: 13.5px !important;
   font-weight: 900 !important;

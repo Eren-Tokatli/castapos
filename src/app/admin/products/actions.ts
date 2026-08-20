@@ -9,6 +9,7 @@ export interface ProductFormData {
   name: string;
   sku: string;
   slug: string;
+  brand: string;
   description: string;
   quantity: string;
   stockStatus: "IN_STOCK" | "OUT_OF_STOCK" | "PREORDER";
@@ -40,6 +41,7 @@ function buildProductData(data: ProductFormData) {
     sku: data.sku.trim(),
     slug: data.slug.trim(),
     description: data.description.trim() || undefined,
+    brand: data.brand.trim() || undefined,
     metaTitle: data.metaTitle.trim() || undefined,
     metaDescription: data.metaDescription.trim() || undefined,
     saleMode: "RENT" as const,

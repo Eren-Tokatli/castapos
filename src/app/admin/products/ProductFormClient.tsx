@@ -23,6 +23,7 @@ const emptyForm: ProductFormData = {
   name: "",
   sku: "",
   slug: "",
+  brand: "",
   description: "",
   quantity: "0",
   stockStatus: "IN_STOCK",
@@ -170,16 +171,27 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Yayın Durumu</label>
-            <select
-              value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as ProductFormData["status"] })}
-              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none bg-white"
-            >
-              <option value="ACTIVE">Yayında / Aktif</option>
-              <option value="INACTIVE">Gizli / Pasif</option>
-            </select>
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Marka</label>
+            <input
+              type="text"
+              placeholder="ör. Voit, WalkingPad"
+              value={form.brand}
+              onChange={(e) => setForm({ ...form, brand: e.target.value })}
+              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+            />
           </div>
+        </div>
+
+        <div className="max-w-[calc(50%-8px)]">
+          <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Yayın Durumu</label>
+          <select
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value as ProductFormData["status"] })}
+            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none bg-white"
+          >
+            <option value="ACTIVE">Yayında / Aktif</option>
+            <option value="INACTIVE">Gizli / Pasif</option>
+          </select>
         </div>
 
         <div>

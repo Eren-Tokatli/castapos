@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 export interface RentalAdvantages {
   campaigned: boolean;
   fastDelivery: boolean;
@@ -48,6 +50,7 @@ export function CategoryFilterSidebar({
   onApply,
 }: CategoryFilterSidebarProps) {
   return (
+    <div className="filter-sidebar-wrap">
     <aside className="filter-sidebar">
       <div className="filter-title">Filtrele</div>
 
@@ -139,11 +142,16 @@ export function CategoryFilterSidebar({
         ))}
       </div>
 
-      <div className="filter-block filter-apply-block">
-        <button type="button" className="filter-apply-btn" onClick={onApply}>
-          Uygula
-        </button>
-      </div>
     </aside>
+
+    {/* Filtreleme kutusunun (uzun marka/kategori listesiyle) İÇİNDE değil
+       hemen altında, kendi sticky konumuyla — kutuyu kaydırmadan da her
+       zaman görünür ve tıklanabilir olsun. */}
+    <div className="filter-apply-sticky">
+      <button type="button" className="filter-apply-btn" onClick={onApply}>
+        Uygula
+      </button>
+    </div>
+    </div>
   );
 }
