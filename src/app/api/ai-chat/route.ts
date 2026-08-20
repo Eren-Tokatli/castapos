@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { PRODUCTS, defaultPeriod, formatPrice, monthlyPrice } from "@/lib/products-data";
+import { defaultPeriod, formatPrice, monthlyPrice, type CatalogProduct } from "@/lib/catalog-shared";
+import { getActiveProducts } from "@/lib/catalog-server";
 
 type ChatMessage = {
   role: "assistant" | "user";
@@ -36,8 +37,8 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
 
-function getCatalogContext() {
-  return PRODUCTS.map((product) => {
+function getCatalogContext(products: CatalogProduct[]) {
+  return products.map((product) => {
     const period = defaultPeriod(product);
     return [
       product.name,
@@ -102,7 +103,7 @@ type RecommendedProduct = {
 // AI cevabinda gecen /urun/<slug> referanslarini katalogla eslestirip kart
 // verisine cevirir; metinden de link/kalin isaretlerini temizler ki ayni
 // urun hem duz yazida hem kartta cift gosterilmesin.
-function extractRecommendedProducts(text: string): { cleanedText: string; products: RecommendedProduct[] } {
+function extractRecommendedProducts(text: string, catalog: CatalogProduct[]): { cleanedText: string; products: RecommendedProduct[] } {
   const slugPattern = /\/urun\/([a-z0-9-]+)/g;
   const foundSlugs = new Set<string>();
   let match: RegExpExecArray | null;
@@ -111,8 +112,8 @@ function extractRecommendedProducts(text: string): { cleanedText: string; produc
   }
 
   const products: RecommendedProduct[] = Array.from(foundSlugs)
-    .map((slug) => PRODUCTS.find((product) => product.id === slug))
-    .filter((product): product is (typeof PRODUCTS)[number] => !!product)
+    .map((slug) => catalog.find((product) => product.id === slug))
+    .filter((product): product is CatalogProduct => !!product)
     .slice(0, 4)
     .map((product) => ({
       id: product.id,
@@ -165,7 +166,7 @@ function extractClarifyQuestion(text: string): { displayText: string; clarify: C
 // temizler. historyReply urun linkleri temizlenmis ama SORU/SECENEK blogu
 // KORUNMUS halidir — boylece bir sonraki turda model kendi sordugu soruyu
 // ve secenekleri konusma gecmisinde hala gorur, tekrar sormaz.
-function buildChatResponse(rawReply: string) {
+function buildChatResponse(rawReply: string, catalog: CatalogProduct[]) {
   if (!rawReply) {
     return NextResponse.json({
       reply: "Şu anda net bir yanıt üretemedim. Canlı destek ekibine yönlenerek hızlıca yardım alabilirsin.",
@@ -175,7 +176,7 @@ function buildChatResponse(rawReply: string) {
     });
   }
 
-  const { cleanedText, products } = extractRecommendedProducts(rawReply);
+  const { cleanedText, products } = extractRecommendedProducts(rawReply, catalog);
   const { displayText, clarify } = extractClarifyQuestion(cleanedText);
 
   return NextResponse.json({
@@ -186,7 +187,7 @@ function buildChatResponse(rawReply: string) {
   });
 }
 
-function buildSystemPrompt() {
+function buildSystemPrompt(products: CatalogProduct[]) {
   return [
     "Sen Castapos'un Turkce konusan kiralama destek asistanisin.",
     "Kisa, net, premium ve guven veren cevaplar ver.",
@@ -197,7 +198,7 @@ function buildSystemPrompt() {
     "Cevaplarinda markdown bicimlendirmesi kullanma: yildiz (**) ile kalinlastirma veya kose parantezli link ([metin](url)) yazma. Urun adini ve /urun/... yolunu duz metin olarak, yan yana yaz.",
     "Kullanici sadece genel bir kategori yazip ozellik/butce/sure gibi hicbir tercih belirtmediyse (ör. sadece 'kosu bandi istiyorum'), urun onermeden once TEK bir netlestirme sorusu sorabilirsin. Bu durumda cevabinin EN SONUNA, baska hicbir yerde kullanmadan, tam olarak su formatta bir blok ekle:\nSORU: <kisa soru>\nSECENEK: <secenek 1>\nSECENEK: <secenek 2>\nSECENEK: <secenek 3>\nEn az 2 en fazla 4 secenek olsun, her secenek 1-3 kelime, somut ve katalogdaki urunlerin gercek ozelliklerine dayali olsun (ör. 'Guclu motor', 'Katlanabilir', 'Butce dostu'). Konusma gecmisinde zaten boyle bir SORU sordugunu goruyorsan veya kullanici zaten bir tercih belirtmisse (butce, sure, ozellik, marka vb.) bir daha SORU bloğu yazma; bu durumda dogrudan katalogdan urun oner.",
     "Cevaplari 2-5 cumle arasinda tut.",
-    `Katalog ozeti:\n${getCatalogContext()}`,
+    `Katalog ozeti:\n${getCatalogContext(products)}`,
   ].join("\n");
 }
 
@@ -205,7 +206,7 @@ function buildConversation(messages: ChatMessage[]) {
   return messages.map((message) => `${message.role === "user" ? "Musteri" : "Castapos AI"}: ${message.text}`).join("\n");
 }
 
-async function askGemini(messages: ChatMessage[]) {
+async function askGemini(messages: ChatMessage[], products: CatalogProduct[]) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
@@ -216,7 +217,7 @@ async function askGemini(messages: ChatMessage[]) {
     },
     body: JSON.stringify({
       systemInstruction: {
-        parts: [{ text: buildSystemPrompt() }],
+        parts: [{ text: buildSystemPrompt(products) }],
       },
       contents: [
         {
@@ -241,10 +242,10 @@ async function askGemini(messages: ChatMessage[]) {
     return null;
   }
 
-  return buildChatResponse(data ? extractGeminiReply(data) : "");
+  return buildChatResponse(data ? extractGeminiReply(data) : "", products);
 }
 
-async function askOpenAI(messages: ChatMessage[]) {
+async function askOpenAI(messages: ChatMessage[], products: CatalogProduct[]) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return null;
 
@@ -258,7 +259,7 @@ async function askOpenAI(messages: ChatMessage[]) {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      instructions: buildSystemPrompt(),
+      instructions: buildSystemPrompt(products),
       input: conversation,
     }),
   });
@@ -272,7 +273,7 @@ async function askOpenAI(messages: ChatMessage[]) {
     );
   }
 
-  return buildChatResponse(data ? extractReply(data) : "");
+  return buildChatResponse(data ? extractReply(data) : "", products);
 }
 
 export async function POST(request: Request) {
@@ -283,10 +284,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Mesaj bulunamadı." }, { status: 400 });
   }
 
-  const geminiResponse = await askGemini(messages);
+  const products = await getActiveProducts();
+
+  const geminiResponse = await askGemini(messages, products);
   if (geminiResponse) return geminiResponse;
 
-  const openAIResponse = await askOpenAI(messages);
+  const openAIResponse = await askOpenAI(messages, products);
   if (openAIResponse) return openAIResponse;
 
   return NextResponse.json(

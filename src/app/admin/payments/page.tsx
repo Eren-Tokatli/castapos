@@ -39,6 +39,7 @@ export default async function AdminPaymentsPage() {
     amount: link.amount,
     description: link.description,
     paid: link.paid,
+    installmentId: link.installmentId,
     createdAt: link.createdAt.toISOString(),
   }));
 

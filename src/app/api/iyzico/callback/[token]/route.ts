@@ -3,6 +3,62 @@ import { prisma } from "@/lib/prisma";
 import { retrieveCheckoutForm } from "@/lib/iyzico";
 import { revalidatePath } from "next/cache";
 import type { Order } from "@/generated/prisma";
+import { sendTransactionalEmail, buildOrderConfirmationEmail } from "@/lib/email";
+import { sendSms } from "@/lib/sms";
+
+/// Ödemesi tamamlanan siparişteki her satır için ürün stok adedini düşürür.
+/// Stok 0'a inerse stockStatus otomatik OUT_OF_STOCK'a çekilir; negatife
+/// düşmesin diye 0'da sabitlenir.
+async function decrementStockForOrder(order: Order) {
+  for (const item of order.items) {
+    const product = await prisma.product.findUnique({ where: { id: item.productId } });
+    if (!product) continue;
+
+    const newQuantity = Math.max(0, product.quantity - item.quantity);
+    await prisma.product.update({
+      where: { id: product.id },
+      data: {
+        quantity: newQuantity,
+        stockStatus: newQuantity === 0 ? "OUT_OF_STOCK" : product.stockStatus,
+      },
+    });
+  }
+}
+
+/// Ödemesi tamamlanan siparişin özetini müşteriye e-posta + SMS ile bildirir.
+/// Her iki kanal da altyapı env değişkenleri eksikse sessizce console mock'a
+/// düşer — sipariş akışını asla bloklamaz (best-effort, hata yutulur).
+async function sendOrderConfirmation(order: Order) {
+  const customerName = `${order.billingFirstName} ${order.billingLastName}`.trim();
+
+  try {
+    const email = buildOrderConfirmationEmail({
+      orderNumber: order.orderNumber,
+      customerName,
+      total: order.total,
+      items: order.items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        rentalTierLabel: item.rentalTierLabel || "",
+        lineTotal: item.lineTotal,
+      })),
+    });
+    await sendTransactionalEmail({ to: order.email, ...email });
+  } catch (error) {
+    console.error("Sipariş onay e-postası gönderilemedi:", error);
+  }
+
+  if (order.phone) {
+    try {
+      await sendSms(
+        order.phone,
+        `Castapos: ${order.orderNumber} numarali siparisiniz alindi, odemeniz tamamlandi. Toplam: ${Math.round(order.total).toLocaleString("tr-TR")} TL.`
+      );
+    } catch (error) {
+      console.error("Sipariş onay SMS'i gönderilemedi:", error);
+    }
+  }
+}
 
 /// Creates one RentalAgreement (+ full installment calendar) per RENT item
 /// in a just-paid Order. The order's checkout payment covers the first
@@ -118,6 +174,12 @@ export async function POST(
         // remaining months stay unpaid and get collected via /takip later.
         await createRentalAgreementsFromOrder(order);
 
+        // Ödenen siparişteki ürünlerin stok adedini düş.
+        await decrementStockForOrder(order);
+
+        // Müşteriye e-posta + SMS ile sipariş onayı gönder (best-effort).
+        await sendOrderConfirmation(order);
+
         // Redirect to success page
         return NextResponse.redirect(
           new URL(`/siparis/basarili/${paymentRecord.orderId}`, request.url),
@@ -152,13 +214,22 @@ export async function POST(
             },
           });
 
+          // Admin panelinde "Ödeme Kayıtları"nda görünen takip kaydını da senkronla.
+          await prisma.paymentLink.updateMany({
+            where: { installmentId: installment.id },
+            data: { paid: true },
+          });
+
+          // Tek başına taksit ödeme linkinden (/pay/taksit/[id]) de, /takip
+          // panelinden de aynı hedefe döner — link "ödendi" durumunu kimlik
+          // doğrulaması gerekmeden gösterir, her iki akış için de çalışır.
           return NextResponse.redirect(
-            new URL(`/takip/${agreement.id}?payment=success`, request.url),
+            new URL(`/pay/taksit/${installment.id}?payment=success`, request.url),
             303
           );
         }
 
-        return NextResponse.redirect(new URL("/takip", request.url), 303);
+        return NextResponse.redirect(new URL(`/pay/taksit/${installment.id}`, request.url), 303);
       } else if (paymentRecord.kind === "MEMBERSHIP" && paymentRecord.userId) {
         const now = new Date();
         const expires = new Date(now);
@@ -216,7 +287,7 @@ export async function POST(
 
         if (installment) {
           return NextResponse.redirect(
-            new URL(`/takip/${installment.rentalAgreementId}?payment=error&msg=${encodeURIComponent(errorMessage)}`, request.url),
+            new URL(`/pay/taksit/${installment.id}?payment=error&msg=${encodeURIComponent(errorMessage)}`, request.url),
             303
           );
         }

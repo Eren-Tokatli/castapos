@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search } from "lucide-react";
-import { toggleInstallmentPaid } from "../agreements/actions";
+import { Search, Link2, MessageCircle } from "lucide-react";
+import { toggleInstallmentPaid, createInstallmentPaymentLink } from "../agreements/actions";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
 import { useAdminToast } from "../_components/ToastProvider";
 
@@ -15,6 +15,16 @@ interface Installment {
   agreementId: string;
   tenantName: string;
   assetName: string;
+  phone: string;
+}
+
+// Telefonu wa.me formatına çevirir: "0532 123 45 67" -> "905321234567"
+function toWhatsAppNumber(phone: string): string | null {
+  const digits = phone.replace(/[^0-9]/g, "");
+  if (!digits) return null;
+  if (digits.startsWith("90")) return digits;
+  if (digits.startsWith("0")) return "90" + digits.slice(1);
+  return "90" + digits;
 }
 
 interface InstallmentsClientProps {
@@ -27,6 +37,22 @@ export function InstallmentsClient({ initialInstallments }: InstallmentsClientPr
   const [filter, setFilter] = useState<"all" | "overdue" | "week" | "month">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
+
+  // JSX render sırasında (SSR dahil) kullanılıyor — window sadece tarayıcıda var,
+  // sunucuda boş string'e düşer, WhatsApp linki hydration sonrası doğru dolar.
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const handleCopyLink = async (installment: Installment) => {
+    const link = `${window.location.origin}/pay/taksit/${installment.id}`;
+    // Ödeme Kayıtları'nda görünsün ve gönderim zamanı takip edilsin diye kaydı oluştur/güncelle.
+    await createInstallmentPaymentLink(installment.id);
+    try {
+      await navigator.clipboard.writeText(link);
+      toast("Ödeme linki kopyalandı ve Ödeme Kayıtları'na eklendi.");
+    } catch {
+      setAlertMessage(`Link kopyalanamadı, elle kopyala: ${link}`);
+    }
+  };
 
   const handleTogglePaid = async (id: string, currentPaid: boolean) => {
     const res = await toggleInstallmentPaid(id, !currentPaid);
@@ -218,13 +244,36 @@ export function InstallmentsClient({ initialInstallments }: InstallmentsClientPr
                       <td className="p-4 font-bold text-slate-900">
                         ₺{i.amount.toLocaleString("tr-TR")}
                       </td>
-                      <td className="p-4 text-right">
-                        <button
-                          onClick={() => handleTogglePaid(i.id, i.paid)}
-                          className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition shadow-sm"
-                        >
-                          Ödeme Al (EFT/Cash)
-                        </button>
+                      <td className="p-4">
+                        <div className="flex justify-end items-center gap-2 flex-wrap">
+                          <button
+                            onClick={() => handleCopyLink(i)}
+                            title="Ödeme linkini kopyala"
+                            className="px-2.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg text-xs font-bold transition shadow-sm inline-flex items-center gap-1"
+                          >
+                            <Link2 size={13} /> Ödeme Linki
+                          </button>
+                          {toWhatsAppNumber(i.phone) && (
+                            <a
+                              href={`https://wa.me/${toWhatsAppNumber(i.phone)}?text=${encodeURIComponent(
+                                `Merhaba ${i.tenantName}, ${i.assetName} kiralamanız için ${i.description || "aylık"} ödemenizi aşağıdaki güvenli linkten yapabilirsiniz:\n${origin}/pay/taksit/${i.id}`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={() => createInstallmentPaymentLink(i.id)}
+                              title="WhatsApp'tan gönder"
+                              className="px-2.5 py-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-xs font-bold transition shadow-sm inline-flex items-center gap-1"
+                            >
+                              <MessageCircle size={13} /> WhatsApp
+                            </a>
+                          )}
+                          <button
+                            onClick={() => handleTogglePaid(i.id, i.paid)}
+                            className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-bold transition shadow-sm"
+                          >
+                            Ödeme Al (EFT/Cash)
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

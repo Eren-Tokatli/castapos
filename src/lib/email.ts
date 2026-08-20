@@ -45,6 +45,86 @@ export async function sendTransactionalEmail(input: SendEmailInput): Promise<Sen
   return { sent: true, provider: "resend" };
 }
 
+export function buildOrderConfirmationEmail(input: {
+  orderNumber: string;
+  customerName: string;
+  total: number;
+  items: { name: string; quantity: number; rentalTierLabel: string; lineTotal: number }[];
+}) {
+  const formatTl = (value: number) =>
+    `${Math.round(value).toLocaleString("tr-TR")} TL`;
+
+  const itemsText = input.items
+    .map((i) => `- ${i.name} (${i.rentalTierLabel}, ${i.quantity} adet): ${formatTl(i.lineTotal)}`)
+    .join("\n");
+
+  const itemsHtml = input.items
+    .map(
+      (i) => `
+        <tr>
+          <td style="padding:10px 0;border-bottom:1px solid #edf0f5;color:#101828">${i.name}<br/><span style="color:#667085;font-size:13px">${i.rentalTierLabel} · ${i.quantity} adet</span></td>
+          <td style="padding:10px 0;border-bottom:1px solid #edf0f5;color:#101828;text-align:right;white-space:nowrap">${formatTl(i.lineTotal)}</td>
+        </tr>`
+    )
+    .join("");
+
+  return {
+    subject: `Siparişin alındı — ${input.orderNumber}`,
+    text: `Merhaba ${input.customerName},\n\n${input.orderNumber} numaralı siparişin alındı ve ödemen tamamlandı.\n\n${itemsText}\n\nToplam: ${formatTl(input.total)}\n\nSiparişini "Siparişlerim" sayfandan takip edebilirsin.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;background:#f6f8fb;padding:28px">
+        <div style="max-width:560px;margin:auto;background:#ffffff;border:1px solid #e5e7ee;border-radius:18px;padding:28px">
+          <div style="font-size:20px;font-weight:800;color:#07111f;margin-bottom:10px">Castapos</div>
+          <h1 style="font-size:22px;line-height:1.25;color:#07111f;margin:0 0 6px">Siparişin alındı 🎉</h1>
+          <p style="font-size:14px;color:#667085;margin:0 0 4px">Sipariş no: <b style="color:#101828">${input.orderNumber}</b></p>
+          <p style="font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px">Merhaba ${input.customerName}, ödemen başarıyla tamamlandı. Kiralama süreci başladı.</p>
+          <table style="width:100%;border-collapse:collapse">
+            ${itemsHtml}
+            <tr>
+              <td style="padding-top:14px;font-weight:900;font-size:17px;color:#101828">Toplam</td>
+              <td style="padding-top:14px;font-weight:900;font-size:17px;color:#101828;text-align:right">${formatTl(input.total)}</td>
+            </tr>
+          </table>
+          <p style="font-size:13px;line-height:1.5;color:#667085;margin:22px 0 0">Siparişinin durumunu hesabındaki "Siparişlerim" sayfasından takip edebilirsin.</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
+export function buildInstallmentReminderEmail(input: {
+  tenantName: string;
+  assetName: string;
+  amount: number;
+  dueDate: Date;
+  payUrl: string;
+}) {
+  const formatTl = (value: number) => `${Math.round(value).toLocaleString("tr-TR")} TL`;
+  const dueDateStr = input.dueDate.toLocaleDateString("tr-TR");
+
+  return {
+    subject: `Ödeme hatırlatması — ${dueDateStr} son ödeme tarihi`,
+    text: `Merhaba ${input.tenantName},\n\n${input.assetName} kiralamanız için ${formatTl(input.amount)} tutarındaki taksitin son ödeme tarihi ${dueDateStr}.\n\nÖdeme linki: ${input.payUrl}\n\nSorun yaşarsanız bize ulaşabilirsiniz.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;background:#f6f8fb;padding:28px">
+        <div style="max-width:520px;margin:auto;background:#ffffff;border:1px solid #e5e7ee;border-radius:18px;padding:28px">
+          <div style="font-size:20px;font-weight:800;color:#07111f;margin-bottom:10px">Castapos</div>
+          <h1 style="font-size:22px;line-height:1.25;color:#07111f;margin:0 0 10px">Ödeme hatırlatması</h1>
+          <p style="font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px">Merhaba ${input.tenantName}, <b>${input.assetName}</b> kiralamanız için son ödeme tarihi yaklaşıyor.</p>
+          <div style="background:#f8fafc;border:1px solid #edf0f5;border-radius:14px;padding:18px;margin:0 0 20px">
+            <p style="margin:0 0 6px;font-size:12px;color:#667085;font-weight:700;text-transform:uppercase">Son Ödeme Tarihi</p>
+            <p style="margin:0 0 14px;font-size:16px;color:#101828;font-weight:800">${dueDateStr}</p>
+            <p style="margin:0 0 6px;font-size:12px;color:#667085;font-weight:700;text-transform:uppercase">Tutar</p>
+            <p style="margin:0;font-size:22px;color:#f35f36;font-weight:900">${formatTl(input.amount)}</p>
+          </div>
+          <a href="${input.payUrl}" style="display:block;text-align:center;background:#101828;color:#fff;font-weight:800;text-decoration:none;padding:14px;border-radius:12px">Güvenli Öde</a>
+          <p style="font-size:12px;line-height:1.5;color:#98a2b3;margin:20px 0 0">Ödemeyi zaten yaptıysanız bu e-postayı dikkate almayabilirsiniz.</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
 export function buildOtpEmail(code: string, purpose: "login" | "register") {
   const title = purpose === "login" ? "Castapos giriş doğrulama kodun" : "Castapos e-posta doğrulama kodun";
   const description =

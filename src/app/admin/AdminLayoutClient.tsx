@@ -7,7 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import {
   BarChart3, FileText, CalendarClock, Package, CreditCard, ShoppingBag,
   FolderTree, Users, Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Sun, Moon,
-  MessageCircle
+  MessageCircle, Calendar
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -32,6 +32,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { label: "Siparişler", icon: ShoppingBag, href: "/admin/orders" },
     { label: "Sözleşmeler", icon: FileText, href: "/admin/agreements" },
     { label: "Taksitler & Kasa", icon: CalendarClock, href: "/admin/installments" },
+    { label: "Takvim", icon: Calendar, href: "/admin/takvim" },
     { label: "Ürünler & Stok", icon: Package, href: "/admin/products" },
     { label: "Kategoriler", icon: FolderTree, href: "/admin/categories" },
     { label: "Kullanıcılar", icon: Users, href: "/admin/users" },

@@ -30,6 +30,7 @@ interface PaymentLinkRecord {
   amount: number;
   description: string;
   paid: boolean;
+  installmentId: string | null;
   createdAt: string;
 }
 
@@ -305,7 +306,9 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                 ) : (
                   filteredLinks.map((link) => {
                     const host = typeof window !== "undefined" ? window.location.origin : "";
-                    const fullUrl = `${host}/pay/link/${link.token}`;
+                    const fullUrl = link.installmentId
+                      ? `${host}/pay/taksit/${link.installmentId}`
+                      : `${host}/pay/link/${link.token}`;
                     return (
                       <tr key={link.id} className="hover:bg-slate-50/50 transition">
                         <td className="p-4">
@@ -318,7 +321,14 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                           <span className="text-[10px] text-slate-400 block">{link.payerEmail}</span>
                           {link.payerPhone && <span className="text-[10px] text-slate-400 block">{link.payerPhone}</span>}
                         </td>
-                        <td className="p-4 text-slate-600 truncate max-w-[200px]">{link.description}</td>
+                        <td className="p-4 text-slate-600 truncate max-w-[200px]">
+                          {link.installmentId && (
+                            <span className="inline-block mr-1.5 text-[9px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">
+                              Taksit
+                            </span>
+                          )}
+                          {link.description}
+                        </td>
                         <td className="p-4 font-bold text-slate-950 text-sm">
                           ₺{link.amount.toLocaleString("tr-TR")}
                         </td>

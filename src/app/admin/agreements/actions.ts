@@ -191,6 +191,54 @@ export async function deleteAgreement(id: string) {
   }
 }
 
+// Bir taksit için ödeme linki kaydı oluşturur (veya zaten varsa onu günceller)
+// — asıl ödenebilir link her zaman /pay/taksit/{installmentId}'dir (evergreen,
+// İyzico oturumu tıklanınca üretilir, süresi geçmez). Bu kayıt sadece admin
+// panelinde "Ödeme Kayıtları" altında görünsün ve gönderim zamanı takip
+// edilsin diye tutulur.
+export async function createInstallmentPaymentLink(installmentId: string) {
+  try {
+    await requireAdmin();
+
+    const installment = await prisma.installment.findUnique({ where: { id: installmentId } });
+    if (!installment) return { success: false, error: "Taksit bulunamadı." };
+
+    const agreement = await prisma.rentalAgreement.findUnique({ where: { id: installment.rentalAgreementId } });
+    if (!agreement) return { success: false, error: "Sözleşme bulunamadı." };
+
+    const existing = await prisma.paymentLink.findFirst({ where: { installmentId } });
+    const now = new Date();
+
+    if (existing) {
+      await prisma.paymentLink.update({
+        where: { id: existing.id },
+        data: { paid: installment.paid, lastSentAt: now },
+      });
+    } else {
+      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      await prisma.paymentLink.create({
+        data: {
+          token,
+          payerName: agreement.tenantName,
+          payerEmail: agreement.email || "",
+          payerPhone: agreement.phone || null,
+          amount: installment.amount,
+          description: `${installment.description || "Taksit Ödemesi"} — ${agreement.assetName}`,
+          paid: installment.paid,
+          installmentId,
+          lastSentAt: now,
+        },
+      });
+    }
+
+    revalidatePath("/admin/payments");
+    return { success: true, url: `/pay/taksit/${installmentId}` };
+  } catch (error: any) {
+    console.error("Create Installment Payment Link Error:", error);
+    return { success: false, error: error.message || "Link oluşturulamadı." };
+  }
+}
+
 export async function toggleInstallmentPaid(id: string, paid: boolean) {
   try {
     await requireAdmin();

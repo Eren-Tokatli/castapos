@@ -2,7 +2,7 @@ import { Percent, Truck, Headset, Sparkles } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { PREMIUM_BENEFITS, PREMIUM_YEARLY_PRICE } from "@/lib/premium";
-import { formatPrice } from "@/lib/products-data";
+import { formatPrice } from "@/lib/catalog-shared";
 import { PremiumPurchasePanel } from "./PremiumPurchasePanel";
 
 const BENEFIT_ICONS = [Percent, Truck, Headset, Sparkles];

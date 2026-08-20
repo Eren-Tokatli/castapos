@@ -528,14 +528,22 @@ model OtpCode {
 }
 
 model PaymentLink {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  token       String   @unique
-  payerName   String
-  payerEmail  String
-  payerPhone  String?
-  amount      Float
-  description String
-  paid        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  token         String   @unique
+  payerName     String
+  payerEmail    String
+  payerPhone    String?
+  amount        Float
+  description   String
+  paid          Boolean  @default(false)
+  // Bir kiralama taksitine karşılık geldiğinde dolu — bu durumda gerçek
+  // ödeme linki /pay/taksit/{installmentId}'dir (token yalnızca takip
+  // amaçlı), ödeme alındığında hem bu kayıt hem asıl Installment paid=true
+  // olarak senkron güncellenir.
+  installmentId String?  @db.ObjectId
+  lastSentAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([installmentId])
 }

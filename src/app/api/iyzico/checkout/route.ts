@@ -24,6 +24,7 @@ export async function POST(request: Request) {
     let buyerEmail = "";
     let buyerAddress = "";
     let buyerCity = "Istanbul";
+    let buyerIdentityNumber = "11111111111"; // Iyzico sandbox test TC — gerçek sipariş/üyelikte müşterinin kendi kimlik no'suyla değiştirilir
     let basketItems: any[] = [];
     let dbUpdateData: any = {};
 
@@ -55,13 +56,14 @@ export async function POST(request: Request) {
       buyerEmail = order.email;
       buyerAddress = `${order.billingAddressLine1} ${order.billingAddressLine2 || ""}`.trim();
       buyerCity = order.billingCity || "Istanbul";
+      if (order.taxOrNationalId) buyerIdentityNumber = order.taxOrNationalId;
 
       basketItems = order.items.map((item: any) => ({
         id: item.productId,
         name: item.name,
         category1: "Electronics",
         itemType: "PHYSICAL",
-        price: item.lineTotal.toString(),
+        price: item.lineTotal.toFixed(2),
       }));
 
       dbUpdateData = {
@@ -105,6 +107,7 @@ export async function POST(request: Request) {
       buyerEmail = agreement.email || "destek@castapos.com";
       buyerAddress = agreement.address || "İstanbul Merkez";
       buyerCity = agreement.city || "Istanbul";
+      if (agreement.taxOrNationalId) buyerIdentityNumber = agreement.taxOrNationalId;
 
       basketItems = [
         {
@@ -112,7 +115,7 @@ export async function POST(request: Request) {
           name: `${agreement.assetName} - Taksit Ödemesi`,
           category1: "Rental",
           itemType: "VIRTUAL",
-          price: amount.toString(),
+          price: amount.toFixed(2),
         },
       ];
 
@@ -161,7 +164,7 @@ export async function POST(request: Request) {
           name: "Castapos Premium Üyelik (Yıllık)",
           category1: "Membership",
           itemType: "VIRTUAL",
-          price: amount.toString(),
+          price: amount.toFixed(2),
         },
       ];
 
@@ -210,7 +213,7 @@ export async function POST(request: Request) {
           name: paylink.description,
           category1: "PaymentLink",
           itemType: "VIRTUAL",
-          price: amount.toString(),
+          price: amount.toFixed(2),
         },
       ];
 
@@ -253,7 +256,7 @@ export async function POST(request: Request) {
         surname: buyerSurname,
         gsmNumber: formattedPhone,
         email: buyerEmail,
-        identityNumber: "11111111111", // Default sandbox TC
+        identityNumber: buyerIdentityNumber,
         registrationAddress: buyerAddress,
         ip: "85.34.78.112",
         city: buyerCity,

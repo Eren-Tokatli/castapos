@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 interface CartItem {
   id: string;
@@ -30,6 +31,11 @@ export async function createStorefrontOrder(
       return { success: false, error: "T.C. kimlik numarası 11 haneli olmalıdır." };
     }
 
+    // Giriş yapmış müşteriyse siparişi hesabına bağla — aksi halde "Siparişlerim"
+    // sayfası (userId'ye göre filtreliyor) bu siparişi hiç göstermez.
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     // item.id storefront'ta ürünün Prisma slug'ı — sepet artık doğrudan
@@ -52,8 +58,12 @@ export async function createStorefrontOrder(
 
         // Tier price is the total for the whole rental term, paid in equal
         // monthly installments — checkout only collects the first month here.
-        const monthlyAmount = termTotal / duration;
-        const lineTotal = monthlyAmount * item.qty;
+        // Kuruşa yuvarla: yuvarlanmamış ondalık (örn. 266.6666666666667) Iyzico'ya
+        // gönderildiğinde "Geçersiz istek" hatasıyla ödeme başlatma tamamen
+        // başarısız oluyordu — tutarlar zaten kuruş hassasiyetinden fazlasını
+        // ifade edemez.
+        const monthlyAmount = Math.round((termTotal / duration) * 100) / 100;
+        const lineTotal = Math.round(monthlyAmount * item.qty * 100) / 100;
 
         return {
           productId: product.id,
@@ -80,6 +90,7 @@ export async function createStorefrontOrder(
     const order = await prisma.order.create({
       data: {
         orderNumber,
+        userId,
         status: "PENDING_PAYMENT",
         currency: "TRY",
         subtotal: itemsSubtotal,
