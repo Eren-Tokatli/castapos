@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, CreditCard, HelpCircle, LifeBuoy, PackageCheck, RefreshCw, ShieldCheck, Truck } from "lucide-react";
+import { CalendarDays, CreditCard, LifeBuoy, PackageCheck, RefreshCw, ShieldCheck, Truck } from "lucide-react";
 import { FaqPageClient } from "./FaqPageClient";
 
 export const metadata: Metadata = {
@@ -80,7 +80,6 @@ export default function SikcaSorulanSorularPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Sıkça Sorulan Sorular
             </nav>
-            <span className="section-kicker">Yardım merkezi</span>
             <h1>Kiralama süreciyle ilgili en net cevaplar.</h1>
             <p>
               Ürün seçimi, teslimat, ödeme, iptal ve destek adımlarında merak edilenleri tek ekranda topladık.
@@ -108,15 +107,6 @@ export default function SikcaSorulanSorularPage() {
           </div>
 
           <div className="faq-content-layout">
-            <aside className="faq-side-card">
-              <HelpCircle size={24} />
-              <h2>Aradığın cevap burada yok mu?</h2>
-              <p>Ürün, teslimat veya ödeme süreciyle ilgili özel bir durum varsa ekibimize yazabilirsin.</p>
-              <Link className="btn btn-soft" href="/bilgi/iletisim">
-                İletişime geç
-              </Link>
-            </aside>
-
             <div className="upgraded-faq-list">
               {faqGroups.map((group) => (
                 <section key={group.title} className="faq-group-card">

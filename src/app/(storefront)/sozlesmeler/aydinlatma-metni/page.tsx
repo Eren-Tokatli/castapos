@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, Database, ShieldCheck } from "lucide-react";
+import { BadgeCheck, CalendarClock, ShieldCheck } from "lucide-react";
 import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function AydinlatmaMetniPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Aydınlatma Metni
             </nav>
-            <span className="section-kicker">KVKK</span>
             <h1>Aydınlatma Metni</h1>
             <p>Kişisel verilerin hangi amaçlarla işlendiği, kimlerle paylaşılabileceği ve kullanıcı hakları.</p>
           </div>
@@ -51,18 +50,8 @@ export default function AydinlatmaMetniPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <Database size={22} />
-            <b>KVKK bilgilendirmesi</b>
-            <p>Aydınlatma metni, kişisel verilerin işlenmesine ilişkin temel bilgileri açıklar.</p>
-            <Link className="btn btn-soft" href="/bilgi/iletisim">
-              Başvuru ilet
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Aydınlatma Metni</span>
               <h2>Kişisel verilerin işlenmesine ilişkin bilgilendirme</h2>
             </div>
             {sections.map((section) => (

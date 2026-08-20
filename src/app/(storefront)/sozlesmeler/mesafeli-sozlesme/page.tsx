@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, FileSignature, PackageCheck } from "lucide-react";
+import { BadgeCheck, CalendarClock, PackageCheck } from "lucide-react";
 import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function MesafeliSozlesmePage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Mesafeli Sözleşme
             </nav>
-            <span className="section-kicker">Sözleşmeler</span>
             <h1>Mesafeli Sözleşme</h1>
             <p>Elektronik ortamda oluşturulan kiralama süreçleri için ana hükümler.</p>
           </div>
@@ -51,18 +50,8 @@ export default function MesafeliSozlesmePage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <FileSignature size={22} />
-            <b>Sipariş öncesi kontrol</b>
-            <p>Ürün, süre, fiyat, teslimat ve ödeme özetini onaylamadan önce kontrol et.</p>
-            <Link className="btn btn-soft" href="/sozlesmeler/on-bilgilendirme-formu">
-              Ön bilgilendirme
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Mesafeli Sözleşme</span>
               <h2>Kiralama planının elektronik ortamda kurulması</h2>
             </div>
             {sections.map((section) => (

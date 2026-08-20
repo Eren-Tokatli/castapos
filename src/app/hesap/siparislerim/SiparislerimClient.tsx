@@ -50,7 +50,6 @@ export function SiparislerimClient({ orders }: { orders: OrderRow[] }) {
   return (
     <>
       <div className="account-panel-hero">
-        <span className="section-kicker">Hesabım</span>
         <h1>Siparişlerim</h1>
         <p>Geçmiş ve devam eden kiralama siparişlerini buradan takip edebilirsin.</p>
       </div>

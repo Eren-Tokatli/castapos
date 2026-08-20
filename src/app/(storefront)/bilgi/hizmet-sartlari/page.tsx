@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertCircle, BadgeCheck, CalendarClock, FileText, LifeBuoy } from "lucide-react";
+import { AlertCircle, BadgeCheck, CalendarClock } from "lucide-react";
 import { InfoPageBodyClass } from "../_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function HizmetSartlariPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Hizmet Şartları
             </nav>
-            <span className="section-kicker">Bilgilendirme</span>
             <h1>Hizmet Şartları</h1>
             <p>Castapos deneyimini güvenli, şeffaf ve takip edilebilir tutmak için temel kullanım koşulları.</p>
           </div>
@@ -51,18 +50,8 @@ export default function HizmetSartlariPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <FileText size={22} />
-            <b>Özet</b>
-            <p>Bu sayfa platform kullanımı ve kiralama sürecine dair genel bilgilendirme sağlar.</p>
-            <Link className="btn btn-soft" href="/bilgi/iletisim">
-              Destek al <LifeBuoy size={16} />
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Hizmet Şartları</span>
               <h2>Kiralama sürecinde bilmen gerekenler</h2>
             </div>
             {sections.map((section) => (

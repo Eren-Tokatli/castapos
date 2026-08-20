@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, PackageCheck, ShieldCheck } from "lucide-react";
+import { BadgeCheck, CalendarClock, ShieldCheck } from "lucide-react";
 import { InfoPageBodyClass } from "../_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function MusteriUrunBilgilendirmePage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Müşteri Ürün Bilgilendirme
             </nav>
-            <span className="section-kicker">Ürün bilgilendirme</span>
             <h1>Müşteri Ürün Bilgilendirme</h1>
             <p>Ürün seçimi, teslimat, kullanım ve iade öncesinde dikkat edilmesi gereken temel noktalar.</p>
           </div>
@@ -51,18 +50,8 @@ export default function MusteriUrunBilgilendirmePage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <PackageCheck size={22} />
-            <b>Ürün kontrolü</b>
-            <p>Planını onaylamadan önce ürün bilgilerini ve kiralama süresini sepetten tekrar kontrol et.</p>
-            <Link className="btn btn-soft" href="/kategori">
-              Ürünleri incele
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Müşteri Ürün Bilgilendirme</span>
               <h2>Kiralama öncesi ve sonrası ürün sorumlulukları</h2>
             </div>
             {sections.map((section) => (

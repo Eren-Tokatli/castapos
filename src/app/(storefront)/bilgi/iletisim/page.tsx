@@ -49,7 +49,6 @@ export default function IletisimPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › İletişim
             </nav>
-            <span className="section-kicker">İletişim</span>
             <h1>Castapos ekibiyle hızlıca iletişime geç.</h1>
             <p>
               Kiralama planı, teslimat, destek talepleri veya iş birlikleri için doğru kanalı seçerek bize ulaşabilirsin.
@@ -76,7 +75,6 @@ export default function IletisimPage() {
 
           <div className="contact-grid enhanced-contact contact-premium-layout">
             <article className="contact-info-panel">
-              <span className="section-kicker">Yanındayız</span>
               <h2>Kiralama sürecinin her adımında net destek.</h2>
               <p>
                 Ürün seçimi, ödeme, teslimat veya iade sürecinde aklına takılanları ekibimize iletebilirsin. Hesap

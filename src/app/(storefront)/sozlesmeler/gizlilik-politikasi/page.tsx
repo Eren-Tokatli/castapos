@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, LockKeyhole, ShieldCheck } from "lucide-react";
+import { BadgeCheck, CalendarClock, ShieldCheck } from "lucide-react";
 import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function GizlilikPolitikasiPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Gizlilik ve Güvenlik Politikası
             </nav>
-            <span className="section-kicker">Sözleşmeler</span>
             <h1>Gizlilik ve Güvenlik Politikası</h1>
             <p>Kişisel verilerin gizliliği, platform güvenliği ve kullanıcı deneyimi için temel bilgilendirme.</p>
           </div>
@@ -51,18 +50,8 @@ export default function GizlilikPolitikasiPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <LockKeyhole size={22} />
-            <b>Güvenlik odağı</b>
-            <p>Ödeme, hesap ve sipariş süreçlerinde veriler yalnızca gerekli amaçlarla işlenir.</p>
-            <Link className="btn btn-soft" href="/sozlesmeler/aydinlatma-metni">
-              Aydınlatma metni
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Gizlilik Politikası</span>
               <h2>Veri gizliliği ve platform güvenliği</h2>
             </div>
             {sections.map((section) => (

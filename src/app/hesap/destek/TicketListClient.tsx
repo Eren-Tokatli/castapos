@@ -92,7 +92,6 @@ export function TicketListClient({
     <>
       <div className="account-panel-hero" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <span className="section-kicker">Hesabım</span>
           <h1>Soru ve Taleplerim</h1>
           <p>Bizimle iletişime geçin, sorularınızı ve teknik taleplerinizi buradan takip edin.</p>
         </div>

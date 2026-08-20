@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, ClipboardList, CreditCard } from "lucide-react";
+import { BadgeCheck, CalendarClock, CreditCard } from "lucide-react";
 import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function OnBilgilendirmeFormuPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Ön Bilgilendirme Formu
             </nav>
-            <span className="section-kicker">Sözleşmeler</span>
             <h1>Ön Bilgilendirme Formu</h1>
             <p>Siparişini onaylamadan önce ürün, fiyat, teslimat, ödeme ve iade süreci hakkında temel bilgiler.</p>
           </div>
@@ -51,18 +50,8 @@ export default function OnBilgilendirmeFormuPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <ClipboardList size={22} />
-            <b>Onay öncesi</b>
-            <p>Sepetteki ürünleri, aylık tutarı ve teslimat bilgilerini dikkatlice incele.</p>
-            <Link className="btn btn-soft" href="/sepet">
-              Sepete git
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Ön Bilgilendirme Formu</span>
               <h2>Sipariş öncesi açık ve anlaşılır bilgilendirme</h2>
             </div>
             {sections.map((section) => (

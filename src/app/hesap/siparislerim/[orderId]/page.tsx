@@ -87,7 +87,6 @@ export default async function OrderDetailPage({
           <ArrowLeft size={16} />
         </Link>
         <div>
-          <span className="section-kicker">Siparişlerim</span>
           <h1 style={{ fontSize: 32 }}>Sipariş #{order.orderNumber}</h1>
         </div>
       </div>

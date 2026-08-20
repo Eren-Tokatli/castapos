@@ -27,7 +27,6 @@ export default async function DegerlendirmelerimPage() {
   return (
     <AccountShell displayName={displayName} email={user?.email || session?.user?.email || ""}>
       <div className="account-panel-hero">
-        <span className="section-kicker">Hesabım</span>
         <h1>Değerlendirmelerim</h1>
         <p>Kiraladığın veya satın aldığın ürünler için yaptığın değerlendirmeler burada listelenir.</p>
       </div>

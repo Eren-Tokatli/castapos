@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, Cookie, Settings2 } from "lucide-react";
-import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
+import { BadgeCheck, CalendarClock } from "lucide-react";
 import { InfoPageBodyClass } from "../../bilgi/_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -70,7 +69,6 @@ export default function CerezPolitikasiPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Çerez Politikası
             </nav>
-            <span className="section-kicker">Gizlilik</span>
             <h1>Çerez Politikası</h1>
             <p>Castapos deneyimini güvenli, hızlı ve kişiselleştirilebilir hale getirmek için kullanılan çerezler.</p>
           </div>
@@ -79,19 +77,8 @@ export default function CerezPolitikasiPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <Cookie size={22} />
-            <b>Tercihlerin sende</b>
-            <p>Zorunlu çerezler dışında kalan çerez kategorilerini dilediğin zaman yönetebilirsin.</p>
-            <CookiePreferencesButton className="btn btn-soft">
-              <Settings2 size={16} />
-              Tercihleri aç
-            </CookiePreferencesButton>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Çerez Politikası</span>
               <h2>Çerez türleri ve tercih yönetimi</h2>
             </div>
             {sections.map((section) => (

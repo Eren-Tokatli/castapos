@@ -162,7 +162,6 @@ export function AiChatClient() {
   return (
     <>
       <div className="ai-chat-copy">
-        <span className="section-kicker">Akıllı destek</span>
         <h1>Kiralama kararını birkaç soruyla netleştir.</h1>
         <p>
           Ürün seçimi, kiralama süresi, ödeme özeti veya teslimat hakkında hızlıca fikir al. Gerekirse canlı destek

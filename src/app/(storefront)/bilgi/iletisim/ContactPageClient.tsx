@@ -19,7 +19,6 @@ export function ContactPageClient() {
       }}
     >
       <div>
-        <span className="section-kicker">Mesaj gönder</span>
         <h2>Ekibimize ulaş</h2>
         <p>Ürün, teslimat veya kiralama süreciyle ilgili konuyu bize yaz.</p>
       </div>

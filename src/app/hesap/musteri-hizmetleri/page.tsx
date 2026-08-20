@@ -68,7 +68,6 @@ export default async function MusteriHizmetleriPage() {
     <AccountShell displayName={displayName} email={user?.email || session?.user?.email || ""}>
       <div className="account-panel-hero" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <span className="section-kicker">Hesabım</span>
           <h1>Müşteri Hizmetleri</h1>
           <p>Ürün seçimi, teslimat, ödeme ve kiralama planı için doğru destek kanalını seçebilirsin.</p>
         </div>

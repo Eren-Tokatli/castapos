@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgeCheck, CalendarClock, CreditCard, RotateCcw } from "lucide-react";
+import { BadgeCheck, CalendarClock, CreditCard } from "lucide-react";
 import { InfoPageBodyClass } from "../_components/InfoPageBodyClass";
 
 export const metadata: Metadata = {
@@ -42,7 +42,6 @@ export default function ParaIadePolitikasiPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Para İade Politikası
             </nav>
-            <span className="section-kicker">İade süreci</span>
             <h1>Para İade Politikası</h1>
             <p>İptal ve iade taleplerinin hangi çerçevede değerlendirildiğini sade şekilde açıklar.</p>
           </div>
@@ -51,18 +50,8 @@ export default function ParaIadePolitikasiPage() {
 
       <section className="section content-page info-doc-section">
         <div className="container info-doc-layout">
-          <aside className="info-doc-aside">
-            <RotateCcw size={22} />
-            <b>İade talebi</b>
-            <p>İade sürecinde sipariş numaranı ve ürün durumunu destek ekibiyle paylaşman gerekir.</p>
-            <Link className="btn btn-soft" href="/hesap/destek">
-              Talep oluştur
-            </Link>
-          </aside>
-
           <article className="legal-copy-card detailed-legal-copy info-doc-card">
             <div className="legal-document-title">
-              <span>Castapos Para İade Politikası</span>
               <h2>İptal, değerlendirme ve ödeme iadesi</h2>
             </div>
             {sections.map((section) => (

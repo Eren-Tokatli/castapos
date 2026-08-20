@@ -69,7 +69,6 @@ export function KullaniciBilgilerimClient({
   return (
     <>
       <div className="account-panel-hero">
-        <span className="section-kicker">Hesabım</span>
         <h1>Kullanıcı Bilgilerim</h1>
         <p>Ad, soyad ve telefon bilgilerini güncel tutarak teslimat ve destek süreçlerinin sorunsuz ilerlemesini sağla.</p>
       </div>

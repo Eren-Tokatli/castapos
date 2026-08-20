@@ -50,7 +50,6 @@ export default function HakkimizdaPage() {
             <nav className="breadcrumb">
               <Link href="/">Ana Sayfa</Link> › Hakkımızda
             </nav>
-            <span className="section-kicker">Castapos</span>
             <h1>Satın almadan önce deneyimlemenin en sade yolu.</h1>
             <p>
               Castapos; spor aletlerinden ev ürünlerine kadar ihtiyaç duyulan ürünleri, satın alma baskısı olmadan
@@ -115,7 +114,6 @@ export default function HakkimizdaPage() {
 
           <div className="about-process-band">
             <div>
-              <span className="section-kicker">Nasıl çalışır?</span>
               <h2>Kiralama kararını daha net, daha hızlı ve daha güvenli hale getiriyoruz.</h2>
             </div>
             <div className="about-process-steps">
@@ -134,7 +132,6 @@ export default function HakkimizdaPage() {
 
           <section className="about-cta-strip">
             <div>
-              <span className="section-kicker">Castapos deneyimi</span>
               <h2>İhtiyacın olan ürünü bugün aylık planla keşfet.</h2>
               <p>Popüler kiralama ürünlerini incele, fiyatı gör ve satın alma kararını deneyimden sonra ver.</p>
             </div>

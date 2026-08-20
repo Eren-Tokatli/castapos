@@ -1394,7 +1394,7 @@ body.mega-menu-open::before{
 .official-footer .footer-bottom{display:flex;align-items:center;gap:12px}
 .footer-bottom span:last-child{font-weight:600;color:#f4d6cf}
 .account-hero{padding:26px 0 22px}
-.account-hero h1,.content-page .account-hero h1{margin-top:10px}
+.account-hero h1,.content-page .account-hero h1{margin-top:30px}
 .breadcrumb{font-size:13px;color:#475467}
 .breadcrumb a{color:#475467}
 .breadcrumb a:hover{color:var(--brand)}
@@ -12649,6 +12649,12 @@ body.page-iletisim .contact-hero p {
   align-items: start;
 }
 
+/* Bu sayfada yan destek kartı kaldırıldı — soru listesi tek sütun,
+   tam genişlikte, sola yaslı duruyor. */
+body.page-sikca-sorulan-sorular .faq-content-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .faq-side-card {
   position: sticky;
   top: 128px;
@@ -13065,6 +13071,19 @@ body.page-musteri-urun-bilgilendirme {
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+
+/* Bu iki sayfada yan panel (Güvenlik odağı / İade talebi) kaldırıldı —
+   kart tek sütun olarak tam genişlikte, sola yaslı duruyor. */
+body.page-gizlilik-politikasi .info-doc-layout,
+body.page-para-iade-politikasi .info-doc-layout,
+body.page-hizmet-sartlari .info-doc-layout,
+body.page-musteri-urun-bilgilendirme .info-doc-layout,
+body.page-on-bilgilendirme-formu .info-doc-layout,
+body.page-cerez-politikasi .info-doc-layout,
+body.page-mesafeli-sozlesme .info-doc-layout,
+body.page-aydinlatma-metni .info-doc-layout {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .info-doc-aside {
