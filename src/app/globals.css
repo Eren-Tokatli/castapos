@@ -522,6 +522,12 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 /* Cleaner, more considered monthly/daily pricing hierarchy */
 .modern-rental-card .product-info{min-height:304px}
 .compact-price-only{min-height:106px;padding:11px 12px;border:1px solid #eaedf3;background:linear-gradient(145deg,#fbfcff,#f5f7fb);display:grid;gap:9px;align-content:center}
+/* Ana sayfa ürün kartlarında "Aylık" satırının hemen altındaki ikinci çizgi
+   kaldırıldı — bu border değil, bir ::after sözde-elemanıydı (bkz.
+   .monthly-primary::after tanımı). Kutunun kendi dış çerçevesi (üst/alt/yan
+   kenarlar) ve Gün/Aylık arasındaki iç ayraç (.daily-secondary) korunuyor. */
+.home-shell .monthly-primary{border-bottom:0!important}
+.home-shell .monthly-primary::after{content:none!important}
 .monthly-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding-bottom:9px;border-bottom:1px solid #e7eaf0}
 .monthly-primary>div{display:grid;gap:1px}
 .monthly-primary span{font-size:11px;text-transform:uppercase;letter-spacing:.045em;color:#667085;font-weight:900}
@@ -1825,9 +1831,13 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .card-periods .extra-periods{display:none;gap:8px;flex-wrap:wrap}
 .card-periods.expanded .extra-periods{display:flex}
 .card-periods.expanded .period-toggle-btn{background:#fff0ea;border-style:solid;border-color:#ffd1c1;color:var(--brand)}
-.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:nowrap}
+.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:wrap;row-gap:0}
 .compact-price-only span{white-space:nowrap}
 .compact-price-only strong{font-size:21px}
+/* İndirimli üründe eski fiyat (üstü çizili) satıra sığmazsa taşmak yerine
+   kendi satırına düşer — sabit dar kart genişliklerinde (rail, mobil vb.)
+   taşmayı önler. */
+.compact-price-only .old-monthly-price{flex-basis:100%}
 .mobile-filter-toggle,.mobile-sort-toggle{display:none}
 .filter-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .filter-title .filter-reset-btn{width:auto;height:34px;padding:0 12px;font-size:13px;font-weight:800}
