@@ -32,6 +32,7 @@ function KategoriPageContent({
   const urlCat = searchParams.get("cat") || "";
   const urlQuery = searchParams.get("q") || "";
   const urlSort = searchParams.get("sort") || "featured";
+  const urlBrand = searchParams.get("brand") || "";
 
   const activeCategory = urlCat;
   const searchQuery = urlQuery;
@@ -40,7 +41,7 @@ function KategoriPageContent({
   // ürün listesini etkilemez. Uygulanan (applied) state'ler asıl filtrelemeyi
   // yapar; aktif filtre etiketleri de bunlardan türetilir.
   const [draftCategory, setDraftCategory] = useState("");
-  const [draftBrand, setDraftBrand] = useState("");
+  const [draftBrand, setDraftBrand] = useState(urlBrand);
   const [draftMinPrice, setDraftMinPrice] = useState("");
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
   const [draftPeriods, setDraftPeriods] = useState<number[]>([]);
@@ -50,7 +51,7 @@ function KategoriPageContent({
   });
 
   const [appliedCategory, setAppliedCategory] = useState("");
-  const [appliedBrand, setAppliedBrand] = useState("");
+  const [appliedBrand, setAppliedBrand] = useState(urlBrand);
   const [appliedMinPrice, setAppliedMinPrice] = useState("");
   const [appliedMaxPrice, setAppliedMaxPrice] = useState("");
   const [appliedPeriods, setAppliedPeriods] = useState<number[]>([]);

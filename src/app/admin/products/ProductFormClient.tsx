@@ -16,6 +16,7 @@ interface ProductFormProps {
   mode: "create" | "edit";
   productId?: string;
   categories: Category[];
+  brands: string[];
   initialData?: ProductFormData;
 }
 
@@ -64,7 +65,7 @@ function slugify(input: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export function ProductFormClient({ mode, productId, categories, initialData }: ProductFormProps) {
+export function ProductFormClient({ mode, productId, categories, brands, initialData }: ProductFormProps) {
   const router = useRouter();
   const toast = useAdminToast();
   const [form, setForm] = useState<ProductFormData>(initialData ?? emptyForm);
@@ -174,11 +175,17 @@ export function ProductFormClient({ mode, productId, categories, initialData }: 
             <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Marka</label>
             <input
               type="text"
-              placeholder="ör. Voit, WalkingPad"
+              list="brand-options"
+              placeholder="Listeden seç veya yeni marka yaz"
               value={form.brand}
               onChange={(e) => setForm({ ...form, brand: e.target.value })}
               className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
             />
+            <datalist id="brand-options">
+              {brands.map((b) => (
+                <option key={b} value={b} />
+              ))}
+            </datalist>
           </div>
         </div>
 

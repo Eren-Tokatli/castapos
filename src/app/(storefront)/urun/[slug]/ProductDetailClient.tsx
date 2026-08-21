@@ -330,7 +330,18 @@ export function ProductDetailClient({
               </div>
             </div>
 
-            <h1>{p.name}</h1>
+            <h1>
+              {p.brand && p.name.toLowerCase().startsWith(p.brand.toLowerCase()) ? (
+                <>
+                  <Link href={`/kategori?brand=${encodeURIComponent(p.brand)}`} className="detail-title-brand-link">
+                    {p.name.slice(0, p.brand.length)}
+                  </Link>
+                  {p.name.slice(p.brand.length)}
+                </>
+              ) : (
+                p.name
+              )}
+            </h1>
             
             <div className="detail-rating">
               <Star size={15} fill="currentColor" strokeWidth={0} /> 4,7{" "}

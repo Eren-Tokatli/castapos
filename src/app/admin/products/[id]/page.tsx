@@ -9,12 +9,18 @@ export const dynamic = "force-dynamic";
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  const [product, categories] = await Promise.all([
+  const [product, categories, brandRows] = await Promise.all([
     prisma.product.findUnique({ where: { id } }),
     prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    prisma.product.findMany({ where: { brand: { not: null } }, select: { brand: true }, distinct: ["brand"] }),
   ]);
 
   if (!product) notFound();
+
+  const brands = brandRows
+    .map((p) => p.brand)
+    .filter((b): b is string => !!b)
+    .sort((a, b) => a.localeCompare(b, "tr"));
 
   const initialData: ProductFormData = {
     name: product.name,
@@ -50,5 +56,5 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     })),
   };
 
-  return <ProductFormClient mode="edit" productId={product.id} categories={categories} initialData={initialData} />;
+  return <ProductFormClient mode="edit" productId={product.id} categories={categories} brands={brands} initialData={initialData} />;
 }
