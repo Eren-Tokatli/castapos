@@ -457,11 +457,6 @@ export function ProductDetailClient({
                       </p>
                     )}
                   </article>
-                  <aside className="premium-copy-card side">
-                    <span><ShieldCheck size={16} /> Castapos kontrolü</span>
-                    <b>Temiz, bakımlı ve kiralamaya hazır</b>
-                    <p>Ürün teslimat öncesi temel kontrol sürecinden geçirilir.</p>
-                  </aside>
                 </div>
               </section>
             )}
