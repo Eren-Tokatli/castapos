@@ -1,15 +1,22 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { MessageSquare, Plus, Send, ChevronDown } from "lucide-react";
+import { MessageSquare, Plus, Send, ChevronRight, X } from "lucide-react";
 import { addMessageToTicket } from "./actions";
 import { NewTicketWizard, type WizardOrder } from "./NewTicketWizard";
 
 interface Message {
   senderId: string;
   senderName: string;
+  senderRole?: "CUSTOMER" | "GUEST" | "AGENT" | string;
   message: string;
   createdAt: string;
+}
+
+function isAgentMessage(msg: Message) {
+  if (msg.senderRole) return msg.senderRole === "AGENT";
+  // Eski kayıtlar (senderRole eklenmeden önce) için geriye dönük uyumluluk
+  return msg.senderId === "agent" || msg.senderId === "support" || msg.senderId === "admin";
 }
 
 interface Ticket {
@@ -44,11 +51,13 @@ export function TicketListClient({
   orders: WizardOrder[];
 }) {
   const [tickets, setTickets] = useState<Ticket[]>(initialTickets);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [showWizard, setShowWizard] = useState(false);
 
   const [replyMessage, setReplyMessage] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+
+  const activeTicket = tickets.find((t) => t.id === activeTicketId) || null;
 
   const groups = useMemo(() => {
     const map = new Map<string, Ticket[]>();
@@ -59,6 +68,11 @@ export function TicketListClient({
     }
     return Array.from(map.entries());
   }, [tickets]);
+
+  const closeChat = () => {
+    setActiveTicketId(null);
+    setReplyMessage("");
+  };
 
   const handleSendReply = async (e: React.FormEvent, ticketId: string) => {
     e.preventDefault();
@@ -79,7 +93,7 @@ export function TicketListClient({
                 status: "OPEN",
                 messages: [
                   ...(t.messages || []),
-                  { senderId: "current-user", senderName: "Siz", message: sentMessage, createdAt: new Date().toISOString() },
+                  { senderId: "current-user", senderName: "Siz", senderRole: "CUSTOMER", message: sentMessage, createdAt: new Date().toISOString() },
                 ],
               }
             : t
@@ -114,85 +128,34 @@ export function TicketListClient({
               <div className="order-list">
                 {monthTickets.map((t) => {
                   const meta = STATUS_META[t.status] || { text: t.status, tone: "wait" };
-                  const isOpen = expandedId === t.id;
                   const title = t.reasonLabel || t.subject;
                   const subLine = t.productName
                     ? `${t.productName}${t.orderNumber ? ` · Sipariş #${t.orderNumber}` : ""}`
                     : t.description;
 
                   return (
-                    <div key={t.id}>
-                      <button
-                        type="button"
-                        className="order-row"
-                        style={{ width: "100%", cursor: "pointer", font: "inherit", textAlign: "left" }}
-                        onClick={() => setExpandedId(isOpen ? null : t.id)}
-                      >
-                        <div className="order-row-thumbs">
-                          <span className="order-row-thumb-fallback"><MessageSquare size={18} /></span>
-                        </div>
-                        <div className="order-row-main">
-                          <span className="order-row-number"><b>{title}</b></span>
-                          <span style={{ display: "block", minWidth: 0, maxWidth: "100%", color: "#667085", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {subLine}
-                          </span>
-                          <span className={`order-status-pill tone-${meta.tone}`}>{meta.text}</span>
-                        </div>
-                        <div className="order-row-end">
-                          <span className="order-row-date">{new Date(t.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "long" })}</span>
-                        </div>
-                        <ChevronDown size={18} className="order-row-chevron" style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform .15s ease" }} />
-                      </button>
-
-                      {isOpen && (
-                        <div style={{ border: "1px solid var(--line)", borderTop: 0, borderRadius: "0 0 16px 16px", marginTop: -12, padding: 18, background: "#fbfbfd" }}>
-                          <div style={{ display: "grid", gap: 12, maxHeight: 320, overflowY: "auto", paddingRight: 4 }}>
-                            <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: 14, padding: 12, maxWidth: "85%" }}>
-                              <span style={{ display: "block", fontSize: 10, fontWeight: 800, color: "#98a2b3", marginBottom: 4 }}>Müşteri</span>
-                              <p style={{ margin: 0, fontSize: 14, whiteSpace: "pre-wrap" }}>{t.description}</p>
-                            </div>
-
-                            {t.messages?.map((msg, idx) => {
-                              const isSiz = msg.senderId !== "agent" && msg.senderId !== "support" && msg.senderId !== "admin";
-                              return (
-                                <div
-                                  key={idx}
-                                  style={{
-                                    alignSelf: isSiz ? "flex-end" : "flex-start",
-                                    marginLeft: isSiz ? "auto" : 0,
-                                    maxWidth: "85%",
-                                    background: isSiz ? "var(--brand)" : "#fff",
-                                    color: isSiz ? "#fff" : "#101828",
-                                    border: isSiz ? "none" : "1px solid var(--line)",
-                                    borderRadius: 14,
-                                    padding: 12,
-                                  }}
-                                >
-                                  <span style={{ display: "block", fontSize: 10, fontWeight: 800, opacity: 0.8, marginBottom: 4 }}>{msg.senderName}</span>
-                                  <p style={{ margin: 0, fontSize: 14, whiteSpace: "pre-wrap" }}>{msg.message}</p>
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          {t.status !== "CLOSED" && (
-                            <form onSubmit={(e) => handleSendReply(e, t.id)} style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                              <input
-                                type="text"
-                                required
-                                placeholder="Yanıtınızı yazın..."
-                                value={replyMessage}
-                                onChange={(e) => setReplyMessage(e.target.value)}
-                                style={{ flex: 1, height: 42, border: "1px solid var(--line)", borderRadius: 10, padding: "0 12px", font: "inherit" }}
-                              />
-                              <button type="submit" className="btn btn-primary" disabled={replyLoading} style={{ width: 42, height: 42, padding: 0, display: "grid", placeItems: "center" }}>
-                                <Send size={16} />
-                              </button>
-                            </form>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <button
+                      key={t.id}
+                      type="button"
+                      className="order-row"
+                      style={{ width: "100%", cursor: "pointer", font: "inherit", textAlign: "left" }}
+                      onClick={() => setActiveTicketId(t.id)}
+                    >
+                      <div className="order-row-thumbs">
+                        <span className="order-row-thumb-fallback"><MessageSquare size={18} /></span>
+                      </div>
+                      <div className="order-row-main">
+                        <span className="order-row-number"><b>{title}</b></span>
+                        <span style={{ display: "block", minWidth: 0, maxWidth: "100%", color: "#667085", fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {subLine}
+                        </span>
+                        <span className={`order-status-pill tone-${meta.tone}`}>{meta.text}</span>
+                      </div>
+                      <div className="order-row-end">
+                        <span className="order-row-date">{new Date(t.createdAt).toLocaleDateString("tr-TR", { day: "2-digit", month: "long" })}</span>
+                      </div>
+                      <ChevronRight size={18} className="order-row-chevron" />
+                    </button>
                   );
                 })}
               </div>
@@ -210,6 +173,65 @@ export function TicketListClient({
             window.location.reload();
           }}
         />
+      )}
+
+      {activeTicket && (
+        <div
+          style={{ position: "fixed", inset: 0, background: "rgba(16,24,40,.48)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, zIndex: 400 }}
+          onClick={closeChat}
+        >
+          <section
+            className="live-support-panel"
+            aria-label="Konuşma geçmişi"
+            style={{ width: "min(640px, calc(100vw - 32px))" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="live-support-head">
+              <span className="live-support-logo"><MessageSquare size={18} /></span>
+              <div>
+                <b>{activeTicket.reasonLabel || activeTicket.subject}</b>
+                <p>{STATUS_META[activeTicket.status]?.text || activeTicket.status}</p>
+              </div>
+              <button type="button" aria-label="Kapat" onClick={closeChat}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="live-support-chat">
+              <div className="live-support-chat-messages">
+                <div className="live-support-chat-bubble mine">
+                  <p>{activeTicket.description}</p>
+                </div>
+                {activeTicket.messages?.map((msg, idx) => {
+                  const isSiz = !isAgentMessage(msg);
+                  return (
+                    <div key={idx} className={`live-support-chat-bubble ${isSiz ? "mine" : "theirs"}`}>
+                      {!isSiz && <small>{msg.senderName}</small>}
+                      <p>{msg.message}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {activeTicket.status === "CLOSED" ? (
+                <p className="live-support-chat-closed">Bu görüşme kapatıldı.</p>
+              ) : (
+                <form className="live-support-chat-composer" onSubmit={(e) => handleSendReply(e, activeTicket.id)}>
+                  <input
+                    type="text"
+                    placeholder="Yanıtını yaz..."
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    disabled={replyLoading}
+                  />
+                  <button type="submit" disabled={replyLoading || !replyMessage.trim()} aria-label="Gönder">
+                    <Send size={17} />
+                  </button>
+                </form>
+              )}
+            </div>
+          </section>
+        </div>
       )}
     </>
   );

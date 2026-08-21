@@ -170,7 +170,7 @@ export async function startLiveChat(message: string, guestName?: string) {
     description: message.trim(),
     status: "OPEN",
     reasonCode: "CANLI_DESTEK",
-    reasonLabel: "Canlı Destek (Genel Soru)",
+    reasonLabel: "Canlı Destek",
   };
 
   const ticket = userId
