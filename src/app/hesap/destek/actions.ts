@@ -125,6 +125,10 @@ export async function addMessageToTicket(ticketId: string, message: string) {
 // ---------- Canlı destek (widget) — giriş şart değil ----------
 
 /** Mevcut kullanıcının/ziyaretçinin açık "canlı destek" görüşmesini döner (varsa). */
+// Canlı destek konuşması bu süre boyunca hareketsiz kalırsa kapanmış sayılır
+// ve bir sonraki mesaj yeni/boş bir konuşma başlatır.
+const LIVE_CHAT_IDLE_MS = 60 * 60 * 1000; // 1 saat
+
 export async function getMyLiveTicket() {
   const session = await auth();
   const userId = session?.user?.id;
@@ -142,6 +146,11 @@ export async function getMyLiveTicket() {
       where: { guestSessionId: guestSession.guestId, reasonCode: "CANLI_DESTEK", status: { not: "CLOSED" } },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  if (ticket && Date.now() - ticket.updatedAt.getTime() > LIVE_CHAT_IDLE_MS) {
+    await prisma.supportTicket.update({ where: { id: ticket.id }, data: { status: "CLOSED" } });
+    return null;
   }
 
   return ticket ? JSON.parse(JSON.stringify(ticket)) : null;
