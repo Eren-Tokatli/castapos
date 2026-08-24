@@ -198,6 +198,57 @@ export async function startLiveChat(message: string, guestName?: string) {
   return { success: true, ticket: JSON.parse(JSON.stringify(ticket)) };
 }
 
+// ---------- İletişim formu (/bilgi/iletisim) — giriş şart değil ----------
+
+/** İletişim formundan gelen mesajı destek talebi olarak kaydeder. */
+export async function submitContactForm(input: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}) {
+  const name = input.name.trim();
+  const email = input.email.trim();
+  const subject = input.subject.trim();
+  const message = input.message.trim();
+
+  if (!name || !email || !subject || !message) {
+    return { success: false, error: "Tüm alanlar gereklidir." };
+  }
+
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  const base = {
+    subject,
+    description: `E-posta: ${email}\n\n${message}`,
+    status: "OPEN",
+    reasonCode: "ILETISIM",
+    reasonLabel: "İletişim Formu",
+  };
+
+  if (userId) {
+    await prisma.supportTicket.create({ data: { ...base, userId } });
+  } else {
+    // startLiveChat'teki gibi tek bir session nesnesi üzerinden hem
+    // guestId hem guestName ayarlanmalı.
+    const guestSession = await getGuestSession();
+    if (!guestSession.guestId) {
+      guestSession.guestId = crypto.randomUUID();
+    }
+    const guestId = guestSession.guestId;
+    guestSession.guestName = name;
+    await guestSession.save();
+    await prisma.supportTicket.create({
+      data: { ...base, userId: null, guestSessionId: guestId, guestName: name },
+    });
+  }
+
+  revalidatePath("/destek");
+  revalidatePath("/admin/canli-destek");
+  return { success: true };
+}
+
 /** Polling için: tek bir talebin güncel halini (mesajlar dahil) döner. */
 export async function getLiveTicket(ticketId: string) {
   const session = await auth();
