@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { canRequestOtp } from "@/lib/otp";
 
 export async function POST(request: Request) {
   try {
@@ -14,6 +15,14 @@ export async function POST(request: Request) {
     }
 
     const cleanTc = taxOrNationalId.trim().replace(/[^0-9]/g, "");
+
+    // Hız sınırı: aynı kimlik için art arda çok sayıda kod istenip SMS/e-posta
+    // spam'i yapılmasını (ve NetGSM maliyetini) önler. Agreement sorgusundan
+    // önce kontrol ediliyor — gereksiz sorgu/işlem yapmadan erken reddet.
+    const rateLimit = await canRequestOtp(cleanTc);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ error: rateLimit.error }, { status: 429 });
+    }
 
     // Search for a matching agreement
     const agreement = await prisma.rentalAgreement.findFirst({

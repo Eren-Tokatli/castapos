@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { validateCustomerIdentity } from "@/lib/account-security";
 import { buildOtpEmail, sendTransactionalEmail } from "@/lib/email";
+import { canRequestOtp, verifyOtp } from "@/lib/otp";
 
 function isStrongPassword(password: string): boolean {
   return (
@@ -31,6 +32,13 @@ export async function sendEmailOtp(email: string, firstName?: string, lastName?:
   const existing = await prisma.user.findUnique({ where: { email: cleanEmail } });
   if (existing) {
     return { success: false, error: "Bu e-posta adresi zaten kullanımda." };
+  }
+
+  // Hız sınırı — art arda çok sayıda doğrulama kodu isteyip e-posta spam'i
+  // yapılmasını engeller.
+  const rateLimit = await canRequestOtp(cleanEmail);
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimit.error };
   }
 
   // Generate 6 digit code
@@ -98,21 +106,10 @@ export async function registerCustomer(form: {
     return { success: false, error: "Telefon numarası 10 hane olmalıdır (Örn: 5051234567)." };
   }
 
-  // Verify Email OTP Code
-  const otp = await prisma.otpCode.findFirst({
-    where: {
-      identifier: email,
-      code: form.verificationCode.trim(),
-      consumed: false,
-      expiresAt: {
-        gt: new Date(),
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  if (!otp) {
-    return { success: false, error: "E-posta doğrulama kodu geçersiz veya süresi dolmuş." };
+  // Verify Email OTP Code — deneme sınırlı (brute-force koruması), bkz. lib/otp.ts.
+  const otpResult = await verifyOtp(email, form.verificationCode.trim());
+  if (!otpResult.success) {
+    return { success: false, error: otpResult.error };
   }
 
   // Check existing user once more
@@ -120,12 +117,6 @@ export async function registerCustomer(form: {
   if (existing) {
     return { success: false, error: "Bu e-posta ile zaten bir hesap var." };
   }
-
-  // Consume OTP
-  await prisma.otpCode.update({
-    where: { id: otp.id },
-    data: { consumed: true },
-  });
 
   const passwordHash = await bcrypt.hash(form.password, 10);
 

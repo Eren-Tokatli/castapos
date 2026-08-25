@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { validateCustomerIdentity } from "@/lib/account-security";
 import { buildOtpEmail, sendTransactionalEmail } from "@/lib/email";
+import { canRequestOtp } from "@/lib/otp";
 
 export async function requestMfaCode(email: string, password: string) {
   const cleanEmail = email.toLowerCase().trim();
@@ -30,6 +31,13 @@ export async function requestMfaCode(email: string, password: string) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
     return { success: false, error: "E-posta veya şifre hatalı." };
+  }
+
+  // Hız sınırı — şifre zaten doğru bilinse bile aynı hesaba art arda çok
+  // sayıda MFA kodu isteyip e-posta/SMS spam'i yapılmasını engeller.
+  const rateLimit = await canRequestOtp(cleanEmail);
+  if (!rateLimit.allowed) {
+    return { success: false, error: rateLimit.error };
   }
 
   // Generate 6 digit code

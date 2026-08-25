@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { validateCustomerIdentity } from "@/lib/account-security";
+import { verifyOtp } from "@/lib/otp";
 import authConfig from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -37,26 +38,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
 
-        // Verify MFA/OTP Code
-        const otp = await prisma.otpCode.findFirst({
-          where: {
-            identifier: email,
-            code,
-            consumed: false,
-            expiresAt: {
-              gt: new Date(),
-            },
-          },
-          orderBy: { createdAt: "desc" },
-        });
-
-        if (!otp) return null;
-
-        // Consume OTP
-        await prisma.otpCode.update({
-          where: { id: otp.id },
-          data: { consumed: true },
-        });
+        // MFA/OTP kodu — deneme sınırlı (brute-force koruması), bkz. lib/otp.ts.
+        const otpResult = await verifyOtp(email, code);
+        if (!otpResult.success) return null;
 
         return {
           id: user.id,
