@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { CatalogProduct, defaultPeriod, monthlyPrice } from "@/lib/catalog-shared";
+import { validateCoupon, type AppliedCoupon } from "@/app/(storefront)/sepet/actions";
 
 export interface CartItem {
   id: string;
@@ -32,8 +33,8 @@ interface StoreContextType {
   isFavoritesOpen: boolean;
   setIsFavoritesOpen: (open: boolean) => void;
 
-  coupon: { code: string } | null;
-  applyCoupon: (code: string) => boolean;
+  coupon: AppliedCoupon | null;
+  applyCoupon: (code: string, cartTotal: number) => Promise<boolean>;
   removeCoupon: () => void;
 
   // Kök layout'ta sunucu tarafında bir kere çekilip buraya prop olarak
@@ -56,7 +57,7 @@ export function StoreProvider({
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFavoritesOpen, setIsFavoritesOpen] = useState(false);
-  const [coupon, setCoupon] = useState<{ code: string } | null>(null);
+  const [coupon, setCoupon] = useState<AppliedCoupon | null>(null);
   const [products] = useState<CatalogProduct[]>(initialProducts);
 
   const getProductById = (id: string) => products.find((p) => p.id === id);
@@ -165,19 +166,20 @@ export function StoreProvider({
     });
   };
 
-  const applyCoupon = (code: string) => {
-    const normalized = code.trim().toLowerCase();
-    if (normalized === "merhaba10") {
-      const val = { code: "merhaba10" };
-      setCoupon(val);
-      localStorage.setItem("castaposCoupon", JSON.stringify(val));
-      showToast("Kupon uygulandı: %10 indirim tanımlandı.");
-      return true;
+  const applyCoupon = async (code: string, cartTotal: number) => {
+    const result = await validateCoupon(code, cartTotal);
+    if (!result.success) {
+      setCoupon(null);
+      localStorage.removeItem("castaposCoupon");
+      showToast(result.error);
+      return false;
     }
-    setCoupon(null);
-    localStorage.removeItem("castaposCoupon");
-    showToast("Kupon kodu geçerli değil.");
-    return false;
+    setCoupon(result.coupon);
+    localStorage.setItem("castaposCoupon", JSON.stringify(result.coupon));
+    const label =
+      result.coupon.discountType === "PERCENTAGE" ? `%${result.coupon.amount}` : `₺${result.coupon.amount}`;
+    showToast(`Kupon uygulandı: ${label} indirim tanımlandı.`);
+    return true;
   };
 
   const removeCoupon = () => {

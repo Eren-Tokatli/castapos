@@ -82,9 +82,13 @@ export default function SepetPage() {
     return !!p && ["Koşu Bantları", "Yürüyüş Bantları", "Bisiklet", "Fitness", "Fitness & Kondisyon"].includes(p.category);
   });
 
-  // Calculate discounts
-  const discountRate = coupon ? 0.10 : 0;
-  const discountAmount = Math.round(monthlyTotal * discountRate);
+  // Calculate discounts — kupon artık gerçek (admin panelden yönetilen)
+  // veri, sabit %10 değil; yüzde ya da sabit tutar olabilir.
+  const discountAmount = !coupon
+    ? 0
+    : coupon.discountType === "PERCENTAGE"
+    ? Math.round(monthlyTotal * (coupon.amount / 100))
+    : Math.min(coupon.amount, monthlyTotal);
   const discountedMonthly = monthlyTotal - discountAmount;
   const vatIncludedAmount = Math.round(discountedMonthly * VAT_RATE / (1 + VAT_RATE));
 
@@ -100,9 +104,9 @@ export default function SepetPage() {
     setTimeout(() => t?.classList.remove("show"), 2100);
   };
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    applyCoupon(couponInput);
+    await applyCoupon(couponInput, monthlyTotal);
   };
 
   const handleRemoveCoupon = () => {
@@ -147,8 +151,7 @@ export default function SepetPage() {
     const orderRes = await createStorefrontOrder(
       shippingForm,
       cart,
-      monthlyTotal,
-      discountAmount
+      coupon?.code
     );
 
     if (!orderRes.success || !orderRes.orderId) {
@@ -369,7 +372,8 @@ export default function SepetPage() {
                 {coupon && (
                   <div className="applied-coupon">
                     <span>
-                      <b>{coupon.code}</b> · Her ay %10 indirim
+                      <b>{coupon.code}</b> · Her ay{" "}
+                      {coupon.discountType === "PERCENTAGE" ? `%${coupon.amount}` : `₺${coupon.amount}`} indirim
                     </span>
                   </div>
                 )}

@@ -7,7 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import {
   BarChart3, FileText, CalendarClock, Package, CreditCard, ShoppingBag,
   FolderTree, Users, Menu, X, ChevronLeft, ChevronRight, Home, LogOut, Sun, Moon,
-  MessageCircle, Calendar, Star, Settings
+  MessageCircle, Calendar, Star, Settings, Tag
 } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -35,6 +35,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     { label: "Takvim", icon: Calendar, href: "/admin/takvim" },
     { label: "Ürünler & Stok", icon: Package, href: "/admin/products" },
     { label: "Kategoriler", icon: FolderTree, href: "/admin/categories" },
+    { label: "Kampanyalar", icon: Tag, href: "/admin/kampanyalar" },
     { label: "Değerlendirmeler", icon: Star, href: "/admin/degerlendirmeler" },
     { label: "Kullanıcılar", icon: Users, href: "/admin/users" },
     { label: "Ödeme Kayıtları", icon: CreditCard, href: "/admin/payments" },

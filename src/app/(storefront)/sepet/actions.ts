@@ -10,6 +10,58 @@ interface CartItem {
   period?: number;
 }
 
+export interface AppliedCoupon {
+  code: string;
+  discountType: "PERCENTAGE" | "FIXED";
+  amount: number;
+}
+
+// Kuponun sepete uygulanabilir olup olmadığını kontrol eder (kod var mı,
+// aktif mi, süresi geçmiş mi, kullanım limiti dolmuş mu, min. sepet tutarı
+// karşılanıyor mu, bu kullanıcı kişi başı limitine ulaşmış mı). Sepet
+// sayfasında "Uygula" butonuna basınca ve checkout'ta ikinci kez (sepet
+// değişmiş/kupon süresi bu arada dolmuş olabilir diye) çağrılır.
+export async function validateCoupon(
+  code: string,
+  cartTotal: number
+): Promise<{ success: true; coupon: AppliedCoupon } | { success: false; error: string }> {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) return { success: false, error: "Kupon kodu boş olamaz." };
+
+  const coupon = await prisma.coupon.findUnique({ where: { code: normalized } });
+  if (!coupon || !coupon.active) {
+    return { success: false, error: "Kupon kodu geçerli değil." };
+  }
+  if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+    return { success: false, error: "Bu kuponun süresi dolmuş." };
+  }
+  if (coupon.usageLimit != null && coupon.usedCount >= coupon.usageLimit) {
+    return { success: false, error: "Bu kupon kullanım limitine ulaştı." };
+  }
+  if (coupon.minCartTotal != null && cartTotal < coupon.minCartTotal) {
+    return {
+      success: false,
+      error: `Bu kupon için sepet tutarı en az ₺${coupon.minCartTotal.toLocaleString("tr-TR")} olmalı.`,
+    };
+  }
+  if (coupon.usageLimitPerUser != null) {
+    const session = await auth();
+    if (session?.user?.id) {
+      const userUses = await prisma.couponRedemption.count({
+        where: { couponId: coupon.id, userId: session.user.id },
+      });
+      if (userUses >= coupon.usageLimitPerUser) {
+        return { success: false, error: "Bu kuponu zaten kullandın." };
+      }
+    }
+  }
+
+  return {
+    success: true,
+    coupon: { code: coupon.code, discountType: coupon.discountType, amount: coupon.amount },
+  };
+}
+
 export async function createStorefrontOrder(
   shippingForm: {
     firstName: string;
@@ -23,8 +75,7 @@ export async function createStorefrontOrder(
     orderNote?: string;
   },
   cartItems: CartItem[],
-  monthlyTotal: number,
-  discountAmount: number
+  couponCode?: string
 ) {
   try {
     if (!/^[0-9]{11}$/.test(shippingForm.taxOrNationalId || "")) {
@@ -79,12 +130,32 @@ export async function createStorefrontOrder(
       })
     );
 
-    // Recompute totals from the resolved Prisma tier data — never trust the
-    // client-submitted monthlyTotal, it's derived from the unrelated static
-    // catalog's own (different) pricing and doesn't reflect what's charged.
     const itemsSubtotal = itemsData.reduce((sum, i) => sum + i.lineTotal, 0);
-    const scaledDiscount = itemsSubtotal > 0 ? Math.round((discountAmount / monthlyTotal) * itemsSubtotal) : 0;
-    const total = itemsSubtotal - scaledDiscount;
+
+    // Kupon burada YENİDEN doğrulanır — sepette "Uygula" denildiğinde geçerli
+    // olması, checkout anında da geçerli olacağı anlamına gelmez (bu arada
+    // süresi dolmuş, limiti dolmuş ya da kaldırılmış olabilir). İndirim tutarı
+    // hiçbir zaman istemciden gelen bir sayıya güvenilerek değil, burada
+    // sunucu tarafında yeniden hesaplanır.
+    let discount = 0;
+    let appliedCoupon: Awaited<ReturnType<typeof prisma.coupon.findUnique>> = null;
+    if (couponCode) {
+      const validation = await validateCoupon(couponCode, itemsSubtotal);
+      if (validation.success) {
+        appliedCoupon = await prisma.coupon.findUnique({ where: { code: validation.coupon.code } });
+        if (appliedCoupon) {
+          discount =
+            appliedCoupon.discountType === "PERCENTAGE"
+              ? Math.round(itemsSubtotal * (appliedCoupon.amount / 100) * 100) / 100
+              : Math.min(appliedCoupon.amount, itemsSubtotal);
+        }
+      }
+      // Kupon artık geçersizse (süresi dolmuş vb.) sessizce indirimsiz devam
+      // ediyoruz — kullanıcı sepet sayfasında zaten "Uygula" derken bunu görmüş
+      // olacaktı, checkout'u burada tıkanmasın diye siparişi engellemiyoruz.
+    }
+
+    const total = itemsSubtotal - discount;
 
     // Save order
     const order = await prisma.order.create({
@@ -117,7 +188,7 @@ export async function createStorefrontOrder(
         items: itemsData,
         totalLines: [
           { code: "subtotal", title: "Ara Toplam", value: itemsSubtotal, sortOrder: 1 },
-          { code: "discount", title: "İndirim", value: -scaledDiscount, sortOrder: 2 },
+          { code: "discount", title: "İndirim", value: -discount, sortOrder: 2 },
           { code: "total", title: "Toplam", value: total, sortOrder: 3 },
         ],
         paymentMethod: "IYZICO",
@@ -125,7 +196,23 @@ export async function createStorefrontOrder(
       },
     });
 
+    if (appliedCoupon && discount > 0) {
+      await prisma.$transaction([
+        prisma.coupon.update({ where: { id: appliedCoupon.id }, data: { usedCount: { increment: 1 } } }),
+        prisma.couponRedemption.create({
+          data: {
+            couponId: appliedCoupon.id,
+            userId,
+            orderId: order.id,
+            orderNumber: order.orderNumber,
+            discountAmount: discount,
+          },
+        }),
+      ]);
+    }
+
     revalidatePath("/admin/payments");
+    revalidatePath("/admin/kampanyalar");
     return { success: true, orderId: order.id, orderNumber: order.orderNumber };
   } catch (error: any) {
     console.error("Create Storefront Order Error:", error);
