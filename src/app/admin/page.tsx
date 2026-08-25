@@ -1,68 +1,80 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Clock, Activity } from "lucide-react";
+import { Clock, Activity, TrendingUp, Package, PieChart } from "lucide-react";
+import { CartesianBarChart } from "./_components/CartesianBarChart";
+import { CartesianLineChart } from "./_components/CartesianLineChart";
+import { bucketByDay, bucketByMonth, daysAgo, monthsAgoStart } from "./_components/chart-data";
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "Ödeme Bekliyor",
+  PROCESSING: "İşleniyor",
+  PAID: "Ödendi",
+  CANCELLED: "İptal",
+  REFUNDED: "İade",
+};
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  // Query statistics from Prisma MongoDB
-  const totalAgreements = await prisma.rentalAgreement.count();
-  
-  const activeRevenueAggregate = await prisma.rentalAgreement.aggregate({
-    _sum: {
-      monthlyAmount: true,
-    },
-    where: {
-      deliveryStatus: {
-        in: ["PENDING", "DELIVERED"],
-      },
-    },
-  });
+  // Bu sayfadaki ~13 sorgunun hiçbiri birbirinin sonucuna bağlı değil, ama
+  // hepsi ayrı ayrı `await` ediliyordu — yani her biri bir öncekinin bitmesini
+  // bekliyordu (Mongo Atlas'a gidip gelen her istek üst üste toplanıyordu,
+  // sayfa gözle görülür yavaş açılıyordu). Tek bir Promise.all ile hepsini
+  // aynı anda başlatıyoruz; toplam süre artık en yavaş tek sorgu kadar.
+  const [
+    totalAgreements,
+    activeRevenueAggregate,
+    overdueInstallments,
+    successfulPaymentsSum,
+    recentUsers,
+    recentOrders,
+    recentTickets,
+    recentPaymentLogs,
+    recentSuccessfulPayments,
+    paidOrdersForProducts,
+    orderStatusCounts,
+    paidOrdersLast14Days,
+  ] = await Promise.all([
+    prisma.rentalAgreement.count(),
+    prisma.rentalAgreement.aggregate({
+      _sum: { monthlyAmount: true },
+      where: { deliveryStatus: { in: ["PENDING", "DELIVERED"] } },
+    }),
+    prisma.installment.count({ where: { paid: false, dueDate: { lt: new Date() } } }),
+    prisma.paymentRecord.aggregate({ _sum: { amount: true }, where: { status: "SUCCESS" } }),
+    prisma.user.findMany({ where: { role: "CUSTOMER" }, take: 5, orderBy: { createdAt: "desc" } }),
+    prisma.order.findMany({ take: 5, orderBy: { createdAt: "desc" } }),
+    prisma.supportTicket.findMany({ take: 5, orderBy: { createdAt: "desc" }, include: { user: true } }),
+    prisma.paymentRecord.findMany({ take: 5, orderBy: { createdAt: "desc" } }),
+    // Aylık ciro trendi (son 6 ay) için ham veri — Mongo'da groupBy ile tarih
+    // kırpma (date truncation) Prisma tarafında desteklenmiyor, aya göre
+    // toplamayı JS tarafında yapıyoruz (bkz. bucketByMonth).
+    prisma.paymentRecord.findMany({
+      where: { status: "SUCCESS", createdAt: { gte: monthsAgoStart(6) } },
+      select: { amount: true, createdAt: true },
+    }),
+    // En çok kiralanan/satılan ürünler (top 5, ödenmiş siparişlerden adet bazlı).
+    prisma.order.findMany({ where: { status: "PAID" }, select: { items: true } }),
+    // Sipariş durumu dağılımı (iptal/iade oranını da içerir).
+    Promise.all(
+      (["PENDING_PAYMENT", "PROCESSING", "PAID", "CANCELLED", "REFUNDED"] as const).map(async (status) => ({
+        label: ORDER_STATUS_LABELS[status],
+        value: await prisma.order.count({ where: { status } }),
+      }))
+    ),
+    // Günlük satılan ürün adedi (son 14 gün) — borsa tarzı trend grafiği için.
+    prisma.order.findMany({
+      where: { status: "PAID", createdAt: { gte: daysAgo(14) } },
+      select: { items: true, createdAt: true },
+    }),
+  ]);
+
   const monthlyRevenue = activeRevenueAggregate._sum.monthlyAmount || 0;
-
-  const overdueInstallments = await prisma.installment.count({
-    where: {
-      paid: false,
-      dueDate: {
-        lt: new Date(),
-      },
-    },
-  });
-
-  const totalPaymentsCount = await prisma.paymentRecord.count();
-  const successfulPaymentsSum = await prisma.paymentRecord.aggregate({
-    _sum: {
-      amount: true,
-    },
-    where: {
-      status: "SUCCESS",
-    },
-  });
   const totalReceivedFunds = successfulPaymentsSum._sum.amount || 0;
-
-  // Recent data for Son Etkinlikler
-  const recentUsers = await prisma.user.findMany({
-    where: { role: "CUSTOMER" },
-    take: 5,
-    orderBy: { createdAt: "desc" },
-  });
-
-  const recentOrders = await prisma.order.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-  });
-
-  const recentTickets = await prisma.supportTicket.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: { user: true },
-  });
-
-  const recentPaymentLogs = await prisma.paymentRecord.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-  });
+  // "Son Ödeme İşlemleri" kartı da aynı son-5-ödeme verisini kullanıyor —
+  // eskiden bu sorgu (recentPayments adıyla) ikinci kez ayrıca çekiliyordu.
+  const recentPayments = recentPaymentLogs;
 
   interface ActivityItem {
     id: string;
@@ -116,10 +128,30 @@ export default async function AdminDashboard() {
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     .slice(0, 5);
 
-  const recentPayments = await prisma.paymentRecord.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-  });
+  // --- Raporlama / Grafikler --- (ham veriler yukarıdaki Promise.all'da
+  // zaten çekildi, burada sadece grafik için işleniyor)
+  const monthlyRevenueTrend = bucketByMonth(recentSuccessfulPayments, (p) => p.createdAt, (p) => p.amount, 6);
+
+  const productQuantities = new Map<string, number>();
+  for (const order of paidOrdersForProducts) {
+    for (const item of order.items) {
+      productQuantities.set(item.name, (productQuantities.get(item.name) || 0) + item.quantity);
+    }
+  }
+  const topProducts = [...productQuantities.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, qty]) => ({
+      label: name.length > 14 ? `${name.slice(0, 13)}…` : name,
+      value: qty,
+    }));
+
+  const dailyUnitsSold = bucketByDay(
+    paidOrdersLast14Days,
+    (o) => o.createdAt,
+    (o) => o.items.reduce((sum, i) => sum + i.quantity, 0),
+    14
+  );
 
   return (
     <div className="space-y-6">
@@ -164,6 +196,43 @@ export default async function AdminDashboard() {
             <span className="text-3xl font-black text-emerald-600">₺{totalReceivedFunds.toLocaleString("tr-TR")}</span>
             <span className="text-xs text-slate-400">Kasa Toplam</span>
           </div>
+        </div>
+      </div>
+
+      {/* Raporlama / Grafikler — genel bakış. Aynı grafiklerin ilgili sayfa
+          bazlı ("özel") versiyonlarını Siparişler, Ürünler ve Ödeme
+          Kayıtları sayfalarında da bulabilirsin. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-emerald-500" />
+            <h3 className="font-bold text-slate-800 text-sm">Aylık Ciro Trendi (Son 6 Ay)</h3>
+          </div>
+          <CartesianLineChart data={monthlyRevenueTrend} formatValue={(v) => `₺${v.toLocaleString("tr-TR")}`} />
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Package size={16} className="text-orange-500" />
+            <h3 className="font-bold text-slate-800 text-sm">Günlük Satılan Ürün Adedi (Son 14 Gün)</h3>
+          </div>
+          <CartesianLineChart data={dailyUnitsSold} formatValue={(v) => `${v}`} />
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Package size={16} className="text-orange-500" />
+            <h3 className="font-bold text-slate-800 text-sm">En Çok Kiralanan Ürünler (Adet)</h3>
+          </div>
+          <CartesianBarChart data={topProducts} barColor="#f97316" formatValue={(v) => `${v}`} />
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <PieChart size={16} className="text-slate-500" />
+            <h3 className="font-bold text-slate-800 text-sm">Sipariş Durumu Dağılımı</h3>
+          </div>
+          <CartesianBarChart data={orderStatusCounts} barColor="#64748b" formatValue={(v) => `${v}`} height={200} />
         </div>
       </div>
 
