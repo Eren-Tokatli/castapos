@@ -7,6 +7,7 @@ import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { SessionProvider } from "next-auth/react";
 import { getActiveProducts } from "@/lib/catalog-server";
 import { getSiteSettings } from "@/lib/site-settings";
+import { SITE_URL } from "@/lib/site-url";
 
 // Header'daki sepet/favori/arama widget'ları ve anasayfa/kategori sayfaları
 // admin panelden yönetilen canlı ürün kataloğunu okuyor — bu sayfalar build
@@ -52,12 +53,30 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
+  // Sayfa metadata'larındaki relative URL'lerin (OG görselleri, canonical
+  // linkler) doğru mutlak adrese çözülmesi için — daha önce yoktu.
+  metadataBase: new URL(SITE_URL),
   title: "Castapos",
   description: "Tek tıkla kirala.",
   verification: {
     google: "PuLzYlrAA28DEYmp6inmyVjNQmD_7zuUY6b3ketthZA",
   },
 };
+
+// Google'ın marka bilgi panelinde (knowledge panel) doğru şirket adı, logo
+// ve iletişim bilgilerini gösterebilmesi için — sitede hiç yapılandırılmış
+// veri (structured data) yoktu.
+function organizationJsonLd(contactEmail: string, socialUrls: string[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Castapos",
+    url: SITE_URL,
+    logo: `${SITE_URL}/assets/castapos-real-logo.png`,
+    email: contactEmail,
+    sameAs: socialUrls,
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -76,6 +95,19 @@ export default async function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              organizationJsonLd(siteSettings.contactEmail, [
+                siteSettings.facebookUrl,
+                siteSettings.instagramUrl,
+                siteSettings.youtubeUrl,
+                siteSettings.linkedinUrl,
+              ])
+            ),
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <SessionProvider>

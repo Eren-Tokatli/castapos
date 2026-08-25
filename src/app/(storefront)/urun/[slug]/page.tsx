@@ -1,6 +1,34 @@
 import { getProductBySlug, getActiveProducts } from "@/lib/catalog-server";
+import { startingPrice, type CatalogProduct } from "@/lib/catalog-shared";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { notFound } from "next/navigation";
+import { SITE_URL } from "@/lib/site-url";
+
+// Google'ın arama sonuçlarında fiyat/marka bilgisiyle zengin snippet
+// gösterebilmesi için — daha önce hiç yapılandırılmış veri yoktu. Gerçek bir
+// değerlendirme/puan verisi olmadığından (bkz. reviews mock verisi) kasıtlı
+// olarak aggregateRating EKLENMİYOR — sahte puan structured data'sı Google'ın
+// spam politikalarına girer.
+function productJsonLd(p: CatalogProduct) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: p.name,
+    image: p.images,
+    description: p.description.replace(/<[^>]+>/g, " ").trim().slice(0, 500),
+    sku: p.code,
+    brand: { "@type": "Brand", name: p.brand },
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/urun/${p.id}`,
+      priceCurrency: "TRY",
+      price: startingPrice(p),
+      availability: "https://schema.org/InStock",
+      // Satılık değil kiralık ürün olduğunu belirten standart (GoodRelations) alan.
+      businessFunction: "http://purl.org/goodrelations/v1#LeaseOut",
+    },
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -32,5 +60,13 @@ export default async function ProductPage({
     .filter((x) => x.id !== p.id && x.category === p.category)
     .slice(0, 4);
 
-  return <ProductDetailClient product={p} similarProducts={similarProducts} />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(p)) }}
+      />
+      <ProductDetailClient product={p} similarProducts={similarProducts} />
+    </>
+  );
 }

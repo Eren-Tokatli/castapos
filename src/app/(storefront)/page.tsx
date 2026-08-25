@@ -1,6 +1,17 @@
+import type { Metadata } from "next";
 import { getActiveProducts } from "@/lib/catalog-server";
 import { hasDiscount } from "@/lib/catalog-shared";
 import { HomeClient, type HomeTestimonial } from "./HomeClient";
+
+// Sitenin en çok ziyaret edilen sayfası — daha önce hiç kendi metadata'sı
+// yoktu, kök layout'un genel "Castapos / Tek tıkla kirala" başlığını miras
+// alıyordu. Google arama sonucunda gösterilecek başlık/açıklama artık
+// sayfaya özel ve anahtar kelime içeriyor.
+export const metadata: Metadata = {
+  title: "Castapos | Spor, Ev ve Teknoloji Ürünlerini Aylık Kirala",
+  description:
+    "Koşu bandı, kondisyon bisikleti, elektrikli süpürge ve daha fazlasını satın almadan aylık planlarla kirala. Ücretsiz teslimat, esnek süre, 3D Secure güvenli ödeme.",
+};
 
 // Yorum metinleri elle yazılmış, belirli bir ürüne değil genel kiralama
 // deneyimine değiniyor — bu yüzden hangi ürüne bağlandıkları önemli değil;

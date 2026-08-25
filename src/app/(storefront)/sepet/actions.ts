@@ -82,10 +82,16 @@ export async function createStorefrontOrder(
       return { success: false, error: "T.C. kimlik numarası 11 haneli olmalıdır." };
     }
 
-    // Giriş yapmış müşteriyse siparişi hesabına bağla — aksi halde "Siparişlerim"
-    // sayfası (userId'ye göre filtreliyor) bu siparişi hiç göstermez.
+    // Kiralama üyelik zorunlu — sepet sayfası bunu zaten kontrol edip giriş
+    // sayfasına yönlendiriyor, ama o client tarafı bir kontrol; asıl güvenlik
+    // burada. userId olmadan sipariş oluşmasına izin verilmez, aksi halde
+    // "Siparişlerim" sayfası (userId'ye göre filtreliyor) bu siparişi hiçbir
+    // yerde göstermez ve müşteri kendi siparişini takip edemez.
     const session = await auth();
     const userId = session?.user?.id;
+    if (!userId) {
+      return { success: false, error: "Sipariş vermek için giriş yapmalısın." };
+    }
 
     const orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 

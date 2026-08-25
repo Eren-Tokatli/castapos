@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { CalendarDays, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/catalog-shared";
@@ -41,6 +43,8 @@ export default function SepetPage() {
     applyCoupon,
     removeCoupon
   } = useStore();
+  const { status: sessionStatus } = useSession();
+  const router = useRouter();
 
   const [couponInput, setCouponInput] = useState(coupon ? coupon.code : "");
   const [checkoutStep, setCheckoutStep] = useState<number | null>(null); // null means modal closed, 1/2 means open
@@ -91,6 +95,18 @@ export default function SepetPage() {
     : Math.min(coupon.amount, monthlyTotal);
   const discountedMonthly = monthlyTotal - discountAmount;
   const vatIncludedAmount = Math.round(discountedMonthly * VAT_RATE / (1 + VAT_RATE));
+
+  // Kiralama artık üyelik zorunlu — daha önce üye olmayan biri de sipariş
+  // verebiliyordu, ama o sipariş "Siparişlerim"de hiçbir yerde görünmüyordu
+  // (userId boş kalıyordu). Adres formunu boşuna doldurmasın diye giriş
+  // kontrolü en başta, "Kiralama planını onayla" tıklanır tıklanmaz yapılır.
+  const handleStartCheckout = () => {
+    if (sessionStatus !== "authenticated") {
+      router.push("/hesap/giris?callbackUrl=/sepet");
+      return;
+    }
+    setCheckoutStep(1);
+  };
 
   const showToast = (message: string) => {
     let t = document.querySelector(".site-toast");
@@ -424,9 +440,9 @@ export default function SepetPage() {
               <button
                 className="btn btn-primary full"
                 type="button"
-                onClick={() => setCheckoutStep(1)}
+                onClick={handleStartCheckout}
               >
-                Kiralama planını onayla
+                {sessionStatus === "authenticated" ? "Kiralama planını onayla" : "Devam etmek için giriş yap"}
               </button>
             </aside>
           </div>
