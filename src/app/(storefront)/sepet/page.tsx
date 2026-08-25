@@ -290,7 +290,7 @@ export default function SepetPage() {
                   return (
                     <article key={idx} className="rental-plan-item">
                       <Link className="cart-product-image" href={detailHref}>
-                        <img src={p.image} alt={p.name} />
+                        <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                       </Link>
                       
                       <div className="plan-product-copy">

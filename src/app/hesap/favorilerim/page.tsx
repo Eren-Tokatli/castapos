@@ -48,7 +48,7 @@ export default function FavorilerimPage() {
                 return (
                   <article key={entry.id} className="favorite-product-card">
                     <Link className="favorite-image" href={detailHref}>
-                      <img src={p.image} alt={p.name} />
+                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                     </Link>
                     
                     <button

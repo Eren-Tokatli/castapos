@@ -209,7 +209,7 @@ export default function StorefrontLayout({
                       setSearchQuery("");
                     }}
                   >
-                    <img src={p.image} alt={p.name} />
+                    <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                     <span>{p.name}</span>
                   </Link>
                 ))}
@@ -537,7 +537,7 @@ export default function StorefrontLayout({
                 <div className="empty-mini-picks">
                   {drawerSuggestedProducts.map((p) => (
                     <Link key={p.id} href={`/urun/${p.id}`} onClick={() => setIsCartOpen(false)}>
-                      <img src={p.image} alt={p.name} />
+                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                       <span>
                         <b>{p.name}</b>
                         <small>{formatPrice(monthlyPrice(p, defaultPeriod(p)))} / Aylık</small>
@@ -556,7 +556,7 @@ export default function StorefrontLayout({
 
                   return (
                     <article key={idx} className="drawer-item">
-                      <img src={p.image} alt={p.name} />
+                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                       <div>
                         <b>{p.name}</b>
                         <span className="drawer-period-meta">
@@ -673,7 +673,7 @@ export default function StorefrontLayout({
 
                   return (
                     <article key={entry.id} className="drawer-item">
-                      <img src={p.image} alt={p.name} />
+                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                       <div>
                         <b>{p.name}</b>
                         <span className="drawer-period-meta">{period} aylık plan</span>

@@ -39,7 +39,7 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
       <div className="product-img">
         <Link href={`/urun/${p.id}`} className="w-full h-full flex items-center justify-center">
           {badge}
-          <img src={p.image} alt={p.name} />
+          <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
         </Link>
         <button
           className={`fav-btn ${favorited ? "active" : ""}`}

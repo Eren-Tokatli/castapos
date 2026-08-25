@@ -242,7 +242,7 @@ export function HomeClient({
                   </button>
                   <div className="easy-step-accordion">
                     <div className="easy-step-accordion-inner">
-                      <img src={item.image} alt="" />
+                      <img src={item.image} alt="" loading="lazy" decoding="async" />
                       <p>{item.text}</p>
                     </div>
                   </div>
@@ -263,7 +263,7 @@ export function HomeClient({
                   <h3>{EASY_STEPS[activeEasyStep].title}</h3>
                   <p>{EASY_STEPS[activeEasyStep].note}</p>
                 </div>
-                <img src={EASY_STEPS[activeEasyStep].image} alt="" />
+                <img src={EASY_STEPS[activeEasyStep].image} alt="" loading="lazy" decoding="async" />
               </div>
             </div>
             <div className="easy-preview-badge">
@@ -364,7 +364,7 @@ export function HomeClient({
                 href={`/urun/${p.id}`}
               >
                 <div className="testimonial-top">
-                  <img src={p.image} alt={p.name} />
+                  <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
                   <div>
                     <h3>{p.name}</h3>
                     <div className="gold-stars small">

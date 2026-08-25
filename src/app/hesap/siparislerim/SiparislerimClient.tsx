@@ -101,7 +101,7 @@ export function SiparislerimClient({ orders }: { orders: OrderRow[] }) {
               <Link key={order.id} href={`/hesap/siparislerim/${order.id}`} className="order-row">
                 <div className="order-row-thumbs">
                   {order.thumbs.slice(0, 2).map((src, idx) => (
-                    <img key={idx} src={src} alt="" />
+                    <img key={idx} src={src} alt="" loading="lazy" decoding="async" />
                   ))}
                   {order.thumbs.length === 0 && (
                     <span className="order-row-thumb-fallback"><ShoppingBag size={20} /></span>

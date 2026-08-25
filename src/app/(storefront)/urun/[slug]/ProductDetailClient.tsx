@@ -294,7 +294,7 @@ export function ProductDetailClient({
                     }
                   }}
                 >
-                  <img src={img} alt="" />
+                  <img src={img} alt="" loading="lazy" decoding="async" />
                 </span>
               ))}
             </div>

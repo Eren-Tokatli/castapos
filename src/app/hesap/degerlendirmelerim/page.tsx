@@ -52,7 +52,7 @@ export default async function DegerlendirmelerimPage() {
             <div key={review.id} className="order-row" style={{ cursor: "default" }}>
               <div className="order-row-thumbs">
                 {review.productImage ? (
-                  <img src={review.productImage} alt="" />
+                  <img src={review.productImage} alt="" loading="lazy" decoding="async" />
                 ) : (
                   <span className="order-row-thumb-fallback"><Star size={18} /></span>
                 )}
