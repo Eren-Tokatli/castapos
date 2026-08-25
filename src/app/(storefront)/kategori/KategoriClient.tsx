@@ -47,7 +47,6 @@ function KategoriPageContent({
   const [draftPeriods, setDraftPeriods] = useState<number[]>([]);
   const [draftAdvantages, setDraftAdvantages] = useState<RentalAdvantages>({
     campaigned: false,
-    fastDelivery: false,
   });
 
   const [appliedCategory, setAppliedCategory] = useState("");
@@ -57,7 +56,6 @@ function KategoriPageContent({
   const [appliedPeriods, setAppliedPeriods] = useState<number[]>([]);
   const [appliedAdvantages, setAppliedAdvantages] = useState<RentalAdvantages>({
     campaigned: false,
-    fastDelivery: false,
   });
 
   const [sortBy, setSortBy] = useState(
@@ -175,10 +173,6 @@ function KategoriPageContent({
   if (appliedAdvantages.campaigned) {
     filteredProducts = filteredProducts.filter((p) => hasDiscount(p));
   }
-  if (appliedAdvantages.fastDelivery) {
-    // Simulated advantage: premium items are marked as fast delivery
-    filteredProducts = filteredProducts.filter((p) => p.premium);
-  }
 
   // Aktif filtre etiketleri (toolbar'da gösterilir, her birinde "x" ile
   // kaldırma var)
@@ -207,9 +201,6 @@ function KategoriPageContent({
   });
   if (appliedAdvantages.campaigned) {
     activeFilterChips.push({ key: "campaigned", label: "Kampanyalı", onRemove: () => clearAdvantageFilter("campaigned") });
-  }
-  if (appliedAdvantages.fastDelivery) {
-    activeFilterChips.push({ key: "fastDelivery", label: "Hızlı teslimat", onRemove: () => clearAdvantageFilter("fastDelivery") });
   }
 
   // Sorting products

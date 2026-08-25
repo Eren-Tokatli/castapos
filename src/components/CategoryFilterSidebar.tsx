@@ -4,7 +4,6 @@ import React from "react";
 
 export interface RentalAdvantages {
   campaigned: boolean;
-  fastDelivery: boolean;
 }
 
 interface CategoryFilterSidebarProps {
@@ -29,7 +28,6 @@ const rentalPeriods = [1, 3, 6, 9];
 
 const advantageLabels: { key: keyof RentalAdvantages; label: string }[] = [
   { key: "campaigned", label: "Kampanyalı" },
-  { key: "fastDelivery", label: "Hızlı teslimat" },
 ];
 
 export function CategoryFilterSidebar({
