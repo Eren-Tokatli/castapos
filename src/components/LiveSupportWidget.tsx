@@ -4,9 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Bot, Headphones, Mail, MessageCircle, Send, X, ChevronLeft } from "lucide-react";
 import { getMyLiveTicket, startLiveChat, getLiveTicket, addMessageToTicket } from "@/app/hesap/destek/actions";
-
-const whatsappUrl =
-  "https://wa.me/905448010433?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 interface LiveMessage {
   senderId: string;
@@ -25,6 +23,8 @@ interface LiveTicket {
 }
 
 export function LiveSupportWidget() {
+  const { supportPhone } = useSiteSettings();
+  const whatsappUrl = `https://wa.me/${supportPhone.replace(/\D/g, "")}?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.`;
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"menu" | "chat">("menu");
   const [ticket, setTicket] = useState<LiveTicket | null>(null);

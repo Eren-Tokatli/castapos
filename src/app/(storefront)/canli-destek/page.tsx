@@ -2,49 +2,52 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Bot, Clock3, Headphones, Mail, MapPin, MessageCircle, PhoneCall, ShieldCheck } from "lucide-react";
 import { CanliDestekBodyClass } from "./CanliDestekBodyClass";
+import { getSiteSettings, formatSupportPhone } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "Canlı Destek | Castapos",
   description: "Castapos canlı destek, WhatsApp, telefon, AI sohbet ve iletişim kanalları.",
 };
 
-const whatsappUrl =
-  "https://wa.me/905448010433?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.";
+export default async function CanliDestekPage() {
+  const settings = await getSiteSettings();
+  const phoneDigits = settings.supportPhone.replace(/\D/g, "");
+  const phonePretty = formatSupportPhone(settings.supportPhone);
+  const whatsappUrl = `https://wa.me/${phoneDigits}?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.`;
 
-const supportActions = [
-  {
-    icon: MessageCircle,
-    title: "WhatsApp ile yaz",
-    text: "Destek ekibimizle sohbet başlat.",
-    value: "+90 544 801 04 33",
-    href: whatsappUrl,
-    external: true,
-    featured: true,
-  },
-  {
-    icon: PhoneCall,
-    title: "Telefonla ara",
-    text: "Sipariş, teslimat ve ürün desteği için ulaş.",
-    value: "+90 544 801 04 33",
-    href: "tel:+905448010433",
-  },
-  {
-    icon: Bot,
-    title: "AI ile sohbet",
-    text: "Ürün seçimi ve kiralama süreci için hızlı öneri al.",
-    value: "Akıllı asistanı aç",
-    href: "/ai-sohbet",
-  },
-  {
-    icon: Mail,
-    title: "İletişim bilgileri",
-    text: "Adres, e-posta ve form bilgilerini görüntüle.",
-    value: "İletişim sayfasına git",
-    href: "/bilgi/iletisim",
-  },
-];
+  const supportActions = [
+    {
+      icon: MessageCircle,
+      title: "WhatsApp ile yaz",
+      text: "Destek ekibimizle sohbet başlat.",
+      value: phonePretty,
+      href: whatsappUrl,
+      external: true,
+      featured: true,
+    },
+    {
+      icon: PhoneCall,
+      title: "Telefonla ara",
+      text: "Sipariş, teslimat ve ürün desteği için ulaş.",
+      value: phonePretty,
+      href: `tel:${settings.supportPhone}`,
+    },
+    {
+      icon: Bot,
+      title: "AI ile sohbet",
+      text: "Ürün seçimi ve kiralama süreci için hızlı öneri al.",
+      value: "Akıllı asistanı aç",
+      href: "/ai-sohbet",
+    },
+    {
+      icon: Mail,
+      title: "İletişim bilgileri",
+      text: "Adres, e-posta ve form bilgilerini görüntüle.",
+      value: "İletişim sayfasına git",
+      href: "/bilgi/iletisim",
+    },
+  ];
 
-export default function CanliDestekPage() {
   return (
     <>
       <CanliDestekBodyClass className="page-canli-destek" />

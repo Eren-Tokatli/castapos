@@ -24,6 +24,12 @@ export default async function DegerlendirmelerimPage() {
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
     : session?.user?.name || "Castapos üyesi";
 
+  const STATUS_META = {
+    PENDING: { label: "Onay Bekliyor", color: "#B54708", bg: "#FFFAEB" },
+    APPROVED: { label: "Yayında", color: "#067647", bg: "#ECFDF3" },
+    REJECTED: { label: "Yayınlanmadı", color: "#B42318", bg: "#FEF3F2" },
+  } as const;
+
   return (
     <AccountShell displayName={displayName} email={user?.email || session?.user?.email || ""}>
       <div className="account-panel-hero">
@@ -52,7 +58,23 @@ export default async function DegerlendirmelerimPage() {
                 )}
               </div>
               <div className="order-row-main">
-                <span className="order-row-number"><b>{review.productName}</b></span>
+                <span className="order-row-number">
+                  <b>{review.productName}</b>{" "}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      color: STATUS_META[review.status].color,
+                      background: STATUS_META[review.status].bg,
+                      verticalAlign: "middle",
+                    }}
+                  >
+                    {STATUS_META[review.status].label}
+                  </span>
+                </span>
                 <div style={{ display: "flex", gap: 2, color: "var(--brand)" }}>
                   {Array.from({ length: 5 }, (_, i) => (
                     <Star key={i} size={14} fill={i < review.rating ? "currentColor" : "none"} strokeWidth={i < review.rating ? 0 : 1.5} />

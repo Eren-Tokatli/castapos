@@ -5,18 +5,21 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AccountShell } from "@/components/AccountShell";
 import { LiveChatActionButton } from "@/components/LiveChatActionButton";
+import { getSiteSettings, formatSupportPhone } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
-const whatsappUrl =
-  "https://wa.me/905448010433?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.";
+function buildSupportActions(supportPhone: string) {
+  const phoneDigits = supportPhone.replace(/\D/g, "");
+  const phonePretty = formatSupportPhone(supportPhone);
+  const whatsappUrl = `https://wa.me/${phoneDigits}?text=Merhaba%20Castapos%2C%20kiralama%20s%C3%BCreci%20hakk%C4%B1nda%20destek%20almak%20istiyorum.`;
 
-const supportActions = [
+  return [
   {
     icon: MessageCircle,
     title: "WhatsApp ile yaz",
     text: "Destek ekibimizle sohbet başlat.",
-    value: "+90 544 801 04 33",
+    value: phonePretty,
     href: whatsappUrl,
     external: true,
     featured: true,
@@ -32,8 +35,8 @@ const supportActions = [
     icon: PhoneCall,
     title: "Telefonla ara",
     text: "Sipariş, teslimat ve ürün desteği için ulaş.",
-    value: "+90 544 801 04 33",
-    href: "tel:+905448010433",
+    value: phonePretty,
+    href: `tel:${supportPhone}`,
   },
   {
     icon: Bot,
@@ -49,7 +52,8 @@ const supportActions = [
     value: "İletişim sayfasına git",
     href: "/bilgi/iletisim",
   },
-];
+  ];
+}
 
 export default async function MusteriHizmetleriPage() {
   const session = await auth();
@@ -59,7 +63,11 @@ export default async function MusteriHizmetleriPage() {
     redirect("/hesap/giris?callbackUrl=/hesap/musteri-hizmetleri");
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const [user, settings] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    getSiteSettings(),
+  ]);
+  const supportActions = buildSupportActions(settings.supportPhone);
   const displayName = user?.firstName
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
     : session?.user?.name || "Castapos üyesi";

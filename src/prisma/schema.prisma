@@ -76,6 +76,12 @@ enum AgreementPaymentStatus {
   COMPLETED
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum UserRole {
   ADMIN
   CUSTOMER
@@ -394,6 +400,10 @@ model Review {
   orderId      String?  @db.ObjectId
   rating       Int
   comment      String
+  // Yeni değerlendirmeler admin onayından geçmeden storefront'ta görünmez —
+  // bkz. admin/degerlendirmeler. Sistem devreye girmeden önce oluşturulmuş
+  // eski kayıtlar geriye dönük APPROVED olarak işaretlendi (bkz. scripts/backfill-review-status.ts).
+  status       ReviewStatus @default(PENDING)
   createdAt    DateTime @default(now())
 
   @@index([userId])
@@ -546,4 +556,23 @@ model PaymentLink {
   updatedAt     DateTime @updatedAt
 
   @@index([installmentId])
+}
+
+// Tekil (singleton) kayıt: footer, iletişim sayfası gibi yerlerde tekrar
+// tekrar koda gömülü duran iletişim bilgilerini tek bir yerden yönetmek
+// için. Koleksiyonda her zaman tek bir doküman olur — bkz. lib/site-settings.ts.
+model SiteSettings {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  contactEmail String   @default("bilgi@castapos.com")
+  // WhatsApp ve "telefonla ara" için tek numara — canli-destek ve
+  // musteri-hizmetleri sayfalarında aynı numara iki ayrı dosyada koda
+  // gömülüydü, buradan tek yerden yönetiliyor.
+  supportPhone String   @default("+905448010433")
+  addressTr    String   @default("Levent Mah. Büyükdere Caddesi Yapı Kredi Plaza, C Blok Kat:17 No:40-41, Beşiktaş/İstanbul")
+  addressUs    String   @default("4695 MacArthur Ct #1100, Newport Beach, CA 92660, Amerika Birleşik Devletleri")
+  facebookUrl  String   @default("https://www.facebook.com/castapos")
+  instagramUrl String   @default("https://www.instagram.com/castapos.official/")
+  youtubeUrl   String   @default("https://www.youtube.com/@castapos")
+  linkedinUrl  String   @default("https://www.linkedin.com/company/castapos/")
+  updatedAt    DateTime @updatedAt
 }

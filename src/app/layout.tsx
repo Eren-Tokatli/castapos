@@ -3,8 +3,10 @@ import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/context/StoreContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { SessionProvider } from "next-auth/react";
 import { getActiveProducts } from "@/lib/catalog-server";
+import { getSiteSettings } from "@/lib/site-settings";
 
 // Header'daki sepet/favori/arama widget'ları ve anasayfa/kategori sayfaları
 // admin panelden yönetilen canlı ürün kataloğunu okuyor — bu sayfalar build
@@ -62,7 +64,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const products = await getActiveProducts();
+  const [products, siteSettings] = await Promise.all([
+    getActiveProducts(),
+    getSiteSettings(),
+  ]);
   return (
     <html
       lang="tr"
@@ -75,9 +80,22 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <SessionProvider>
           <ThemeProvider>
-            <StoreProvider initialProducts={products}>
-              {children}
-            </StoreProvider>
+            <SiteSettingsProvider
+              value={{
+                contactEmail: siteSettings.contactEmail,
+                supportPhone: siteSettings.supportPhone,
+                addressTr: siteSettings.addressTr,
+                addressUs: siteSettings.addressUs,
+                facebookUrl: siteSettings.facebookUrl,
+                instagramUrl: siteSettings.instagramUrl,
+                youtubeUrl: siteSettings.youtubeUrl,
+                linkedinUrl: siteSettings.linkedinUrl,
+              }}
+            >
+              <StoreProvider initialProducts={products}>
+                {children}
+              </StoreProvider>
+            </SiteSettingsProvider>
           </ThemeProvider>
         </SessionProvider>
       </body>

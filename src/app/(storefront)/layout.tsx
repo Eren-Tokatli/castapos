@@ -7,6 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { formatPrice, defaultPeriod, monthlyPrice } from "@/lib/catalog-shared";
 import { ACCOUNT_MENU_LINKS } from "@/lib/account-menu";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -43,6 +44,7 @@ export default function StorefrontLayout({
     }
   }
   const { theme, toggleTheme } = useTheme();
+  const siteSettings = useSiteSettings();
   const {
     cart,
     removeFromCart,
@@ -341,32 +343,35 @@ export default function StorefrontLayout({
             <h4>İletişim</h4>
             <div className="footer-address-block">
               <b>Türkiye</b>
-              <p>Levent Mah. Büyükdere Caddesi Yapı Kredi Plaza, C Blok Kat:17 No:40-41, Beşiktaş/İstanbul</p>
+              <p>{siteSettings.addressTr}</p>
             </div>
             <div className="footer-address-block">
               <b>ABD</b>
-              <p>4695 MacArthur Ct #1100, Newport Beach, CA 92660, Amerika Birleşik Devletleri</p>
+              <p>{siteSettings.addressUs}</p>
             </div>
-            <a className="footer-mail" href="mailto:bilgi@castapos.com">
-              bilgi@castapos.com
+            <a className="footer-mail" href={`mailto:${siteSettings.contactEmail}`}>
+              {siteSettings.contactEmail}
+            </a>
+            <a className="footer-mail" href={`tel:${siteSettings.supportPhone}`}>
+              {siteSettings.supportPhone}
             </a>
             <div className="footer-socials" aria-label="Sosyal medya bağlantıları">
-              <a href="https://www.facebook.com/castapos" target="_blank" rel="noopener" aria-label="Facebook">
+              <a href={siteSettings.facebookUrl} target="_blank" rel="noopener" aria-label="Facebook">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M13.5 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.2-1.5 1.5-1.5h1.8V3.1c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.5-4 4.2v2.4H8v3.2h2.4V21h3.1Z" fill="currentColor"/>
                 </svg>
               </a>
-              <a href="https://www.instagram.com/castapos.official/" target="_blank" rel="noopener" aria-label="Instagram">
+              <a href={siteSettings.instagramUrl} target="_blank" rel="noopener" aria-label="Instagram">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7.8 3h8.4A4.8 4.8 0 0 1 21 7.8v8.4a4.8 4.8 0 0 1-4.8 4.8H7.8A4.8 4.8 0 0 1 3 16.2V7.8A4.8 4.8 0 0 1 7.8 3Zm0 1.8A3 3 0 0 0 4.8 7.8v8.4a3 3 0 0 0 3 3h8.4a3 3 0 0 0 3-3V7.8a3 3 0 0 0-3-3H7.8Zm8.85 1.35a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1ZM12 7.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 1.8A2.7 2.7 0 1 0 14.7 12 2.7 2.7 0 0 0 12 9.3Z" fill="currentColor"/>
                 </svg>
               </a>
-              <a href="https://www.youtube.com/@castapos" target="_blank" rel="noopener" aria-label="YouTube">
+              <a href={siteSettings.youtubeUrl} target="_blank" rel="noopener" aria-label="YouTube">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M21.4 7.2a2.9 2.9 0 0 0-2-2C17.6 4.7 12 4.7 12 4.7s-5.6 0-7.4.5a2.9 2.9 0 0 0-2-2A30.6 30.6 0 0 0 2 12a30.6 30.6 0 0 0 .6 4.8 2.9 2.9 0 0 0 2 2c1.8.5 7.4.5 7.4.5s5.6 0 7.4-.5a2.9 2.9 0 0 0 2-2A30.6 30.6 0 0 0 22 12a30.6 30.6 0 0 0-.6-4.8ZM10 15.6V8.4L16 12l-6 3.6Z" fill="currentColor"/>
                 </svg>
               </a>
-              <a href="https://www.linkedin.com/company/castapos/" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <a href={siteSettings.linkedinUrl} target="_blank" rel="noopener" aria-label="LinkedIn">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6.2 8.1H3.2V21h3V8.1Zm.2-4.1A1.8 1.8 0 1 0 6.4 7.6a1.8 1.8 0 0 0 0-3.6ZM20.8 13.1c0-3.1-1.7-5.4-4.8-5.4a4.1 4.1 0 0 0-3.7 2V8.1H9.4c0 1 .1 12.9.1 12.9h3V13.8c0-.4 0-.8.2-1.1a2.5 2.5 0 0 1 2.3-1.7c1.7 0 2.3 1.3 2.3 3.1V21h3v-7.9Z" fill="currentColor"/>
                 </svg>

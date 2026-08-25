@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Bot, Clock3, Headphones, Mail, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
 import { ContactPageClient } from "./ContactPageClient";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata: Metadata = {
   title: "İletişim | Castapos",
@@ -9,38 +10,40 @@ export const metadata: Metadata = {
     "Castapos iletişim bilgileri, destek kanalları ve kiralama süreci hakkında iletişim formu.",
 };
 
-const contactCards = [
-  {
-    icon: Mail,
-    title: "E-posta",
-    text: "Ürün, sipariş ve iş birlikleri için bize yazabilirsin.",
-    value: "bilgi@castapos.com",
-    href: "mailto:bilgi@castapos.com",
-  },
-  {
-    icon: Headphones,
-    title: "Canlı Destek",
-    text: "WhatsApp, telefon ve hızlı destek kanallarını aç.",
-    value: "Canlı desteğe git",
-    href: "/canli-destek",
-  },
-  {
-    icon: Bot,
-    title: "AI ile sohbet",
-    text: "Ürün seçimi ve kiralama planı için hızlı öneri al.",
-    value: "Asistanı aç",
-    href: "/ai-sohbet",
-  },
-  {
-    icon: MapPin,
-    title: "Merkez",
-    text: "Levent Mah. Büyükdere Caddesi Yapı Kredi Plaza, Beşiktaş/İstanbul",
-    value: "Türkiye operasyon merkezi",
-    href: "#adresler",
-  },
-];
+export default async function IletisimPage() {
+  const settings = await getSiteSettings();
 
-export default function IletisimPage() {
+  const contactCards = [
+    {
+      icon: Mail,
+      title: "E-posta",
+      text: "Ürün, sipariş ve iş birlikleri için bize yazabilirsin.",
+      value: settings.contactEmail,
+      href: `mailto:${settings.contactEmail}`,
+    },
+    {
+      icon: Headphones,
+      title: "Canlı Destek",
+      text: "WhatsApp, telefon ve hızlı destek kanallarını aç.",
+      value: "Canlı desteğe git",
+      href: "/canli-destek",
+    },
+    {
+      icon: Bot,
+      title: "AI ile sohbet",
+      text: "Ürün seçimi ve kiralama planı için hızlı öneri al.",
+      value: "Asistanı aç",
+      href: "/ai-sohbet",
+    },
+    {
+      icon: MapPin,
+      title: "Merkez",
+      text: settings.addressTr,
+      value: "Türkiye operasyon merkezi",
+      href: "#adresler",
+    },
+  ];
+
   return (
     <>
       <section className="listing-head account-hero contact-hero">
@@ -96,9 +99,9 @@ export default function IletisimPage() {
               </div>
               <div id="adresler" className="contact-address-box">
                 <b>Türkiye</b>
-                <p>Levent Mah. Büyükdere Caddesi Yapı Kredi Plaza, C Blok Kat:17 No:40-41, Beşiktaş/İstanbul</p>
+                <p>{settings.addressTr}</p>
                 <b>ABD</b>
-                <p>4695 MacArthur Ct #1100, Newport Beach, CA 92660, Amerika Birleşik Devletleri</p>
+                <p>{settings.addressUs}</p>
               </div>
             </article>
 

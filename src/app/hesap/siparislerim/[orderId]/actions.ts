@@ -56,5 +56,6 @@ export async function submitReview(input: {
 
   revalidatePath(`/hesap/siparislerim/${input.orderId}`);
   revalidatePath("/hesap/degerlendirmelerim");
+  revalidatePath("/admin/degerlendirmeler");
   return { success: true };
 }
