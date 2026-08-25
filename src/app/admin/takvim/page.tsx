@@ -9,25 +9,28 @@ export default async function AdminTakvimPage() {
     orderBy: { dueDate: "asc" },
   });
 
-  const serialized = await Promise.all(
-    installments.map(async (i) => {
-      const agreement = await prisma.rentalAgreement.findUnique({
-        where: { id: i.rentalAgreementId },
-        select: { tenantName: true, assetName: true, phone: true },
-      });
+  // Eskiden her taksit için ayrı ayrı sözleşme sorgusu atılıyordu (N+1).
+  // Tek seferde toplu çekip Map'ten okumak çok daha hızlı.
+  const agreementIds = [...new Set(installments.map((i) => i.rentalAgreementId))];
+  const agreements = await prisma.rentalAgreement.findMany({
+    where: { id: { in: agreementIds } },
+    select: { id: true, tenantName: true, assetName: true, phone: true },
+  });
+  const agreementById = new Map(agreements.map((a) => [a.id, a]));
 
-      return {
-        id: i.id,
-        dueDate: i.dueDate.toISOString(),
-        amount: i.amount,
-        paid: i.paid,
-        description: i.description,
-        tenantName: agreement?.tenantName || "Bilinmeyen Müşteri",
-        assetName: agreement?.assetName || "Bilinmeyen Cihaz",
-        phone: agreement?.phone || "",
-      };
-    })
-  );
+  const serialized = installments.map((i) => {
+    const agreement = agreementById.get(i.rentalAgreementId);
+    return {
+      id: i.id,
+      dueDate: i.dueDate.toISOString(),
+      amount: i.amount,
+      paid: i.paid,
+      description: i.description,
+      tenantName: agreement?.tenantName || "Bilinmeyen Müşteri",
+      assetName: agreement?.assetName || "Bilinmeyen Cihaz",
+      phone: agreement?.phone || "",
+    };
+  });
 
   return <TakvimClient installments={serialized} />;
 }
