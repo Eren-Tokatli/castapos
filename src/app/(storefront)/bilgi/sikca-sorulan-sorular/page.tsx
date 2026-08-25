@@ -78,7 +78,7 @@ export default function SikcaSorulanSorularPage() {
         <div className="container listing-head-inner">
           <div>
             <nav className="breadcrumb">
-              <Link href="/">Ana Sayfa</Link> › Sıkça Sorulan Sorular
+              <Link href="/">Mağaza</Link> › Sıkça Sorulan Sorular
             </nav>
             <h1>Kiralama süreciyle ilgili en net cevaplar.</h1>
             <p>

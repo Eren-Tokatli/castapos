@@ -19,6 +19,12 @@ export default function StorefrontLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   const router = useRouter();
   const pathname = usePathname();
+  // Blog + Sıkça Sorulan Sorular, trlsg.com/kaynaklar'daki gibi mağazadan
+  // ayrı, sade bir "kaynaklar" başlığıyla açılıyor: arama/sepet/kategori
+  // mega menüsü yok, sadece Mağaza/Blog/SSS linkleri. Diğer tüm rotalar
+  // normal ticaret header'ını kullanır.
+  const isResourcePage =
+    pathname?.startsWith("/blog") || pathname?.startsWith("/bilgi/sikca-sorulan-sorular") || false;
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
   const userFirstName = session?.user?.name ? session.user.name.trim().split(" ")[0] : "";
@@ -89,6 +95,19 @@ export default function StorefrontLayout({
     return () => window.removeEventListener("mousemove", clear);
   }, [pathname]);
 
+  // Aynı sebepten (layout route değişse de yeniden mount olmuyor): örneğin
+  // ana sayfada aşağıda kaydırılmışken Blog'a geçilirse, blog sayfası daha
+  // kısa olduğundan sticky header eski scroll konumunda ekranın dışında
+  // kalıp hiç görünmeyebiliyordu. window.scrollTo yerine scrollTop'u direkt
+  // atıyoruz — html{scroll-behavior:smooth} yüzünden scrollTo(0,0) saniyeler
+  // süren bir kaydırma animasyonuna dönüşüyordu, o sırada header "altından
+  // açılıyormuş" gibi görünüyordu. Direkt atama CSS'teki smooth davranışını
+  // atlayıp anında tepeye sarıyor.
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname]);
+
   // Suggestions search list
   const suggestedProducts = searchQuery.trim()
     ? products.filter((p) => {
@@ -124,6 +143,35 @@ export default function StorefrontLayout({
   return (
     <div className={`${mobileMenuOpen ? "mobile-open" : ""} ${mobileCategoriesOpen ? "mobile-categories-open" : ""} ${mobileAccountOpen ? "mobile-account-open" : ""} ${isCartOpen ? "cart-open" : ""}`}>
       {/* HEADER */}
+      {isResourcePage ? (
+        <header className="resource-header">
+          <div className="container resource-header-inner">
+            <Link className="brand-logo" href="/" aria-label="Castapos ana sayfa">
+              <img src="/assets/castapos-real-logo.png" alt="Castapos" />
+              <span>Tek tıkla kirala</span>
+            </Link>
+            <nav className="resource-nav" aria-label="Kaynaklar menüsü">
+              <Link href="/">Mağaza</Link>
+              <Link href="/blog" className={pathname?.startsWith("/blog") ? "active" : ""}>Blog</Link>
+              <Link
+                href="/bilgi/sikca-sorulan-sorular"
+                className={pathname?.startsWith("/bilgi/sikca-sorulan-sorular") ? "active" : ""}
+              >
+                Sık Sorulan Sorular
+              </Link>
+            </nav>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              aria-label={theme === "dark" ? "Gündüz moduna geç" : "Gece moduna geç"}
+              title={theme === "dark" ? "Gündüz modu" : "Gece modu"}
+            >
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
+        </header>
+      ) : (
       <header className="commerce-header">
         <div className="container commerce-top">
           <Link className="brand-logo" href="/" aria-label="Castapos ana sayfa">
@@ -280,6 +328,7 @@ export default function StorefrontLayout({
           </div>
         </nav>
       </header>
+      )}
 
       {/* CHILDREN PAGE CONTENT */}
       <main>{children}</main>
@@ -328,6 +377,7 @@ export default function StorefrontLayout({
           <section className="footer-link-chip-list">
             <h4>Bilgiler</h4>
             <Link href="/bilgi/hakkimizda">Hakkımızda</Link>
+            <Link href="/blog">Blog</Link>
             <Link href="/bilgi/sikca-sorulan-sorular">Sıkça Sorulan Sorular</Link>
             <Link href="/bilgi/iletisim">İletişim</Link>
             <Link href="/bilgi/hizmet-sartlari">Hizmet Şartları</Link>

@@ -88,20 +88,21 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
               C
             </span>
             {!isCollapsed && (
-              <span className="flex items-center gap-2 overflow-hidden">
-                <span className="text-white text-xl font-black tracking-wider transition-all">CASTAPOS</span>
-                <span className="text-[9px] bg-white/10 text-slate-300 font-extrabold px-1.5 py-0.5 rounded-md border border-white/10 tracking-wide">CRM</span>
-              </span>
+              <span className="text-white text-xl font-black tracking-wider transition-all overflow-hidden">CASTAPOS</span>
             )}
           </Link>
 
-          {/* Desktop Collapse Trigger */}
+          {/* Desktop Collapse Trigger — absolute konumu koruyoruz (daraltılmış
+              84px'lik sidebar'da logo ile yan yana sığmıyor), ama eskiden
+              -right-3 ile header'ın sağ kenarından dışarı taşıp dar
+              pencerede yarısı kesik görünüyordu. Artık header sınırının
+              içinde (right-2) duruyor, hiçbir zaman kesilmiyor. */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden md:flex absolute -right-3 top-6 w-6 h-6 bg-orange-500 text-white rounded-full items-center justify-center hover:bg-orange-600 transition shadow-lg shadow-orange-500/40 border-2 border-[var(--navy)]"
+            className="hidden md:flex absolute right-2 top-4 w-8 h-8 bg-orange-500 text-white rounded-full items-center justify-center hover:bg-orange-600 transition shadow-lg shadow-orange-500/40 border-2 border-[var(--navy)]"
             aria-label={isCollapsed ? "Genişlet" : "Daralt"}
           >
-            {isCollapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         </div>
 
