@@ -9,9 +9,9 @@ import {
   defaultPeriod,
   monthlyPrice,
   dailyPrice,
-  ratingCount,
   formatPrice,
 } from "@/lib/catalog-shared";
+import type { ProductReview } from "@/lib/catalog-server";
 import { ProductCard } from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
 
@@ -23,50 +23,18 @@ const PRODUCT_DETAIL_TABS = [
   { key: "return", label: "İptal & İade Koşulları" },
 ] as const;
 
-interface Review {
-  name: string;
-  rating: number;
-  text: string;
-}
-
 interface QAItem {
   q: string;
   a: string;
 }
 
-const REVIEW_DATA_DEFAULT = {
-  average: 4.7,
+const QA_DATA_DEFAULT = {
   qa: [
     { q: "Teslimat ne kadar sürede yapılıyor?", a: "Ürün uygunluğuna göre teslimat planı destek ekibi tarafından 1-3 iş günü içinde organize edilir." },
     { q: "Kiralama süresi sonunda uzatma yapabiliyor muyum?", a: "Uygun stok bulunması halinde kiralama süresi uzatma talebi oluşturabilirsin." },
     { q: "Kiralama sürem bitmeden ürünü iade edebilir miyim?", a: "Erken iade talebi destek ekibi üzerinden değerlendirilir; kalan süreye göre bilgilendirme yapılır." }
-  ],
-  reviews: [
-    { name: "Merve A.", rating: 5, text: "Ürün beklediğimden sessiz çıktı. Kurulum ve teslimat süreci de sorunsuz ilerledi." },
-    { name: "Emir T.", rating: 4, text: "Ev kullanımı için yeterli. Kısa süreli ihtiyaçta satın almadan denemek çok mantıklı." },
-    { name: "Seda K.", rating: 5, text: "Kiralama deneyimi pratikti. Ürün temiz ve düzenli teslim edildi." },
-    { name: "Koray B.", rating: 3, text: "Genel olarak memnunum, ancak ürün detay açıklamaları biraz daha fazla olabilir." }
   ]
 };
-
-function expandedReviews(seed: Review[]): Review[] {
-  const names = [
-    "Merve A.", "Emir T.", "Seda K.", "Koray B.", "İrem Y.", "Fatih D.", "Buse N.", "Oğuz K.",
-    "Pelin S.", "Can E.", "Nisa U.", "Volkan A.", "Aslı G.", "Mehmet P.", "Zeynep Ç.", "Tolga M.",
-    "Derya H.", "Cem K.", "Ece Y.", "Murat L.", "Sinem A.", "Onur T.", "Begüm E."
-  ];
-  const notes = [
-    " Teslimat ekibi zamanında ulaştı.",
-    " Fiyat/performans açısından tatmin edici buldum.",
-    " İlk kez kiralama denedim ve süreç kolaydı.",
-    " Açıklamalar biraz daha detaylı olabilir ama genel deneyim iyiydi."
-  ];
-  return Array.from({ length: 23 }, (_, i) => ({
-    name: names[i % names.length],
-    rating: [5, 4, 5, 3, 4][i % 5],
-    text: (seed[i % seed.length]?.text || "") + notes[i % notes.length]
-  }));
-}
 
 function expandedQa(seed: QAItem[]): QAItem[] {
   const qs = [
@@ -121,9 +89,11 @@ const INFO_PANELS = {
 export function ProductDetailClient({
   product: p,
   similarProducts,
+  reviews,
 }: {
   product: CatalogProduct;
   similarProducts: CatalogProduct[];
+  reviews: ProductReview[];
 }) {
   const { addToCart, toggleFavorite, isFavorite } = useStore();
 
@@ -134,8 +104,6 @@ export function ProductDetailClient({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [slideDir, setSlideDir] = useState<"left" | "right">("right");
   const [infoPanel, setInfoPanel] = useState<keyof typeof INFO_PANELS | null>(null);
-  const [starRating, setStarRating] = useState<number | null>(null);
-  const [reviewText, setReviewText] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [reviewFilter, setReviewFilter] = useState<string>("Tümü");
   // Ürün Açıklaması/Teknik Özellikler/... sekmeleri mobilde anasayfadaki
@@ -182,7 +150,8 @@ export function ProductDetailClient({
 
   const currentMonthly = monthlyPrice(p, period);
   const rentTotal = currentMonthly * period;
-  const reviewCount = ratingCount(p);
+  const reviewCount = reviews.length;
+  const averageRating = reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
 
   const selectedTotal = rentTotal;
   const favorited = isFavorite(p.id);
@@ -212,9 +181,8 @@ export function ProductDetailClient({
     return () => window.removeEventListener("keydown", onKey);
   }, [zoomOpen, images.length]);
 
-  // Review & Q&A data
-  const qaItems = expandedQa(REVIEW_DATA_DEFAULT.qa);
-  const reviews = expandedReviews(REVIEW_DATA_DEFAULT.reviews);
+  // Q&A data (henüz gerçek bir soru-cevap sistemi yok, bkz. reviews için Review modeli)
+  const qaItems = expandedQa(QA_DATA_DEFAULT.qa);
 
   // Filtered reviews
   const filteredReviews = reviews.filter((r) => {
@@ -232,13 +200,6 @@ export function ProductDetailClient({
     t.textContent = message;
     t.classList.add("show");
     setTimeout(() => t?.classList.remove("show"), 2100);
-  };
-
-  const handleReviewSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    showToast("Değerlendirmen alındı.");
-    setReviewText("");
-    setStarRating(null);
   };
 
   const handleQuestionSubmit = (e: React.FormEvent) => {
@@ -344,7 +305,12 @@ export function ProductDetailClient({
             </h1>
             
             <div className="detail-rating">
-              <Star size={15} fill="currentColor" strokeWidth={0} /> 4,7{" "}
+              {reviewCount > 0 && (
+                <>
+                  <Star size={15} fill="currentColor" strokeWidth={0} />{" "}
+                  {averageRating.toFixed(1).replace(".", ",")}{" "}
+                </>
+              )}
               <button
                 type="button"
                 className="review-link"
@@ -356,7 +322,7 @@ export function ProductDetailClient({
                   });
                 }}
               >
-                ({reviewCount} değerlendirme)
+                {reviewCount > 0 ? `(${reviewCount} değerlendirme)` : "Henüz değerlendirme yok"}
               </button>
             </div>
 
@@ -495,42 +461,26 @@ export function ProductDetailClient({
                     <div className="review-summary-box">
                       <div>
                         <small>Ortalama puan</small>
-                        <strong>{String(REVIEW_DATA_DEFAULT.average).replace(".", ",")}</strong>
+                        <strong>{reviewCount > 0 ? averageRating.toFixed(1).replace(".", ",") : "-"}</strong>
                         <span>{reviewCount} kullanıcı değerlendirmesi</span>
                       </div>
                       <div className="gold-stars">
-                        <StarRating rating={Math.round(REVIEW_DATA_DEFAULT.average)} />
+                        <StarRating rating={Math.round(averageRating)} />
                       </div>
                     </div>
 
-                    <form className="review-form-box" onSubmit={handleReviewSubmit}>
+                    <div className="review-form-box">
                       <div className="review-form-head">
-                        <h4>Değerlendirme Yap</h4>
+                        <h4>Bu Ürünü Değerlendir</h4>
                       </div>
-                      <div className="review-rating-pick">
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <button
-                            key={n}
-                            type="button"
-                          className={starRating === n ? "active" : ""}
-                          onClick={() => setStarRating(n)}
-                        >
-                          <span className="rating-pick-number">{n}</span>
-                          <span className="rating-pick-stars" aria-hidden="true">
-                            <Star size={12} fill="currentColor" strokeWidth={0} />
-                          </span>
-                        </button>
-                      ))}
+                      <p>
+                        Değerlendirme yapabilmek için bu ürünü daha önce kiralamış olman gerekiyor.
+                        Tamamlanan siparişlerinden ürünü değerlendirebilirsin.
+                      </p>
+                      <Link href="/hesap/siparislerim" className="btn btn-primary mt-2">
+                        Siparişlerime Git
+                      </Link>
                     </div>
-                      <textarea
-                        placeholder="Ürünü kullandıysan deneyimini kısaca paylaşabilirsin."
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                      />
-                      <button type="submit" className="btn btn-primary mt-2">
-                        Yorumu Gönder
-                      </button>
-                    </form>
                   </div>
 
                   <div className="review-list-head">
@@ -554,17 +504,21 @@ export function ProductDetailClient({
 
                   <div className="qa-list review-list">
                     {filteredReviews.length === 0 ? (
-                      <p className="p-4 text-center text-neutral-500">Bu filtreye uygun yorum bulunamadı.</p>
+                      <p className="p-4 text-center text-neutral-500">
+                        {reviews.length === 0
+                          ? "Bu ürün için henüz bir değerlendirme yapılmamış."
+                          : "Bu filtreye uygun yorum bulunamadı."}
+                      </p>
                     ) : (
-                      filteredReviews.map((r, idx) => (
-                        <article key={idx}>
+                      filteredReviews.map((r) => (
+                        <article key={r.id}>
                           <div className="review-head">
                             <b>{r.name}</b>
                             <span className="gold-stars small">
                               <StarRating rating={r.rating} size={13} />
                             </span>
                           </div>
-                          <p>{r.text}</p>
+                          <p>{r.comment}</p>
                         </article>
                       ))
                     )}

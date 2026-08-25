@@ -1,15 +1,14 @@
-import { getProductBySlug, getActiveProducts } from "@/lib/catalog-server";
+import { getProductBySlug, getActiveProducts, getProductReviews } from "@/lib/catalog-server";
 import { startingPrice, type CatalogProduct } from "@/lib/catalog-shared";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "@/lib/site-url";
 
 // Google'ın arama sonuçlarında fiyat/marka bilgisiyle zengin snippet
-// gösterebilmesi için — daha önce hiç yapılandırılmış veri yoktu. Gerçek bir
-// değerlendirme/puan verisi olmadığından (bkz. reviews mock verisi) kasıtlı
-// olarak aggregateRating EKLENMİYOR — sahte puan structured data'sı Google'ın
-// spam politikalarına girer.
-function productJsonLd(p: CatalogProduct) {
+// gösterebilmesi için. aggregateRating sadece gerçekten onaylanmış
+// (APPROVED) değerlendirme varsa eklenir — sahte puan structured data'sı
+// Google'ın spam politikalarına girer, bkz. getProductReviews.
+function productJsonLd(p: CatalogProduct, reviewCount: number, averageRating: number) {
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -27,6 +26,15 @@ function productJsonLd(p: CatalogProduct) {
       // Satılık değil kiralık ürün olduğunu belirten standart (GoodRelations) alan.
       businessFunction: "http://purl.org/goodrelations/v1#LeaseOut",
     },
+    ...(reviewCount > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: averageRating.toFixed(1),
+            reviewCount,
+          },
+        }
+      : {}),
   };
 }
 
@@ -55,18 +63,25 @@ export default async function ProductPage({
     notFound();
   }
 
-  const allProducts = await getActiveProducts();
+  const [allProducts, reviews] = await Promise.all([
+    getActiveProducts(),
+    getProductReviews(p.dbId),
+  ]);
   const similarProducts = allProducts
     .filter((x) => x.id !== p.id && x.category === p.category)
     .slice(0, 4);
+
+  const reviewCount = reviews.length;
+  const averageRating =
+    reviewCount > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(p)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(p, reviewCount, averageRating)) }}
       />
-      <ProductDetailClient product={p} similarProducts={similarProducts} />
+      <ProductDetailClient product={p} similarProducts={similarProducts} reviews={reviews} />
     </>
   );
 }

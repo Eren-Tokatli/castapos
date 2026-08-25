@@ -119,6 +119,33 @@ export const getProductBySlug = cache(async (slug: string): Promise<CatalogProdu
   return toCatalogProduct(product, categoryMap);
 });
 
+export interface ProductReview {
+  id: string;
+  name: string;
+  rating: number;
+  comment: string;
+  createdAt: Date;
+}
+
+// Ürün detay sayfasındaki değerlendirmeler — sadece admin onayından geçmiş
+// (APPROVED) yorumlar storefront'ta görünür, bkz. admin/degerlendirmeler.
+export const getProductReviews = cache(async (productId: string): Promise<ProductReview[]> => {
+  const reviews = await prisma.review.findMany({
+    where: { productId, status: "APPROVED" },
+    orderBy: { createdAt: "desc" },
+    include: { user: { select: { firstName: true, lastName: true } } },
+  });
+  return reviews.map((r) => ({
+    id: r.id,
+    name: r.user
+      ? `${r.user.firstName}${r.user.lastName ? ` ${r.user.lastName.charAt(0)}.` : ""}`.trim()
+      : "Castapos Müşterisi",
+    rating: r.rating,
+    comment: r.comment,
+    createdAt: r.createdAt,
+  }));
+});
+
 export interface NavCategoryEntry {
   name: string;
   href: string;
