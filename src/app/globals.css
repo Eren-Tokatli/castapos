@@ -10552,7 +10552,11 @@ body.page-musteri-urun-bilgilendirme .info-doc-layout,
 body.page-on-bilgilendirme-formu .info-doc-layout,
 body.page-cerez-politikasi .info-doc-layout,
 body.page-mesafeli-sozlesme .info-doc-layout,
-body.page-aydinlatma-metni .info-doc-layout {
+body.page-aydinlatma-metni .info-doc-layout,
+body.page-uyelik-sozlesmesi .info-doc-layout,
+body.page-tacir-satis-sozlesmesi .info-doc-layout,
+body.page-kullanim-sartlari .info-doc-layout,
+body.page-kiralama-kosullari .info-doc-layout {
   grid-template-columns: minmax(0, 1fr);
 }
 
