@@ -1611,7 +1611,7 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 .product-detail-grid.refined.compact-detail-grid{align-items:stretch!important}
 .gallery-panel.detail-clean{display:grid!important;grid-template-rows:minmax(0,1fr) auto!important;gap:14px!important;align-self:stretch!important;height:auto!important;min-height:0!important;padding:18px!important}
 .detail-panel.refined.clean.compact-panel{align-self:stretch!important;height:auto!important;min-height:0!important;padding-bottom:18px!important}
-.main-gallery-image.clean{min-width:0!important;min-height:0!important;height:auto!important;aspect-ratio:auto!important;padding:14px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
+.main-gallery-image.clean{min-width:0!important;min-height:0!important;height:auto!important;aspect-ratio:auto!important;padding:6px!important;display:grid!important;place-items:center!important;overflow:hidden!important}
 .main-gallery-image.clean img{width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;object-fit:contain!important;display:block!important}
 .thumb-row.clean{margin:0!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
 .thumb-row.clean span{height:58px!important;min-width:0!important;display:grid!important;place-items:center!important;overflow:hidden!important}
@@ -4504,7 +4504,10 @@ body.page-product-detail .main-gallery-image.clean.product-hero-image:before {
 body.page-urun-detay .main-gallery-image.clean.product-hero-image img,
 body.page-product-detail .main-gallery-image.clean.product-hero-image img {
   filter: drop-shadow(0 28px 32px rgba(17, 24, 39, .18));
-  transform: scale(1.02);
+  /* Katalog fotoğrafları (800x800) etrafında boşluk bırakılarak çekilmiş —
+     çerçeveye tam otursun diye hafifçe yakınlaştırıp taşan kısmı kırpıyoruz
+     (üst kutuda overflow:hidden zaten var). */
+  transform: scale(1.32);
 }
 
 .detail-premium-strip {
