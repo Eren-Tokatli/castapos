@@ -10,11 +10,12 @@ function msUntilNextMidnight() {
 
 function formatDuration(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return `${days} Gün ${pad(hours)} Saat ${pad(minutes)} Dakika ${pad(seconds)} Saniye`;
 }
 
 /** Cosmetic countdown to local midnight — purely a front-end "today's deals"
@@ -33,7 +34,7 @@ export function CountdownTimer() {
   }, []);
 
   if (remaining === null) {
-    return <span className="countdown-timer">--:--:--</span>;
+    return <span className="countdown-timer">-- Gün -- Saat -- Dakika -- Saniye</span>;
   }
 
   return <span className="countdown-timer">{formatDuration(remaining)}</span>;

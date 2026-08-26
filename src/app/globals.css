@@ -13097,3 +13097,21 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   .resource-nav a{font-size:12px}
 }
 
+/* Anasayfa banner'ları artık hepsi aynı gerçek orana sahip (2322x677,
+   ~3.43:1) — yukarıdaki çeşitli deneme kutuları (clamp yükseklik, 16:10,
+   4:3) bu oranla uyuşmadığından object-fit:cover küçük ekranlarda
+   görseli sağdan/soldan kırpıyordu. Kutunun oranını görselin gerçek
+   oranına sabitleyip her ekran boyutunda kırpmayı tamamen ortadan
+   kaldırıyoruz. */
+.home-shell .promo-track {
+  height: auto !important;
+  aspect-ratio: 2322 / 677 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+
+.home-shell .promo-slide img {
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
