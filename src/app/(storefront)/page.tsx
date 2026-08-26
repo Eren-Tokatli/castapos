@@ -63,6 +63,13 @@ export default async function HomePage() {
     .sort((a, b) => a.sortOrder - b.sortOrder)
     .map((b) => ({ url: b.url, alt: b.alt, href: b.href || undefined }));
 
+  // Sabit 3 slot — admin panelden doldurulmamış bir pozisyon null olarak
+  // geçer, HomeClient kendi varsayılan (gradient) görseline döner.
+  const campaignTiles = Array.from({ length: 3 }, (_, i) => {
+    const t = settings.campaignTiles[i];
+    return t?.url ? { url: t.url, alt: t.alt, href: t.href || undefined } : null;
+  });
+
   return (
     <HomeClient
       popularProducts={popularProducts}
@@ -71,6 +78,7 @@ export default async function HomePage() {
       testimonials={testimonials}
       banners={banners}
       bannerIntervalSeconds={settings.bannerIntervalSeconds}
+      campaignTiles={campaignTiles}
     />
   );
 }

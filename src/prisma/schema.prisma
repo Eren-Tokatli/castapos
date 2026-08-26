@@ -578,6 +578,10 @@ model SiteSettings {
   // Görsel dosya yükleme değil, ürün fotoğraflarındaki gibi URL yapıştırma.
   banners               HomeBanner[]
   bannerIntervalSeconds Int          @default(5)
+  // Anasayfada "Sizden Gelenler" üstündeki sabit 3'lü kampanya kutucukları
+  // (bkz. HomeClient.tsx campaign-strip). Sıra sabit 3 pozisyon — ekleme/
+  // çıkarma yok, sadece görsel/link değiştirilir.
+  campaignTiles CampaignTile[]
   updatedAt    DateTime @updatedAt
 }
 
@@ -587,6 +591,12 @@ type HomeBanner {
   // Boşsa banner tıklanamaz (sade görsel), doluysa tıklanınca bu adrese gider.
   href      String?
   sortOrder Int      @default(0)
+}
+
+type CampaignTile {
+  url  String
+  alt  String
+  href String?
 }
 
 enum CouponDiscountType {

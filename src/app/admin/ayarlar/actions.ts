@@ -11,6 +11,12 @@ export interface HomeBannerFormData {
   href: string;
 }
 
+export interface CampaignTileFormData {
+  url: string;
+  alt: string;
+  href: string;
+}
+
 export interface SiteSettingsFormData {
   contactEmail: string;
   supportPhone: string;
@@ -22,6 +28,9 @@ export interface SiteSettingsFormData {
   linkedinUrl: string;
   banners: HomeBannerFormData[];
   bannerIntervalSeconds: number;
+  // Sabit 3 pozisyon (anasayfa "Sizden Gelenler" üstündeki kutucuklar).
+  // Bir slot boş bırakılırsa storefront kendi varsayılan görseline döner.
+  campaignTiles: CampaignTileFormData[];
 }
 
 async function requireAdmin() {
@@ -56,6 +65,13 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
     }
     const bannersWithOrder = cleanBanners.map((b, i) => ({ ...b, sortOrder: i }));
 
+    const cleanCampaignTiles = data.campaignTiles
+      .map((t) => ({ url: t.url.trim(), alt: t.alt.trim(), href: t.href.trim() || null }))
+      .filter((t) => t.url);
+    if (cleanCampaignTiles.some((t) => !t.alt)) {
+      return { success: false, error: "Her kampanya kutucuğu için bir alt metin girilmeli." };
+    }
+
     await prisma.siteSettings.upsert({
       where: { id: SITE_SETTINGS_ID },
       update: {
@@ -69,6 +85,7 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
         linkedinUrl: data.linkedinUrl.trim(),
         banners: bannersWithOrder,
         bannerIntervalSeconds: bannerInterval,
+        campaignTiles: cleanCampaignTiles,
       },
       create: {
         id: SITE_SETTINGS_ID,
@@ -82,6 +99,7 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
         linkedinUrl: data.linkedinUrl.trim(),
         banners: bannersWithOrder,
         bannerIntervalSeconds: bannerInterval,
+        campaignTiles: cleanCampaignTiles,
       },
     });
 

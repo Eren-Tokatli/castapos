@@ -22,6 +22,12 @@ export default async function AdminSettingsPage() {
           .sort((a, b) => a.sortOrder - b.sortOrder)
           .map((b) => ({ url: b.url, alt: b.alt, href: b.href || "" })),
         bannerIntervalSeconds: settings.bannerIntervalSeconds,
+        // Sabit 3 slot — kayıtlı olan kadarı kullanılır, kalanı boş form
+        // alanı olarak gösterilir (henüz doldurulmamış demektir).
+        campaignTiles: Array.from({ length: 3 }, (_, i) => {
+          const t = settings.campaignTiles[i];
+          return { url: t?.url || "", alt: t?.alt || "", href: t?.href || "" };
+        }),
       }}
     />
   );

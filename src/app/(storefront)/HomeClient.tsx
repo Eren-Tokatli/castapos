@@ -57,6 +57,12 @@ export interface HomeBanner {
   href?: string;
 }
 
+export interface CampaignTile {
+  url: string;
+  alt: string;
+  href?: string;
+}
+
 export function HomeClient({
   popularProducts,
   newProducts,
@@ -64,6 +70,7 @@ export function HomeClient({
   testimonials,
   banners,
   bannerIntervalSeconds,
+  campaignTiles,
 }: {
   popularProducts: CatalogProduct[];
   newProducts: CatalogProduct[];
@@ -71,6 +78,9 @@ export function HomeClient({
   testimonials: HomeTestimonial[];
   banners: HomeBanner[];
   bannerIntervalSeconds: number;
+  // Sabit 3 slot; null olan pozisyon admin panelde doldurulmamış demektir,
+  // varsayılan (gradient) görsel + eski href/alt gösterilir.
+  campaignTiles: (CampaignTile | null)[];
 }) {
   const [activeEasyStep, setActiveEasyStep] = useState(0);
 
@@ -309,30 +319,27 @@ export function HomeClient({
         </div>
       </section>
 
-      {/* CAMPAIGN BANNER STRIP */}
+      {/* CAMPAIGN BANNER STRIP — sabit 3 kutucuk, admin panelden (Site
+          Ayarları) doldurulmamış pozisyon kendi varsayılan görseline döner. */}
       <section className="campaign-strip-section" aria-label="Kampanya alanları">
         <div className="container campaign-strip-grid">
-          <Link
-            className="campaign-tile tile-orange campaign-visual-tile"
-            href="/kategori?cat=Yaz%20Sezonu"
-            aria-label="Yaz sezonu kampanya alanı"
-          >
-            <img src="/assets/campaign-orange.svg" alt="Yaz sezonu kampanya görseli" />
-          </Link>
-          <Link
-            className="campaign-tile tile-purple campaign-visual-tile"
-            href="/kategori?cat=Koşu%20Bantları"
-            aria-label="Koşu bantları kampanya alanı"
-          >
-            <img src="/assets/campaign-purple.svg" alt="Koşu bantları kampanya görseli" />
-          </Link>
-          <Link
-            className="campaign-tile tile-blue campaign-visual-tile"
-            href="/kategori?cat=Ev%20Aletleri"
-            aria-label="Ev aletleri kampanya alanı"
-          >
-            <img src="/assets/campaign-blue.svg" alt="Ev aletleri kampanya görseli" />
-          </Link>
+          {[
+            { fallbackClass: "tile-orange", fallbackImg: "/assets/campaign-orange.svg", fallbackHref: "/kategori?cat=Yaz%20Sezonu", fallbackAlt: "Yaz sezonu kampanya görseli" },
+            { fallbackClass: "tile-purple", fallbackImg: "/assets/campaign-purple.svg", fallbackHref: "/kategori?cat=Koşu%20Bantları", fallbackAlt: "Koşu bantları kampanya görseli" },
+            { fallbackClass: "tile-blue", fallbackImg: "/assets/campaign-blue.svg", fallbackHref: "/kategori?cat=Ev%20Aletleri", fallbackAlt: "Ev aletleri kampanya görseli" },
+          ].map((fallback, idx) => {
+            const tile = campaignTiles[idx];
+            return (
+              <Link
+                key={idx}
+                className={`campaign-tile campaign-visual-tile ${tile ? "campaign-tile-custom" : fallback.fallbackClass}`}
+                href={tile ? tile.href || "/" : fallback.fallbackHref}
+                aria-label={tile ? tile.alt : fallback.fallbackAlt}
+              >
+                <img src={tile ? tile.url : fallback.fallbackImg} alt={tile ? tile.alt : fallback.fallbackAlt} />
+              </Link>
+            );
+          })}
         </div>
       </section>
 

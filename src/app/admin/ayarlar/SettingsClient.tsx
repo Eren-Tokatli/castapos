@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mail, MapPin, Save, MessageCircle, Link2, Image as ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, Timer } from "lucide-react";
-import { updateSiteSettings, type SiteSettingsFormData, type HomeBannerFormData } from "./actions";
+import { Mail, MapPin, Save, MessageCircle, Link2, Image as ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, Timer, LayoutGrid } from "lucide-react";
+import { updateSiteSettings, type SiteSettingsFormData, type HomeBannerFormData, type CampaignTileFormData } from "./actions";
 import { useAdminToast } from "../_components/ToastProvider";
 
 const EMPTY_BANNER: HomeBannerFormData = { url: "", alt: "", href: "" };
@@ -36,6 +36,13 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
       [next[idx], next[target]] = [next[target], next[idx]];
       return { ...f, banners: next };
     });
+  };
+
+  const updateCampaignTileField = (idx: number, field: keyof CampaignTileFormData, value: string) => {
+    setForm((f) => ({
+      ...f,
+      campaignTiles: f.campaignTiles.map((t, i) => (i === idx ? { ...t, [field]: value } : t)),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -292,6 +299,67 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
                 className="w-32 h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Kampanya kutucukları — anasayfada "Sizden Gelenler" üstündeki sabit 3'lü alan */}
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
+            <LayoutGrid size={14} /> Kampanya Kutucukları (3&apos;lü Alan)
+          </div>
+          <p className="text-xs text-slate-500 -mt-2">
+            Anasayfada &quot;Sizden Gelenler&quot; bölümünün hemen üstünde yan yana duran 3 kutucuk. Sabit 3
+            pozisyon — boş bırakılan kutucuk varsayılan görseliyle gösterilir.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {form.campaignTiles.map((tile, idx) => (
+              <div key={idx} className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50/60">
+                <span className="text-xs font-bold text-slate-500">Kutucuk {idx + 1}</span>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Görsel URL</label>
+                  <input
+                    type="text"
+                    value={tile.url}
+                    onChange={(e) => updateCampaignTileField(idx, "url", e.target.value)}
+                    placeholder="https://.../kutucuk.png"
+                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Alt Metin</label>
+                  <input
+                    type="text"
+                    value={tile.alt}
+                    onChange={(e) => updateCampaignTileField(idx, "alt", e.target.value)}
+                    placeholder="Görseli kısaca tarif et"
+                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Tıklanınca gidilecek link</label>
+                  <input
+                    type="text"
+                    value={tile.href}
+                    onChange={(e) => updateCampaignTileField(idx, "href", e.target.value)}
+                    placeholder="/urun/urun-slug"
+                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+                  />
+                </div>
+
+                {tile.url && (
+                  <img
+                    src={tile.url}
+                    alt=""
+                    className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-white"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
