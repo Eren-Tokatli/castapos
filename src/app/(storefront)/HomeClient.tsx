@@ -79,14 +79,8 @@ export function HomeClient({
     { href: "/kategori?cat=Yürüyüş%20Bantları", img: "/assets/banners/banner-walkingpad-premium.png", alt: "Yer kaplamayan spor aleti kiralama fırsatları" },
     {
       href: "/kategori?cat=Yaz%20Sezonu",
-      img: "/assets/banners/banner-summer-season-offer.jpg",
+      img: "/assets/banners/banner-summer-season-offer.png",
       alt: "Yaz sezonu elektrikli bisiklet ve scooter kiralama",
-      overlay: {
-        badge: "Sezon Fırsatı",
-        title: "Yaz Sezonuna Özel Çözümler",
-        description: "Katlanabilir şehir bisikletleri, kompakt eliptik aletleri ve yaz aylarında formda kalmanızı sağlayacak tüm ekipmanlar.",
-        cta: "Fırsatları İncele",
-      },
     },
     { href: "/kategori?cat=Ev%20Aletleri", img: "/assets/banners/banner-cleaning-premium-wide.png", alt: "Halı ve koltuk temizliği için kiralama çözümleri" },
   ];
@@ -118,20 +112,10 @@ export function HomeClient({
             {slides.map((slide, idx) => (
               <Link
                 key={idx}
-                className={`promo-slide ${slide.overlay ? "promo-slide-overlay" : ""} ${idx === activeSlide ? "active" : ""}`}
+                className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
                 href={slide.href}
               >
                 <img src={slide.img} alt={slide.alt} />
-                {slide.overlay && (
-                  <div className="promo-slide-panel">
-                    <span className="promo-slide-badge">{slide.overlay.badge}</span>
-                    <h2>{slide.overlay.title}</h2>
-                    <p>{slide.overlay.description}</p>
-                    <span className="promo-slide-btn">
-                      {slide.overlay.cta} →
-                    </span>
-                  </div>
-                )}
               </Link>
             ))}
           </div>
