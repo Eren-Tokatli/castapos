@@ -45,9 +45,21 @@ interface AgreementsClientProps {
   agreements: Agreement[];
 }
 
+// Gecikmede olanlar takibi en acil olanlar — filtre "Tümü"yken bile en
+// üstte görünsünler diye sıralama önceliği burada tanımlı.
+const PAYMENT_STATUS_PRIORITY: Record<string, number> = { LATE: 0, CURRENT: 1, COMPLETED: 2 };
+
+const PAYMENT_STATUS_FILTERS = [
+  { value: "ALL", label: "Tümü" },
+  { value: "LATE", label: "Gecikmede" },
+  { value: "CURRENT", label: "Ödeniyor" },
+  { value: "COMPLETED", label: "Tamamlandı" },
+];
+
 export function AgreementsClient({ agreements }: AgreementsClientProps) {
   const toast = useAdminToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "CURRENT" | "LATE" | "COMPLETED">("ALL");
   const [activeModal, setActiveModal] = useState<"create" | "edit" | "installments" | null>(null);
   const [selectedAgreement, setSelectedAgreement] = useState<Agreement | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,15 +102,23 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
   const [deleteTarget, setDeleteTarget] = useState<Agreement | null>(null);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
-  const filteredAgreements = agreements.filter((a) => {
-    const term = searchTerm.toLowerCase();
-    return (
-      a.tenantName.toLowerCase().includes(term) ||
-      a.assetName.toLowerCase().includes(term) ||
-      a.taxOrNationalId.includes(term) ||
-      (a.serialNumber && a.serialNumber.toLowerCase().includes(term))
+  const filteredAgreements = agreements
+    .filter((a) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        a.tenantName.toLowerCase().includes(term) ||
+        a.assetName.toLowerCase().includes(term) ||
+        a.taxOrNationalId.includes(term) ||
+        (a.serialNumber && a.serialNumber.toLowerCase().includes(term));
+      const matchesStatus = statusFilter === "ALL" || a.paymentStatus === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    // Gecikmede olanlar en üstte — takibi kolaylaştırmak için. Aynı durumdakiler
+    // arasında sıra korunur (JS sort stabildir), yani en yeni sözleşme üstte kalır.
+    .sort(
+      (a, b) =>
+        (PAYMENT_STATUS_PRIORITY[a.paymentStatus] ?? 1) - (PAYMENT_STATUS_PRIORITY[b.paymentStatus] ?? 1)
     );
-  });
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,15 +238,33 @@ export function AgreementsClient({ agreements }: AgreementsClientProps) {
       </div>
 
       {/* Toolbar / Search */}
-      <div className="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex items-center">
-        <Search size={17} className="text-slate-400 mr-2 shrink-0" />
-        <input
-          type="text"
-          placeholder="Müşteri adı, cihaz adı, T.C. numarası veya seri no ile ara..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full text-slate-800 placeholder-slate-400 outline-none text-sm bg-transparent"
-        />
+      <div className="bg-white p-4 border border-slate-200 rounded-2xl shadow-sm flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="flex items-center flex-1">
+          <Search size={17} className="text-slate-400 mr-2 shrink-0" />
+          <input
+            type="text"
+            placeholder="Müşteri adı, cihaz adı, T.C. numarası veya seri no ile ara..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full text-slate-800 placeholder-slate-400 outline-none text-sm bg-transparent"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {PAYMENT_STATUS_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setStatusFilter(f.value as typeof statusFilter)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition border ${
+                statusFilter === f.value
+                  ? "bg-slate-900 text-white border-slate-900"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table List */}
