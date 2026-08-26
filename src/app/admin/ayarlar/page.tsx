@@ -18,6 +18,10 @@ export default async function AdminSettingsPage() {
         instagramUrl: settings.instagramUrl,
         youtubeUrl: settings.youtubeUrl,
         linkedinUrl: settings.linkedinUrl,
+        banners: [...settings.banners]
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((b) => ({ url: b.url, alt: b.alt, href: b.href || "" })),
+        bannerIntervalSeconds: settings.bannerIntervalSeconds,
       }}
     />
   );

@@ -574,7 +574,19 @@ model SiteSettings {
   instagramUrl String   @default("https://www.instagram.com/castapos.official/")
   youtubeUrl   String   @default("https://www.youtube.com/@castapos")
   linkedinUrl  String   @default("https://www.linkedin.com/company/castapos/")
+  // Anasayfa hero slider'ı — admin panelden yönetilir (bkz. admin/ayarlar).
+  // Görsel dosya yükleme değil, ürün fotoğraflarındaki gibi URL yapıştırma.
+  banners               HomeBanner[]
+  bannerIntervalSeconds Int          @default(5)
   updatedAt    DateTime @updatedAt
+}
+
+type HomeBanner {
+  url       String
+  alt       String
+  // Boşsa banner tıklanamaz (sade görsel), doluysa tıklanınca bu adrese gider.
+  href      String?
+  sortOrder Int      @default(0)
 }
 
 enum CouponDiscountType {

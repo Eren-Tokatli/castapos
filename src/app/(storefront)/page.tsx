@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getActiveProducts } from "@/lib/catalog-server";
 import { hasDiscount } from "@/lib/catalog-shared";
+import { getSiteSettings } from "@/lib/site-settings";
 import { HomeClient, type HomeTestimonial } from "./HomeClient";
 
 // Sitenin en çok ziyaret edilen sayfası — daha önce hiç kendi metadata'sı
@@ -44,7 +45,7 @@ const TESTIMONIAL_TEXTS = [
 ];
 
 export default async function HomePage() {
-  const products = await getActiveProducts();
+  const [products, settings] = await Promise.all([getActiveProducts(), getSiteSettings()]);
 
   // getActiveProducts() sonucu zaten createdAt desc (en yeni önce) sırada —
   // "Yeni Gelenler" doğrudan bu sırayı kullanır. "Öne Çıkanlar" farklı
@@ -58,12 +59,18 @@ export default async function HomePage() {
     product: products[i % Math.max(products.length, 1)],
   })).filter((t) => t.product);
 
+  const banners = [...settings.banners]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((b) => ({ url: b.url, alt: b.alt, href: b.href || undefined }));
+
   return (
     <HomeClient
       popularProducts={popularProducts}
       newProducts={newProducts}
       flashSaleProducts={flashSaleProducts}
       testimonials={testimonials}
+      banners={banners}
+      bannerIntervalSeconds={settings.bannerIntervalSeconds}
     />
   );
 }

@@ -51,16 +51,26 @@ const EASY_STEPS = [
   }
 ];
 
+export interface HomeBanner {
+  url: string;
+  alt: string;
+  href?: string;
+}
+
 export function HomeClient({
   popularProducts,
   newProducts,
   flashSaleProducts,
   testimonials,
+  banners,
+  bannerIntervalSeconds,
 }: {
   popularProducts: CatalogProduct[];
   newProducts: CatalogProduct[];
   flashSaleProducts: CatalogProduct[];
   testimonials: HomeTestimonial[];
+  banners: HomeBanner[];
+  bannerIntervalSeconds: number;
 }) {
   const [activeEasyStep, setActiveEasyStep] = useState(0);
 
@@ -72,25 +82,18 @@ export function HomeClient({
     }
   };
 
-  // Slider State
+  // Slider State — anasayfa banner'ları ve geçiş süresi admin panelden
+  // (Site Ayarları) yönetiliyor, bkz. lib/site-settings.ts.
   const [activeSlide, setActiveSlide] = useState(0);
-  const slides = [
-    { href: "/kategori?cat=Fitness", img: "/assets/banners/banner-cardio-wide.png", alt: "Eliptik bisiklet kiralama fırsatları" },
-    { href: "/kategori?cat=Yürüyüş%20Bantları", img: "/assets/banners/banner-walkingpad-premium.png", alt: "Yer kaplamayan spor aleti kiralama fırsatları" },
-    {
-      href: "/kategori?cat=Yaz%20Sezonu",
-      img: "/assets/banners/banner-summer-season-offer.png",
-      alt: "Yaz sezonu elektrikli bisiklet ve scooter kiralama",
-    },
-    { href: "/kategori?cat=Ev%20Aletleri", img: "/assets/banners/banner-cleaning-premium-wide.png", alt: "Halı ve koltuk temizliği için kiralama çözümleri" },
-  ];
+  const slides = banners.map((b) => ({ href: b.href || undefined, img: b.url, alt: b.alt }));
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, Math.max(2, bannerIntervalSeconds) * 1000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [slides.length, bannerIntervalSeconds]);
 
   const popularRailRef = useRef<HTMLDivElement>(null);
   const newRailRef = useRef<HTMLDivElement>(null);
@@ -105,19 +108,27 @@ export function HomeClient({
 
   return (
     <div className="home-shell">
-      {/* HERO SLIDER SECTION */}
+      {/* HERO SLIDER SECTION — anasayfa banner'ı hiç eklenmemişse (admin
+          hepsini sildiyse) bölüm tamamen gizlenir. */}
+      {slides.length > 0 && (
       <section className="home-hero">
         <div className="promo-slider">
           <div className="promo-track">
-            {slides.map((slide, idx) => (
-              <Link
-                key={idx}
-                className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
-                href={slide.href}
-              >
-                <img src={slide.img} alt={slide.alt} />
-              </Link>
-            ))}
+            {slides.map((slide, idx) =>
+              slide.href ? (
+                <Link
+                  key={idx}
+                  className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
+                  href={slide.href}
+                >
+                  <img src={slide.img} alt={slide.alt} />
+                </Link>
+              ) : (
+                <div key={idx} className={`promo-slide ${idx === activeSlide ? "active" : ""}`}>
+                  <img src={slide.img} alt={slide.alt} />
+                </div>
+              )
+            )}
           </div>
 
           {slides.length > 1 && (
@@ -153,6 +164,7 @@ export function HomeClient({
           )}
         </div>
       </section>
+      )}
 
       {/* FLASH SALE SECTION */}
       {flashSaleProducts.length > 0 && (

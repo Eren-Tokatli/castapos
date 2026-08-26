@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Plus, Package, CheckCircle2, XCircle, EyeOff, Pencil, RefreshCcw } from "lucide-react";
+import { Plus, Package, CheckCircle2, XCircle, EyeOff, Pencil, RefreshCcw, Search } from "lucide-react";
 import { updateProduct } from "./actions";
 import { useAdminToast } from "../_components/ToastProvider";
 import { useTableControls } from "../_components/useTableControls";
@@ -42,6 +42,7 @@ export function ProductsClient({ products }: ProductsClientProps) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   const stats = {
     total: products.length,
@@ -54,7 +55,16 @@ export function ProductsClient({ products }: ProductsClientProps) {
     ...p,
     minPrice: p.rentalTiers.reduce((min, tier) => (tier.price < min ? tier.price : min), Infinity),
   }));
-  const table = useTableControls(productsWithPrice, 10);
+
+  const filteredProducts = productsWithPrice.filter((p) => {
+    const term = search.trim().toLocaleLowerCase("tr-TR");
+    if (!term) return true;
+    return (
+      p.name.toLocaleLowerCase("tr-TR").includes(term) ||
+      p.sku.toLocaleLowerCase("tr-TR").includes(term)
+    );
+  });
+  const table = useTableControls(filteredProducts, 10);
 
   const handleEditClick = (p: Product) => {
     setSelectedProduct(p);
@@ -117,6 +127,20 @@ export function ProductsClient({ products }: ProductsClientProps) {
         ))}
       </div>
 
+      {/* Search */}
+      <div className="bg-white border border-slate-200/70 rounded-2xl shadow-sm p-4">
+        <div className="relative max-w-sm">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Ürün adı veya SKU ile ara..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-9 pl-9 pr-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition"
+          />
+        </div>
+      </div>
+
       {/* List */}
       <div className="bg-white border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -132,7 +156,14 @@ export function ProductsClient({ products }: ProductsClientProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {table.pageItems.map((p) => {
+              {table.pageItems.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-slate-400">
+                    Ürün bulunamadı.
+                  </td>
+                </tr>
+              ) : (
+                table.pageItems.map((p) => {
                 const minRentalPrice = p.minPrice;
                 const stock = STOCK_STYLES[p.stockStatus] ?? STOCK_STYLES.IN_STOCK;
 
@@ -185,8 +216,9 @@ export function ProductsClient({ products }: ProductsClientProps) {
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
