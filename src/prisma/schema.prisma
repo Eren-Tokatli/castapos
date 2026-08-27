@@ -468,6 +468,9 @@ model RentalAgreement {
   reminder30SentAt DateTime?
   reminder7SentAt  DateTime?
   reminder1SentAt  DateTime?
+  // Süre bitip (rentalEnd geçti) uzatılmadığında bir kez gönderilen
+  // "deneyimini değerlendir" daveti — bkz. api/cron/rental-extension-reminders.
+  reviewInviteSentAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

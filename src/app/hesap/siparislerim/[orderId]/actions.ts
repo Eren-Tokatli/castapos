@@ -3,6 +3,55 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { sendTransactionalEmail, buildReviewThankYouCouponEmail } from "@/lib/email";
+
+const REVIEW_COUPON_PERCENT = 10;
+const REVIEW_COUPON_VALID_MONTHS = 6;
+
+/// Değerlendirme gönderildiğinde teşekkür amaçlı, tek kullanımlık, 6 ay
+/// geçerli %10 kupon oluşturur ve müşteriye mail atar (best-effort — mail
+/// başarısız olsa bile kupon zaten oluşmuştur, review akışını bloklamaz).
+/// Kod üretimi çakışırsa (son derece nadir) birkaç kez tekrar dener.
+async function grantReviewCoupon(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + REVIEW_COUPON_VALID_MONTHS);
+
+  let coupon = null;
+  for (let attempt = 0; attempt < 5 && !coupon; attempt++) {
+    const code = `TESEKKUR-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    try {
+      coupon = await prisma.coupon.create({
+        data: {
+          code,
+          description: `${user.firstName} ${user.lastName} — değerlendirme teşekkür kuponu`.trim(),
+          discountType: "PERCENTAGE",
+          amount: REVIEW_COUPON_PERCENT,
+          active: true,
+          expiresAt,
+          usageLimit: 1,
+          usageLimitPerUser: 1,
+        },
+      });
+    } catch (error: any) {
+      if (error.code !== "P2002") throw error;
+    }
+  }
+  if (!coupon) return;
+
+  try {
+    const email = buildReviewThankYouCouponEmail({
+      customerName: `${user.firstName} ${user.lastName}`.trim(),
+      couponCode: coupon.code,
+      expiresAt,
+    });
+    await sendTransactionalEmail({ to: user.email, ...email });
+  } catch (error) {
+    console.error("Değerlendirme kuponu e-postası gönderilemedi:", error);
+  }
+}
 
 export async function submitReview(input: {
   orderId: string;
@@ -57,5 +106,8 @@ export async function submitReview(input: {
   revalidatePath(`/hesap/siparislerim/${input.orderId}`);
   revalidatePath("/hesap/degerlendirmelerim");
   revalidatePath("/admin/degerlendirmeler");
+
+  await grantReviewCoupon(userId);
+
   return { success: true };
 }

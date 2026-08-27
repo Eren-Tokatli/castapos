@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendTransactionalEmail, buildRentalExtensionReminderEmail } from "@/lib/email";
+import { sendTransactionalEmail, buildRentalExtensionReminderEmail, buildReviewInviteEmail } from "@/lib/email";
 import type { RentalAgreement } from "@/generated/prisma";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +80,52 @@ export async function GET(request: Request) {
       } catch (error: any) {
         errors.push(`${agreement.id} (${milestone.days}g): ${error.message}`);
       }
+    }
+  }
+
+  // Süre bitmiş (rentalEnd = dün) ama uzatılmamış sözleşmeler için — uzatma
+  // yapılsaydı rentalEnd zaten ileri alınmış olurdu, bu yüzden bu sorguya hiç
+  // düşmezdi. boughtOut/earlyReturn/RETURNED dahil tüm durumlarda gönderilir
+  // (kiralama nasıl bittiyse bitsin, deneyim değerlendirmesi hâlâ istenir).
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const dayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+
+  const endedAgreements = await prisma.rentalAgreement.findMany({
+    where: { rentalEnd: { gte: dayStart, lt: dayEnd }, reviewInviteSentAt: null },
+  });
+
+  for (const agreement of endedAgreements as RentalAgreement[]) {
+    try {
+      if (!agreement.email) { skipped++; continue; }
+
+      const order = agreement.orderReferenceNo
+        ? await prisma.order.findFirst({ where: { orderNumber: agreement.orderReferenceNo } })
+        : null;
+      if (!order) { skipped++; continue; }
+
+      const reviewUrl = `${origin}/hesap/siparislerim/${order.id}`;
+      const email = buildReviewInviteEmail({
+        tenantName: agreement.tenantName,
+        assetName: agreement.assetName,
+        reviewUrl,
+      });
+      const result = await sendTransactionalEmail({ to: agreement.email, ...email });
+      if (!result.sent) {
+        errors.push(`${agreement.id} (review daveti): e-posta gönderilemedi`);
+        continue;
+      }
+
+      await prisma.rentalAgreement.update({
+        where: { id: agreement.id },
+        data: { reviewInviteSentAt: new Date() },
+      });
+
+      sent++;
+    } catch (error: any) {
+      errors.push(`${agreement.id} (review daveti): ${error.message}`);
     }
   }
 

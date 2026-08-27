@@ -160,6 +160,59 @@ export function buildRentalExtensionReminderEmail(input: {
   };
 }
 
+export function buildReviewInviteEmail(input: {
+  tenantName: string;
+  assetName: string;
+  reviewUrl: string;
+}) {
+  return {
+    subject: `${input.assetName} deneyimin nasıldı? Değerlendir, %10 kupon kazan`,
+    text: `Merhaba ${input.tenantName},\n\n${input.assetName} kiralaman sona erdi. Deneyimini değerlendirmen 2 dakikanı alır ve bize çok yardımcı olur — üstelik değerlendirme yaptığında bir sonraki siparişinde geçerli %10 indirim kuponu hesabına otomatik tanımlanır.\n\nDeğerlendir: ${input.reviewUrl}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;background:#f6f8fb;padding:28px">
+        <div style="max-width:520px;margin:auto;background:#ffffff;border:1px solid #e5e7ee;border-radius:18px;padding:28px">
+          <div style="font-size:20px;font-weight:800;color:#07111f;margin-bottom:10px">Castapos</div>
+          <h1 style="font-size:22px;line-height:1.25;color:#07111f;margin:0 0 10px">Deneyimin nasıldı?</h1>
+          <p style="font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px">Merhaba ${input.tenantName}, <b>${input.assetName}</b> kiralaman sona erdi. Deneyimini değerlendirir misin?</p>
+          <div style="background:#fff4ef;border:1px solid #ffd4c7;border-radius:14px;padding:18px;margin:0 0 20px">
+            <p style="margin:0;font-size:14px;line-height:1.5;color:#101828"><b>Değerlendirme yapınca</b> bir sonraki siparişinde geçerli <b style="color:#f35f36">%10 indirim kuponu</b> otomatik olarak hesabına tanımlanır.</p>
+          </div>
+          <a href="${input.reviewUrl}" style="display:block;text-align:center;background:#101828;color:#fff;font-weight:800;text-decoration:none;padding:14px;border-radius:12px">Deneyimimi Değerlendir</a>
+        </div>
+      </div>
+    `,
+  };
+}
+
+export function buildReviewThankYouCouponEmail(input: {
+  customerName: string;
+  couponCode: string;
+  expiresAt: Date;
+}) {
+  const expiresStr = input.expiresAt.toLocaleDateString("tr-TR");
+
+  return {
+    subject: "Değerlendirmen için teşekkürler — %10 kuponun hazır",
+    text: `Merhaba ${input.customerName},\n\nDeğerlendirmen için teşekkür ederiz! Bir sonraki siparişinde kullanabileceğin %10 indirim kuponun hesabına tanımlandı.\n\nKupon kodu: ${input.couponCode}\nSon kullanma tarihi: ${expiresStr}\n\nSepette "Kupon Kodu" alanına yapıştırman yeterli.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;background:#f6f8fb;padding:28px">
+        <div style="max-width:520px;margin:auto;background:#ffffff;border:1px solid #e5e7ee;border-radius:18px;padding:28px">
+          <div style="font-size:20px;font-weight:800;color:#07111f;margin-bottom:10px">Castapos</div>
+          <h1 style="font-size:22px;line-height:1.25;color:#07111f;margin:0 0 10px">Teşekkürler! 🎉</h1>
+          <p style="font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px">Merhaba ${input.customerName}, değerlendirmen için teşekkür ederiz. Bir sonraki siparişinde kullanabileceğin kuponun hazır.</p>
+          <div style="background:#fff4ef;border:1px solid #ffd4c7;border-radius:14px;padding:20px;text-align:center;margin:0 0 16px">
+            <p style="margin:0 0 8px;font-size:12px;color:#667085;font-weight:700;text-transform:uppercase">Kupon Kodu</p>
+            <p style="margin:0;letter-spacing:3px;font-size:26px;font-weight:900;color:#f35f36">${input.couponCode}</p>
+          </div>
+          <p style="font-size:13px;line-height:1.5;color:#667085;margin:0 0 4px">İndirim: <b style="color:#101828">%10</b></p>
+          <p style="font-size:13px;line-height:1.5;color:#667085;margin:0">Son kullanma tarihi: <b style="color:#101828">${expiresStr}</b></p>
+          <p style="font-size:12px;line-height:1.5;color:#98a2b3;margin:20px 0 0">Sepette "Kupon Kodu" alanına yapıştırman yeterli.</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
 export function buildOtpEmail(code: string, purpose: "login" | "register") {
   const title = purpose === "login" ? "Castapos giriş doğrulama kodun" : "Castapos e-posta doğrulama kodun";
   const description =
