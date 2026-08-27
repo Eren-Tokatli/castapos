@@ -21,6 +21,17 @@ interface PaymentRecord {
   createdAt: string;
 }
 
+// PaymentRecord.kind için etiket + renk — eskiden sadece ORDER/diğer ikili
+// ayrımı vardı (MEMBERSHIP/PAYLINK/EXTENSION hepsi yanlışlıkla "Taksit
+// Ödemesi" görünüyordu), şimdi her kind kendi etiketiyle gösteriliyor.
+const KIND_META: Record<string, { label: string; tone: string }> = {
+  ORDER: { label: "Sipariş Ödemesi", tone: "bg-purple-50 text-purple-700 border-purple-200" },
+  INSTALLMENT: { label: "Taksit Ödemesi", tone: "bg-blue-50 text-blue-700 border-blue-200" },
+  MEMBERSHIP: { label: "Üyelik Ödemesi", tone: "bg-amber-50 text-amber-700 border-amber-200" },
+  PAYLINK: { label: "Ödeme Linki", tone: "bg-slate-50 text-slate-700 border-slate-200" },
+  EXTENSION: { label: "Kiralama Uzatma", tone: "bg-orange-50 text-orange-700 border-orange-200" },
+};
+
 interface PaymentLinkRecord {
   id: string;
   token: string;
@@ -234,13 +245,9 @@ export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) 
                       </td>
                       <td className="p-4">
                         <span
-                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded border ${
-                            p.kind === "ORDER"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
-                          }`}
+                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded border ${KIND_META[p.kind]?.tone || KIND_META.INSTALLMENT.tone}`}
                         >
-                          {p.kind === "ORDER" ? "Sipariş Ödemesi" : "Taksit Ödemesi"}
+                          {KIND_META[p.kind]?.label || p.kind}
                         </span>
                       </td>
                       <td className="p-4">

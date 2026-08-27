@@ -125,6 +125,41 @@ export function buildInstallmentReminderEmail(input: {
   };
 }
 
+export function buildRentalExtensionReminderEmail(input: {
+  tenantName: string;
+  assetName: string;
+  daysLeft: 30 | 7 | 1;
+  rentalEnd: Date;
+  extendUrl: string;
+}) {
+  const rentalEndStr = input.rentalEnd.toLocaleDateString("tr-TR");
+  const periodLabel =
+    input.daysLeft === 30 ? "1 ay" : input.daysLeft === 7 ? "1 hafta" : "1 gün";
+  const urgent = input.daysLeft === 1;
+
+  return {
+    subject: urgent
+      ? `Son gün — ${input.assetName} kiralaman yarın sona eriyor`
+      : `${periodLabel} kaldı — ${input.assetName} kiralaman ${rentalEndStr} tarihinde sona eriyor`,
+    text: `Merhaba ${input.tenantName},\n\n${input.assetName} kiralamanın bitişine ${periodLabel} kaldı (son gün: ${rentalEndStr}).\n\nDevam etmek istersen kiralamanı uzatabilirsin: ${input.extendUrl}\n\nBir şey yapmazsan kiralaman ${rentalEndStr} tarihinde sona erecek.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;background:#f6f8fb;padding:28px">
+        <div style="max-width:520px;margin:auto;background:#ffffff;border:1px solid #e5e7ee;border-radius:18px;padding:28px">
+          <div style="font-size:20px;font-weight:800;color:#07111f;margin-bottom:10px">Castapos</div>
+          <h1 style="font-size:22px;line-height:1.25;color:#07111f;margin:0 0 10px">${urgent ? "Kiralaman yarın sona eriyor" : "Kiralaman sona ermek üzere"}</h1>
+          <p style="font-size:15px;line-height:1.55;color:#667085;margin:0 0 20px">Merhaba ${input.tenantName}, <b>${input.assetName}</b> kiralamanın bitişine <b>${periodLabel}</b> kaldı.</p>
+          <div style="background:#f8fafc;border:1px solid #edf0f5;border-radius:14px;padding:18px;margin:0 0 20px">
+            <p style="margin:0 0 6px;font-size:12px;color:#667085;font-weight:700;text-transform:uppercase">Bitiş Tarihi</p>
+            <p style="margin:0;font-size:16px;color:#101828;font-weight:800">${rentalEndStr}</p>
+          </div>
+          <a href="${input.extendUrl}" style="display:block;text-align:center;background:#101828;color:#fff;font-weight:800;text-decoration:none;padding:14px;border-radius:12px">Kiralamamı Uzat</a>
+          <p style="font-size:12px;line-height:1.5;color:#98a2b3;margin:20px 0 0">Bir şey yapmazsan kiralaman ${rentalEndStr} tarihinde sona erer. Ürünü uzatmak istemiyorsan bu e-postayı dikkate almayabilirsin.</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
 export function buildOtpEmail(code: string, purpose: "login" | "register") {
   const title = purpose === "login" ? "Castapos giriş doğrulama kodun" : "Castapos e-posta doğrulama kodun";
   const description =

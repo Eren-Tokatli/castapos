@@ -139,11 +139,6 @@ async function extendRentalAgreement(paymentRecord: PaymentRecord) {
   const newRentalEnd = new Date(extendFrom);
   newRentalEnd.setMonth(newRentalEnd.getMonth() + months);
 
-  await prisma.rentalAgreement.update({
-    where: { id: agreement.id },
-    data: { rentalEnd: newRentalEnd },
-  });
-
   const installmentsData = Array.from({ length: months }, (_, i) => {
     const dueDate = new Date(extendFrom);
     dueDate.setMonth(dueDate.getMonth() + i);
@@ -157,6 +152,22 @@ async function extendRentalAgreement(paymentRecord: PaymentRecord) {
   });
 
   await prisma.installment.createMany({ data: installmentsData });
+
+  // Uzatma öncesinden kalan ödenmemiş taksitler varsa (agreement daha önce
+  // LATE olabilir) onları da say — paymentStatus'u sadece bu uzatmanın
+  // taksitlerine değil, sözleşmenin tamamına göre belirle.
+  const unpaidInstallments = await prisma.installment.count({
+    where: { rentalAgreementId: agreement.id, paid: false },
+  });
+
+  await prisma.rentalAgreement.update({
+    where: { id: agreement.id },
+    data: {
+      rentalEnd: newRentalEnd,
+      rentalTermMonths: (agreement.rentalTermMonths || 0) + months,
+      paymentStatus: unpaidInstallments === 0 ? "COMPLETED" : "CURRENT",
+    },
+  });
 
   revalidatePath("/admin/agreements");
   revalidatePath("/hesap/siparislerim");

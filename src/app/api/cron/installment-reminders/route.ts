@@ -64,7 +64,13 @@ export async function GET(request: Request) {
         dueDate: installment.dueDate,
         payUrl,
       });
-      await sendTransactionalEmail({ to: agreement.email, ...email });
+      const result = await sendTransactionalEmail({ to: agreement.email, ...email });
+      if (!result.sent) {
+        // Gönderim başarısız oldu — ödeme linki kaydını lastSentAt olmadan
+        // bırakırız ki yarın tekrar denensin, sessizce "gönderildi" sayılmasın.
+        errors.push(`${installment.id}: e-posta gönderilemedi`);
+        continue;
+      }
 
       if (existingLink) {
         await prisma.paymentLink.update({ where: { id: existingLink.id }, data: { lastSentAt: new Date() } });
