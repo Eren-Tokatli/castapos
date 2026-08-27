@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Search, ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronRight, RefreshCw, Search, ShoppingBag } from "lucide-react";
 
 export type OrderRow = {
   id: string;
@@ -12,6 +13,8 @@ export type OrderRow = {
   status: string;
   itemsLabel: string;
   thumbs: string[];
+  // Kiralama süresi 30 güne kadar kaldıysa dolu — kartta doğrudan "Uzat" butonu göstermek için.
+  extendableRentalAgreementId: string | null;
 };
 
 const STATUS_META: Record<string, { text: string; tone: "wait" | "progress" | "done" | "cancel" }> = {
@@ -30,6 +33,7 @@ const FILTERS: { key: string; label: string; statuses: string[] | null }[] = [
 ];
 
 export function SiparislerimClient({ orders }: { orders: OrderRow[] }) {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState("all");
   const [query, setQuery] = useState("");
 
@@ -118,6 +122,19 @@ export function SiparislerimClient({ orders }: { orders: OrderRow[] }) {
                   <b className="order-row-total">
                     {order.total.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL
                   </b>
+                  {order.extendableRentalAgreementId && (
+                    <button
+                      type="button"
+                      className="order-row-extend-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/pay/uzatma/${order.extendableRentalAgreementId}`);
+                      }}
+                    >
+                      <RefreshCw size={13} /> Uzat
+                    </button>
+                  )}
                 </div>
 
                 <ChevronRight size={18} className="order-row-chevron" />

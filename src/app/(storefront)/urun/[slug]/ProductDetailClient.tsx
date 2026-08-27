@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Star, Check, BadgeCheck, ChevronLeft, ChevronRight, ShieldAlert, ShieldCheck, Truck, Wallet, X, ZoomIn } from "lucide-react";
+import { Star, Check, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, ShieldAlert, ShieldCheck, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
   CatalogProduct,
@@ -72,17 +72,17 @@ const INFO_PANELS = {
   damage: {
     icon: ShieldAlert,
     title: "Ürüne zarar gelirse ne olur?",
-    text: "Kiralama süresi boyunca üründe oluşabilecek normal kullanım kaynaklı arızalar Castapos güvencesi kapsamındadır — destek ekibimizle iletişime geçmen yeterli, teknik ekip ürünü yerinde inceler ve gerekirse ücretsiz onarım ya da değişim sağlanır. Kasıtlı hasar veya ürünün amacı dışında kullanımı durumunda hasar bedeli sözleşme koşullarına göre ayrıca değerlendirilir."
+    text: "Normal kullanımdan kaynaklanan arızalar Castapos güvencesindedir — destek ekibine bildir, ücretsiz onarım ya da değişim sağlanır. Kasıtlı hasarda bedel sözleşmeye göre değerlendirilir."
   },
   installment: {
     icon: Wallet,
     title: "Taksit ödemelerimi nasıl yapacağım?",
-    text: "Aylık ödemen, sipariş sırasında kayıtlı kartından her ay otomatik olarak tahsil edilir; ödeme tarihinden birkaç gün önce hatırlatma bildirimi alırsın. Güncel taksit durumunu ve ödeme geçmişini T.C. kimlik numaranla giriş yaptığın /takip sayfasından ya da Hesabım > Siparişlerim ekranından her an takip edebilirsin."
+    text: "Aylık ödemen kayıtlı kartından otomatik tahsil edilir, ödeme öncesi hatırlatma alırsın. Güncel durumu /takip sayfasından ya da Hesabım > Siparişlerim'den takip edebilirsin."
   },
   warranty: {
     icon: BadgeCheck,
     title: "Ürünün garantisi var mı?",
-    text: "Tüm kiralık ürünler teslimattan önce Castapos teknik ekibi tarafından kontrolden geçirilir ve kiralama süren boyunca garanti kapsamındadır. Üretim kaynaklı bir arıza yaşarsan ücretsiz teknik servis desteği alır, gerekirse ürün aynı gün içinde değiştirilir."
+    text: "Tüm ürünler teslimat öncesi kontrolden geçer, kiralama boyunca garanti kapsamındadır. Üretim kaynaklı arızada ücretsiz teknik servis, gerekirse aynı gün değişim sağlanır."
   }
 } as const;
 
@@ -106,47 +106,15 @@ export function ProductDetailClient({
   const [infoPanel, setInfoPanel] = useState<keyof typeof INFO_PANELS | null>(null);
   const [questionText, setQuestionText] = useState("");
   const [reviewFilter, setReviewFilter] = useState<string>("Tümü");
-  // Ürün Açıklaması/Teknik Özellikler/... sekmeleri mobilde anasayfadaki
-  // "Ürünü seç" adımları gibi tek bir accordion listesine dönüşüyor;
-  // masaüstünde mevcut sticky sekme çubuğu + altında tek panel aynen duruyor.
-  const [isMobileTabs, setIsMobileTabs] = useState(false);
-  const tabItemRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
+  const tabSectionRefs = React.useRef<Record<string, HTMLElement | null>>({});
 
-  // Uzun bir panel (ör. Soru & Cevap) kapanıp yeni sekme açılınca sayfa
-  // yüksekliği aniden değişiyor ve kullanıcı ekranda "kaybolmuş" oluyordu.
-  // setTimeout yerine gerçek CSS geçişinin (max-height) bitişini bekleyip
-  // ondan sonra yeni açılan sekmeyi ekranın üstüne kaydırıyoruz — animasyon
-  // süresi cihaza göre değişse de (arka plan sekmesi vs.) doğru anı yakalar.
-  const scrollTabIntoView = (key: string) => {
-    const itemEl = tabItemRefs.current[key];
-    if (!itemEl) return;
-    const accordionEl = itemEl.querySelector<HTMLElement>(".detail-tab-accordion");
-    const doScroll = () => itemEl.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (!accordionEl) {
-      doScroll();
-      return;
-    }
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      accordionEl.removeEventListener("transitionend", onEnd);
-      doScroll();
-    };
-    const onEnd = (e: TransitionEvent) => {
-      if (e.propertyName === "max-height") finish();
-    };
-    accordionEl.addEventListener("transitionend", onEnd);
-    // transitionend hiç ateşlenmezse (ör. reduced-motion) diye güvenlik ağı.
-    window.setTimeout(finish, 500);
+  // Ürün Açıklaması/Teknik Özellikler/... artık accordion değil — hepsi
+  // sayfada alt alta her zaman açık duruyor. Üstteki (sticky) sekme
+  // butonları sadece o bölüme kaydırıyor.
+  const scrollToTabSection = (key: string) => {
+    setActiveTab(key);
+    tabSectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 760px)");
-    const update = () => setIsMobileTabs(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   const currentMonthly = monthlyPrice(p, period);
   const rentTotal = currentMonthly * period;
@@ -374,21 +342,30 @@ export function ProductDetailClient({
             </div>
           </div>
 
-            {/* Info teaser stack — fiyat kartının dışında, hemen altında */}
+            {/* Info teaser accordion — fiyat kartının dışında, hemen altında.
+                Aynı anda sadece bir tanesi açık kalır: birine basınca açık
+                olan varsa kapanır, tıklanan açılır. */}
             <div className="detail-info-teaser-stack">
               {(Object.keys(INFO_PANELS) as (keyof typeof INFO_PANELS)[]).map((key) => {
                 const panel = INFO_PANELS[key];
                 const Icon = panel.icon;
+                const isOpen = infoPanel === key;
                 return (
-                  <button
-                    key={key}
-                    type="button"
-                    className="info-teaser-card"
-                    onClick={() => setInfoPanel(key)}
-                  >
-                    <span className="info-teaser-icon"><Icon size={22} /></span>
-                    <span className="info-teaser-text">{panel.title}</span>
-                  </button>
+                  <div key={key} className={`info-teaser-item ${isOpen ? "open" : ""}`}>
+                    <button
+                      type="button"
+                      className="info-teaser-card"
+                      aria-expanded={isOpen}
+                      onClick={() => setInfoPanel(isOpen ? null : key)}
+                    >
+                      <span className="info-teaser-icon"><Icon size={22} /></span>
+                      <span className="info-teaser-text">{panel.title}</span>
+                      <ChevronDown size={17} className="info-teaser-chevron" />
+                    </button>
+                    <div className="info-teaser-body">
+                      <p>{panel.text}</p>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -396,247 +373,217 @@ export function ProductDetailClient({
         </div>
       </section>
 
-      {/* DETAIL TABS SECTION */}
+      {/* DETAIL TABS SECTION — accordion değil; tüm bölümler sayfada alt alta
+          her zaman açık, üstteki sticky butonlar sadece o bölüme kaydırır. */}
       <section className="section product-info-section">
         <div className="container" id="reviews-anchor">
-          {(() => {
-            const activePanelContent = (
-              <>
+          <div className="detail-tabs">
+            {PRODUCT_DETAIL_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={activeTab === tab.key ? "active" : ""}
+                onClick={() => scrollToTabSection(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="detail-tab-panels detail-tab-panels-stacked">
             {/* Description Panel */}
-            {activeTab === "description" && (
-              <section className="detail-tab-panel active">
-                <div className="premium-tab-head">
-                  <h3>Ürün Hakkında</h3>
-                  <p>Satın almadan önce ürünün günlük kullanımına uygunluğunu daha net gör.</p>
-                </div>
-                <div className="premium-description-grid">
-                  <article className="premium-copy-card main">
-                    {p.description ? (
-                      <div dangerouslySetInnerHTML={{ __html: p.description }} />
-                    ) : (
-                      <p>Bu ürün için henüz bir açıklama girilmemiş.</p>
-                    )}
-                    {p.periods.length > 0 && (
-                      <p>
-                        Bu ürün <strong>{p.periods.join(", ")} ay</strong> kiralama seçenekleriyle
-                        satın alma öncesi deneme ihtiyacına cevap verir.
-                      </p>
-                    )}
-                  </article>
-                </div>
-              </section>
-            )}
+            <section
+              ref={(el) => { tabSectionRefs.current.description = el; }}
+              className="detail-tab-panel active"
+            >
+              <div className="premium-tab-head">
+                <h3>Ürün Hakkında</h3>
+                <p>Satın almadan önce ürünün günlük kullanımına uygunluğunu daha net gör.</p>
+              </div>
+              <div className="premium-description-grid">
+                <article className="premium-copy-card main">
+                  {p.description ? (
+                    <div dangerouslySetInnerHTML={{ __html: p.description }} />
+                  ) : (
+                    <p>Bu ürün için henüz bir açıklama girilmemiş.</p>
+                  )}
+                  {p.periods.length > 0 && (
+                    <p>
+                      Bu ürün <strong>{p.periods.join(", ")} ay</strong> kiralama seçenekleriyle
+                      satın alma öncesi deneme ihtiyacına cevap verir.
+                    </p>
+                  )}
+                </article>
+              </div>
+            </section>
 
             {/* Specs Panel */}
-            {activeTab === "specs" && (
-              <section className="detail-tab-panel active">
-                <div className="premium-tab-head">
-                  <h3>Teknik Özellikler</h3>
-                  <p>Kiralama kararını etkileyen temel özellikleri sade ve okunabilir şekilde incele.</p>
+            <section
+              ref={(el) => { tabSectionRefs.current.specs = el; }}
+              className="detail-tab-panel active"
+            >
+              <div className="premium-tab-head">
+                <h3>Teknik Özellikler</h3>
+                <p>Kiralama kararını etkileyen temel özellikleri sade ve okunabilir şekilde incele.</p>
+              </div>
+              {p.specs.length > 0 ? (
+                <div className="spec-table">
+                  {p.specs.map((s, idx) => (
+                    <div key={idx}>
+                      <span>{s.label}</span>
+                      <b>{s.value}</b>
+                    </div>
+                  ))}
                 </div>
-                {p.specs.length > 0 ? (
-                  <div className="spec-table">
-                    {p.specs.map((s, idx) => (
-                      <div key={idx}>
-                        <span>{s.label}</span>
-                        <b>{s.value}</b>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p>Bu ürünün teknik özellikleri "Ürün Açıklaması" sekmesindeki detaylarda yer almaktadır.</p>
-                )}
-              </section>
-            )}
+              ) : (
+                <p>Bu ürünün teknik özellikleri &quot;Ürün Açıklaması&quot; bölümündeki detaylarda yer almaktadır.</p>
+              )}
+            </section>
 
             {/* Reviews Panel */}
-            {activeTab === "reviews" && (
-              <section className="detail-tab-panel active">
-                <div className="premium-tab-head">
-                  <h3>Değerlendirmeler</h3>
-                  <p>Ürünü deneyen kullanıcıların puanlarını ve kısa yorumlarını burada takip et.</p>
-                </div>
-                <div className="reviews-shell">
-                  <div className="reviews-top-grid">
-                    <div className="review-summary-box">
-                      <div>
-                        <small>Ortalama puan</small>
-                        <strong>{reviewCount > 0 ? averageRating.toFixed(1).replace(".", ",") : "-"}</strong>
-                        <span>{reviewCount} kullanıcı değerlendirmesi</span>
-                      </div>
-                      <div className="gold-stars">
-                        <StarRating rating={Math.round(averageRating)} />
-                      </div>
-                    </div>
-
-                    <div className="review-form-box">
-                      <div className="review-form-head">
-                        <h4>Bu Ürünü Değerlendir</h4>
-                      </div>
-                      <p>
-                        Değerlendirme yapabilmek için bu ürünü daha önce kiralamış olman gerekiyor.
-                        Tamamlanan siparişlerinden ürünü değerlendirebilirsin.
-                      </p>
-                      <Link href="/hesap/siparislerim" className="btn btn-primary mt-2">
-                        Siparişlerime Git
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="review-list-head">
+            <section
+              ref={(el) => { tabSectionRefs.current.reviews = el; }}
+              className="detail-tab-panel active"
+            >
+              <div className="premium-tab-head">
+                <h3>Değerlendirmeler</h3>
+                <p>Ürünü deneyen kullanıcıların puanlarını ve kısa yorumlarını burada takip et.</p>
+              </div>
+              <div className="reviews-shell">
+                <div className="reviews-top-grid">
+                  <div className="review-summary-box">
                     <div>
-                      <strong>Yorumlar</strong>
-                      <span>Filtreleyerek hızlıca incele</span>
+                      <small>Ortalama puan</small>
+                      <strong>{reviewCount > 0 ? averageRating.toFixed(1).replace(".", ",") : "-"}</strong>
+                      <span>{reviewCount} kullanıcı değerlendirmesi</span>
                     </div>
-                    <div className="review-filter-bar">
-                      {["Tümü", "5", "4", "3", "2", "1"].map((f) => (
-                        <button
-                          key={f}
-                          type="button"
-                          className={reviewFilter === f ? "active" : ""}
-                          onClick={() => setReviewFilter(f)}
-                        >
-                          {f === "Tümü" ? "Tümü" : f + " Yıldız"}
-                        </button>
-                      ))}
+                    <div className="gold-stars">
+                      <StarRating rating={Math.round(averageRating)} />
                     </div>
                   </div>
 
-                  <div className="qa-list review-list">
-                    {filteredReviews.length === 0 ? (
-                      <p className="p-4 text-center text-neutral-500">
-                        {reviews.length === 0
-                          ? "Bu ürün için henüz bir değerlendirme yapılmamış."
-                          : "Bu filtreye uygun yorum bulunamadı."}
-                      </p>
-                    ) : (
-                      filteredReviews.map((r) => (
-                        <article key={r.id}>
-                          <div className="review-head">
-                            <b>{r.name}</b>
-                            <span className="gold-stars small">
-                              <StarRating rating={r.rating} size={13} />
-                            </span>
-                          </div>
-                          <p>{r.comment}</p>
-                        </article>
-                      ))
-                    )}
+                  <div className="review-form-box">
+                    <div className="review-form-head">
+                      <h4>Bu Ürünü Değerlendir</h4>
+                    </div>
+                    <p>
+                      Değerlendirme yapabilmek için bu ürünü daha önce kiralamış olman gerekiyor.
+                      Tamamlanan siparişlerinden ürünü değerlendirebilirsin.
+                    </p>
+                    <Link href="/hesap/siparislerim" className="btn btn-primary mt-2">
+                      Siparişlerime Git
+                    </Link>
                   </div>
                 </div>
-              </section>
-            )}
+
+                <div className="review-list-head">
+                  <div>
+                    <strong>Yorumlar</strong>
+                    <span>Filtreleyerek hızlıca incele</span>
+                  </div>
+                  <div className="review-filter-bar">
+                    {["Tümü", "5", "4", "3", "2", "1"].map((f) => (
+                      <button
+                        key={f}
+                        type="button"
+                        className={reviewFilter === f ? "active" : ""}
+                        onClick={() => setReviewFilter(f)}
+                      >
+                        {f === "Tümü" ? "Tümü" : f + " Yıldız"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="qa-list review-list">
+                  {filteredReviews.length === 0 ? (
+                    <p className="p-4 text-center text-neutral-500">
+                      {reviews.length === 0
+                        ? "Bu ürün için henüz bir değerlendirme yapılmamış."
+                        : "Bu filtreye uygun yorum bulunamadı."}
+                    </p>
+                  ) : (
+                    filteredReviews.map((r) => (
+                      <article key={r.id}>
+                        <div className="review-head">
+                          <b>{r.name}</b>
+                          <span className="gold-stars small">
+                            <StarRating rating={r.rating} size={13} />
+                          </span>
+                        </div>
+                        <p>{r.comment}</p>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </div>
+            </section>
 
             {/* Q&A Panel */}
-            {activeTab === "qa" && (
-              <section className="detail-tab-panel active">
-                <div className="premium-tab-head">
-                  <h3>Soru & Cevap</h3>
-                  <p>Teslimat, kurulum ve uzatma gibi konularda hızlı bilgi al.</p>
+            <section
+              ref={(el) => { tabSectionRefs.current.qa = el; }}
+              className="detail-tab-panel active"
+            >
+              <div className="premium-tab-head">
+                <h3>Soru & Cevap</h3>
+                <p>Teslimat, kurulum ve uzatma gibi konularda hızlı bilgi al.</p>
+              </div>
+              <form className="question-box" onSubmit={handleQuestionSubmit}>
+                <h4>Sorunu Sor</h4>
+                <p>Ürünle ilgili merak ettiğin konuyu yaz; destek ekibi en kısa sürede dönüş sağlar.</p>
+                <textarea
+                  placeholder="Örn: Teslimat, kurulum veya kiralama uzatma süreci hakkında soru sorabilirsin."
+                  value={questionText}
+                  onChange={(e) => setQuestionText(e.target.value)}
+                />
+                <div className="question-actions single-action mt-2">
+                  <button type="submit" className="btn btn-primary">
+                    Soru Gönder
+                  </button>
                 </div>
-                <form className="question-box" onSubmit={handleQuestionSubmit}>
-                  <h4>Sorunu Sor</h4>
-                  <p>Ürünle ilgili merak ettiğin konuyu yaz; destek ekibi en kısa sürede dönüş sağlar.</p>
-                  <textarea
-                    placeholder="Örn: Teslimat, kurulum veya kiralama uzatma süreci hakkında soru sorabilirsin."
-                    value={questionText}
-                    onChange={(e) => setQuestionText(e.target.value)}
-                  />
-                  <div className="question-actions single-action mt-2">
-                    <button type="submit" className="btn btn-primary">
-                      Soru Gönder
-                    </button>
-                  </div>
-                </form>
-                <div className="qa-list">
-                  {qaItems.map((item, idx) => (
-                    <article key={idx}>
-                      <b>Alper A.</b>
-                      <p>{item.q}</p>
-                      <div className="qa-answer">
-                        <strong>Castapos yanıtı</strong>
-                        <p>{item.a}</p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </section>
-            )}
+              </form>
+              <div className="qa-list">
+                {qaItems.map((item, idx) => (
+                  <article key={idx}>
+                    <b>Alper A.</b>
+                    <p>{item.q}</p>
+                    <div className="qa-answer">
+                      <strong>Castapos yanıtı</strong>
+                      <p>{item.a}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
 
             {/* Return Policy Panel */}
-            {activeTab === "return" && (
-              <section className="detail-tab-panel active">
-                <div className="premium-tab-head">
-                  <h3>İptal & İade Koşulları</h3>
-                  <p>Kiralama sürecinde teslimat öncesi iptal, dönem sonu iade ve kontrol adımları şeffaf ilerler.</p>
-                </div>
-                <div className="return-policy-grid">
-                  <article>
-                    <span>01</span>
-                    <b>Teslimat öncesi iptal</b>
-                    <p>Teslimat öncesi iptal talebi destek ekibi üzerinden alınır.</p>
-                  </article>
-                  <article>
-                    <span>02</span>
-                    <b>Dönem sonu iade</b>
-                    <p>Kiralama sonunda ürün kontrolü sonrası iade süreci tamamlanır.</p>
-                  </article>
-                  <article>
-                    <span>03</span>
-                    <b>Kiralama uzatma</b>
-                    <p>Uygun stok bulunması halinde kiralama süresi uzatma talebi oluşturabilirsin.</p>
-                  </article>
-                </div>
-              </section>
-            )}
-              </>
-            );
-
-            if (isMobileTabs) {
-              return (
-                <div className="detail-tabs-accordion">
-                  {PRODUCT_DETAIL_TABS.map((tab) => (
-                    <div
-                      key={tab.key}
-                      ref={(el) => { tabItemRefs.current[tab.key] = el; }}
-                      className={`detail-tab-item ${activeTab === tab.key ? "active" : ""}`}
-                    >
-                      <button
-                        type="button"
-                        className={activeTab === tab.key ? "active" : ""}
-                        onClick={() => {
-                          setActiveTab(tab.key);
-                          scrollTabIntoView(tab.key);
-                        }}
-                      >
-                        {tab.label}
-                      </button>
-                      <div className="detail-tab-accordion">
-                        {activeTab === tab.key && activePanelContent}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            }
-
-            return (
-              <>
-                <div className="detail-tabs">
-                  {PRODUCT_DETAIL_TABS.map((tab) => (
-                    <button
-                      key={tab.key}
-                      className={activeTab === tab.key ? "active" : ""}
-                      onClick={() => setActiveTab(tab.key)}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="detail-tab-panels">{activePanelContent}</div>
-              </>
-            );
-          })()}
+            <section
+              ref={(el) => { tabSectionRefs.current.return = el; }}
+              className="detail-tab-panel active"
+            >
+              <div className="premium-tab-head">
+                <h3>İptal & İade Koşulları</h3>
+                <p>Kiralama sürecinde teslimat öncesi iptal, dönem sonu iade ve kontrol adımları şeffaf ilerler.</p>
+              </div>
+              <div className="return-policy-grid">
+                <article>
+                  <span>01</span>
+                  <b>Teslimat öncesi iptal</b>
+                  <p>Teslimat öncesi iptal talebi destek ekibi üzerinden alınır.</p>
+                </article>
+                <article>
+                  <span>02</span>
+                  <b>Dönem sonu iade</b>
+                  <p>Kiralama sonunda ürün kontrolü sonrası iade süreci tamamlanır.</p>
+                </article>
+                <article>
+                  <span>03</span>
+                  <b>Kiralama uzatma</b>
+                  <p>Uygun stok bulunması halinde kiralama süresi uzatma talebi oluşturabilirsin.</p>
+                </article>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
 
@@ -698,29 +645,6 @@ export function ProductDetailClient({
         </div>
       )}
 
-      {/* INFO PANEL (zarar/taksit/garanti) */}
-      {infoPanel && (
-        <div className="image-zoom-backdrop open" onClick={() => setInfoPanel(null)}>
-          <div className="info-panel-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="image-zoom-close"
-              onClick={() => setInfoPanel(null)}
-              aria-label="Kapat"
-            >
-              <X size={20} />
-            </button>
-            <div className="info-panel-visual">
-              {(() => {
-                const Icon = INFO_PANELS[infoPanel].icon;
-                return <Icon size={40} />;
-              })()}
-            </div>
-            <h3>{INFO_PANELS[infoPanel].title}</h3>
-            <p>{INFO_PANELS[infoPanel].text}</p>
-          </div>
-        </div>
-      )}
     </>
   );
 }

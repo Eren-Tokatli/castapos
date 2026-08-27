@@ -62,6 +62,7 @@ enum PaymentRecordKind {
   INSTALLMENT
   MEMBERSHIP
   PAYLINK
+  EXTENSION
 }
 
 enum DeliveryStatus {
@@ -501,6 +502,11 @@ model PaymentRecord {
   installmentId String?           @db.ObjectId
   userId        String?           @db.ObjectId
   paymentLinkId String?           @db.ObjectId
+  // EXTENSION kind için: hangi kiralama sözleşmesinin uzatıldığı + seçilen
+  // paketin kaç ay olduğu (callback'te rentalEnd'i bu kadar ileri almak
+  // ve yeni Installment satırları oluşturmak için gerekir).
+  rentalAgreementId String?       @db.ObjectId
+  extensionMonths    Int?
 
   payerName  String
   payerEmail String?
@@ -520,6 +526,7 @@ model PaymentRecord {
   @@index([orderId])
   @@index([installmentId])
   @@index([paymentLinkId])
+  @@index([rentalAgreementId])
 }
 
 /// Server-side OTP storage for the installment portal's TC/tax-id + SMS

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { retrieveCheckoutForm } from "@/lib/iyzico";
 import { revalidatePath } from "next/cache";
-import type { Order } from "@/generated/prisma";
+import type { Order, PaymentRecord } from "@/generated/prisma";
 import { sendTransactionalEmail, buildOrderConfirmationEmail } from "@/lib/email";
 import { sendSms } from "@/lib/sms";
 
@@ -118,6 +118,50 @@ async function createRentalAgreementsFromOrder(order: Order) {
     revalidatePath("/admin/agreements");
     revalidatePath("/admin");
   }
+}
+
+/// EXTENSION ödemesi tamamlanınca çağrılır: rentalEnd'i seçilen paketin ay
+/// sayısı kadar ileri alır ve o kadar yeni Installment satırı ekler — ilk ay
+/// (bu ödeme) paid:true, kalanı normal /takip akışında tahsil edilmek üzere
+/// unpaid. Mevcut bitiş tarihi henüz gelmemişse ondan devam eder (süre
+/// üst üste binmez), geçmişse bugünden başlar.
+async function extendRentalAgreement(paymentRecord: PaymentRecord) {
+  if (!paymentRecord.rentalAgreementId || !paymentRecord.extensionMonths) return null;
+
+  const agreement = await prisma.rentalAgreement.findUnique({
+    where: { id: paymentRecord.rentalAgreementId },
+  });
+  if (!agreement) return null;
+
+  const months = paymentRecord.extensionMonths;
+  const monthlyAmount = paymentRecord.amount;
+  const extendFrom = agreement.rentalEnd && agreement.rentalEnd > new Date() ? agreement.rentalEnd : new Date();
+  const newRentalEnd = new Date(extendFrom);
+  newRentalEnd.setMonth(newRentalEnd.getMonth() + months);
+
+  await prisma.rentalAgreement.update({
+    where: { id: agreement.id },
+    data: { rentalEnd: newRentalEnd },
+  });
+
+  const installmentsData = Array.from({ length: months }, (_, i) => {
+    const dueDate = new Date(extendFrom);
+    dueDate.setMonth(dueDate.getMonth() + i);
+    return {
+      rentalAgreementId: agreement.id,
+      dueDate,
+      amount: monthlyAmount,
+      paid: i === 0, // uzatmanın ilk ayı bu ödemeyle tahsil edildi
+      description: `Uzatma - ${i + 1}. Ay Ödemesi`,
+    };
+  });
+
+  await prisma.installment.createMany({ data: installmentsData });
+
+  revalidatePath("/admin/agreements");
+  revalidatePath("/hesap/siparislerim");
+
+  return agreement;
 }
 
 export async function POST(
@@ -255,6 +299,15 @@ export async function POST(
           new URL(`/pay/link/basarili?name=${encodeURIComponent(paymentRecord.payerName)}&amount=${paymentRecord.amount}`, request.url),
           303
         );
+      } else if (paymentRecord.kind === "EXTENSION" && paymentRecord.rentalAgreementId) {
+        const agreement = await extendRentalAgreement(paymentRecord);
+
+        if (agreement) {
+          return NextResponse.redirect(
+            new URL(`/pay/uzatma/${agreement.id}?payment=success`, request.url),
+            303
+          );
+        }
       }
     } else {
       // Payment Failed
@@ -306,6 +359,11 @@ export async function POST(
             303
           );
         }
+      } else if (paymentRecord.kind === "EXTENSION" && paymentRecord.rentalAgreementId) {
+        return NextResponse.redirect(
+          new URL(`/pay/uzatma/${paymentRecord.rentalAgreementId}?payment=error&msg=${encodeURIComponent(errorMessage)}`, request.url),
+          303
+        );
       }
     }
 

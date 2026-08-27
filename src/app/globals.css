@@ -4004,6 +4004,26 @@ body:has(.account-page) .category-bar {
   color: #98a2b3;
 }
 
+.order-row-extend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--gold-dark, #b8860b);
+  background: transparent;
+  color: var(--gold-dark, #b8860b);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease;
+}
+
+.order-row-extend-btn:hover {
+  background: var(--gold-dark, #b8860b);
+  color: #fff;
+}
+
 :root[data-theme="dark"] .account-panel-page {
   background:
     radial-gradient(circle at 80% 10%, rgba(243, 95, 54, .1), transparent 28%),
@@ -5266,6 +5286,22 @@ body.page-urun-detay .detail-tab-panel {
   position: relative;
   overflow: hidden;
   padding: 28px;
+}
+
+/* Bölümler artık sekme değişince gizlenmiyor, sayfada alt alta duruyor —
+   aralarına boşluk + üstteki sticky sekme çubuğunun altında kalmasın diye
+   kaydırma payı (scroll-margin-top, sticky bar yüksekliğine göre). */
+.detail-tab-panels-stacked {
+  display: grid;
+  gap: 20px;
+}
+body.page-urun-detay .detail-tab-panels-stacked .detail-tab-panel {
+  scroll-margin-top: 180px;
+}
+@media (max-width: 980px) {
+  body.page-urun-detay .detail-tab-panels-stacked .detail-tab-panel {
+    scroll-margin-top: 24px;
+  }
 }
 
 body.page-urun-detay .detail-tab-panel:before {
@@ -12746,24 +12782,29 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   flex: 1;
   gap: 10px;
 }
+.info-teaser-item {
+  background: #fff;
+  border: 1.5px solid #d8dde7;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+.info-teaser-item.open {
+  border-color: rgba(243, 95, 54, .35);
+  box-shadow: 0 12px 26px rgba(16, 24, 40, .08);
+}
 .info-teaser-card {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 14px;
   width: 100%;
-  background: #fff;
-  border: 1.5px solid #d8dde7;
-  border-radius: 16px;
+  background: transparent;
+  border: 0;
   padding: 16px 18px;
   text-align: left;
   cursor: pointer;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-}
-.info-teaser-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(16, 24, 40, .08);
-  border-color: rgba(243, 95, 54, .35);
+  font: inherit;
 }
 .info-teaser-icon {
   display: inline-flex;
@@ -12777,45 +12818,35 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   color: var(--brand);
 }
 .info-teaser-text {
+  flex: 1;
   font-size: 14px;
   font-weight: 800;
   color: #1f2937;
   line-height: 1.35;
 }
-
-
-/* Ürün sayfası: zarar/taksit/garanti bilgi paneli (görsel + açıklama) */
-.info-panel-modal {
-  position: relative;
-  width: min(1120px, 96%);
-  max-height: 90vh;
-  overflow: auto;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 40px 90px rgba(16, 24, 40, .3);
-  padding: 56px 36px 52px;
-  text-align: center;
+.info-teaser-chevron {
+  flex-shrink: 0;
+  color: #98a2b3;
+  transition: transform .2s ease;
 }
-.info-panel-visual {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
-  background: linear-gradient(145deg, #111827, #1b2942);
-  color: #ffb199;
+.info-teaser-item.open .info-teaser-chevron {
+  transform: rotate(180deg);
+  color: var(--brand);
 }
-.info-panel-modal h3 {
-  font-size: 22px;
-  margin: 0 0 12px;
-  color: #111827;
+.info-teaser-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .28s ease;
 }
-.info-panel-modal p {
-  font-size: 15px;
-  line-height: 1.7;
-  color: #667085;
+.info-teaser-item.open .info-teaser-body {
+  max-height: 200px;
+}
+.info-teaser-body p {
   margin: 0;
+  padding: 0 18px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #667085;
 }
 
 /* Ürün sayfası: sol (galeri) ve sağ (fiyat kartı + bilgi kartları) kolonların

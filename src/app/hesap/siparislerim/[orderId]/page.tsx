@@ -1,11 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
-import { ArrowLeft, Calendar, FileText, CreditCard } from "lucide-react";
+import { ArrowLeft, Calendar, FileText, CreditCard, CalendarClock, RefreshCw } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AccountShell } from "@/components/AccountShell";
 import { OrderItemsClient, type ReviewableItem } from "./OrderItemsClient";
+
+// Bitiş tarihine bu kadar veya daha az gün kaldıysa "Uzat" butonu gösterilir.
+const EXTENSION_WINDOW_DAYS = 30;
 
 export const dynamic = "force-dynamic";
 
@@ -45,14 +48,41 @@ export default async function OrderDetailPage({
     notFound();
   }
 
-  const [user, products, reviews] = await Promise.all([
+  const [user, products, reviews, rentalAgreements] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.product.findMany({
       where: { id: { in: order.items.map((i) => i.productId) } },
       select: { id: true, images: true },
     }),
     prisma.review.findMany({ where: { userId, orderId: order.id }, select: { productId: true } }),
+    // Ödeme tamamlanınca her RENT satırı için otomatik oluşan sözleşme —
+    // bkz. api/iyzico/callback createRentalAgreementsFromOrder. Bitiş
+    // tarihi ve uzatma buradan okunur, Order'da tutulmuyor.
+    prisma.rentalAgreement.findMany({ where: { orderReferenceNo: order.orderNumber } }),
   ]);
+
+  const now = new Date();
+  const rentalStatusByProductId = new Map(
+    order.items
+      .filter((item) => item.saleMode === "RENT")
+      .map((item) => {
+        const agreement = rentalAgreements.find(
+          (a) => a.assetSku === item.sku || a.assetName === item.name
+        );
+        if (!agreement || !agreement.rentalEnd) return null;
+        const daysLeft = Math.ceil((agreement.rentalEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return [
+          item.productId,
+          {
+            rentalAgreementId: agreement.id,
+            rentalEnd: agreement.rentalEnd,
+            daysLeft,
+            canExtend: daysLeft <= EXTENSION_WINDOW_DAYS,
+          },
+        ] as const;
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+  );
 
   const imageByProductId = new Map(
     products.map((p) => [p.id, [...p.images].sort((a, b) => a.sortOrder - b.sortOrder)[0]?.url])
@@ -145,6 +175,46 @@ export default async function OrderDetailPage({
             </div>
           </div>
         </div>
+
+        {rentalStatusByProductId.size > 0 && (
+          <div className="premium-surface p-6 space-y-4">
+            <h3 className="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Kiralama Durumu</h3>
+            <div className="space-y-3">
+              {reviewableItems
+                .filter((item) => rentalStatusByProductId.has(item.productId))
+                .map((item) => {
+                  const rental = rentalStatusByProductId.get(item.productId)!;
+                  return (
+                    <div
+                      key={item.productId}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-9 h-9 bg-slate-50 border border-slate-200 text-slate-500 rounded-xl flex items-center justify-center shrink-0">
+                          <CalendarClock size={16} />
+                        </span>
+                        <div>
+                          <p className="font-bold text-slate-800 text-sm">{item.name}</p>
+                          <p className="text-xs text-slate-500">
+                            Kiralama bitiş tarihi: {rental.rentalEnd.toLocaleDateString("tr-TR")}
+                            {rental.daysLeft >= 0 ? ` (${rental.daysLeft} gün kaldı)` : " (süresi doldu)"}
+                          </p>
+                        </div>
+                      </div>
+                      {rental.canExtend && (
+                        <Link
+                          href={`/pay/uzatma/${rental.rentalAgreementId}`}
+                          className="inline-flex items-center gap-1.5 shrink-0 h-9 px-4 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition"
+                        >
+                          <RefreshCw size={14} /> Kiralamayı Uzat
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
 
         <div className="premium-surface p-6 space-y-4">
           <h3 className="font-bold text-slate-800 text-sm border-b border-slate-100 pb-2">Sipariş Edilen Ürünler</h3>

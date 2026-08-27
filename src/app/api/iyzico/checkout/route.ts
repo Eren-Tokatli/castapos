@@ -7,11 +7,12 @@ import { PREMIUM_YEARLY_PRICE } from "@/lib/premium";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { kind, orderId, installmentId, customerId, paymentLinkId } = body;
+    const { kind, orderId, installmentId, customerId, paymentLinkId, rentalAgreementId, tierLabel } = body;
 
-    if (!kind || (kind !== "ORDER" && kind !== "INSTALLMENT" && kind !== "MEMBERSHIP" && kind !== "PAYLINK")) {
+    const VALID_KINDS = ["ORDER", "INSTALLMENT", "MEMBERSHIP", "PAYLINK", "EXTENSION"];
+    if (!kind || !VALID_KINDS.includes(kind)) {
       return NextResponse.json(
-        { error: "Geçersiz işlem türü (ORDER, INSTALLMENT, MEMBERSHIP veya PAYLINK olmalıdır)." },
+        { error: "Geçersiz işlem türü (ORDER, INSTALLMENT, MEMBERSHIP, PAYLINK veya EXTENSION olmalıdır)." },
         { status: 400 }
       );
     }
@@ -177,6 +178,63 @@ export async function POST(request: Request) {
         amount,
         description: "Castapos Premium Üyelik (Yıllık)",
       };
+    } else if (kind === "EXTENSION") {
+      if (!rentalAgreementId || !tierLabel) {
+        return NextResponse.json({ error: "Sözleşme ID ve paket seçimi gereklidir." }, { status: 400 });
+      }
+
+      const agreement = await prisma.rentalAgreement.findUnique({
+        where: { id: rentalAgreementId },
+      });
+
+      if (!agreement) {
+        return NextResponse.json({ error: "Sözleşme bulunamadı." }, { status: 404 });
+      }
+
+      const product = agreement.assetSku
+        ? await prisma.product.findUnique({ where: { sku: agreement.assetSku } })
+        : null;
+      const tier = product?.rentalTiers.find((t) => t.label === tierLabel);
+
+      if (!tier) {
+        return NextResponse.json({ error: "Seçilen uzatma paketi bulunamadı." }, { status: 404 });
+      }
+
+      // tier.price paketin TÜM süresi boyunca TOPLAM tutarı (bkz. sepet/actions.ts) —
+      // aylık tutar termTotal/duration'dır, checkout burada da sadece ilk ayı tahsil eder.
+      amount = Math.round((tier.price / tier.durationMonths) * 100) / 100;
+      buyerId = agreement.userId || "CUSTOMER";
+
+      const nameParts = agreement.tenantName.trim().split(" ");
+      buyerSurname = nameParts.pop() || "";
+      buyerName = nameParts.join(" ") || "Müşteri";
+
+      buyerPhone = agreement.phone;
+      buyerEmail = agreement.email || "destek@castapos.com";
+      buyerAddress = agreement.address || "İstanbul Merkez";
+      buyerCity = agreement.city || "Istanbul";
+      if (agreement.taxOrNationalId) buyerIdentityNumber = agreement.taxOrNationalId;
+
+      basketItems = [
+        {
+          id: agreement.id,
+          name: `${agreement.assetName} - Kiralama Uzatma (${tier.label})`,
+          category1: "Rental",
+          itemType: "VIRTUAL",
+          price: amount.toFixed(2),
+        },
+      ];
+
+      dbUpdateData = {
+        kind: "EXTENSION",
+        rentalAgreementId: agreement.id,
+        extensionMonths: tier.durationMonths,
+        payerName: agreement.tenantName,
+        payerEmail: buyerEmail,
+        payerPhone: buyerPhone,
+        amount,
+        description: `${agreement.assetName} kiralama uzatma (${tier.label})`,
+      };
     } else {
       // PAYLINK
       if (!paymentLinkId) {
@@ -246,7 +304,7 @@ export async function POST(request: Request) {
       price: amount.toFixed(2),
       paidPrice: amount.toFixed(2),
       currency: "TRY",
-      basketId: orderId || installmentId || customerId,
+      basketId: orderId || installmentId || customerId || rentalAgreementId,
       paymentGroup: "PRODUCT",
       callbackUrl: `${origin}/api/iyzico/callback/${callbackToken}`,
       enabledInstallments: [2, 3, 6, 9],
