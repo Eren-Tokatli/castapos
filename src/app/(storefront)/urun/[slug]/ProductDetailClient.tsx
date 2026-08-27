@@ -36,6 +36,10 @@ const QA_DATA_DEFAULT = {
   ]
 };
 
+// Soru & Cevap listesi uzun (23 soru) — varsayılan olarak sadece ilk birkaçı
+// açık, gerisi "Daha Fazla Gör" ile genişletiliyor (bkz. showAllQa state'i).
+const QA_INITIAL_VISIBLE = 5;
+
 function expandedQa(seed: QAItem[]): QAItem[] {
   const qs = [
     "Teslimat kurulumu da kapsıyor mu?",
@@ -106,6 +110,7 @@ export function ProductDetailClient({
   const [infoPanel, setInfoPanel] = useState<keyof typeof INFO_PANELS | null>(null);
   const [questionText, setQuestionText] = useState("");
   const [reviewFilter, setReviewFilter] = useState<string>("Tümü");
+  const [showAllQa, setShowAllQa] = useState(false);
   const tabSectionRefs = React.useRef<Record<string, HTMLElement | null>>({});
 
   // Ürün Açıklaması/Teknik Özellikler/... artık accordion değil — hepsi
@@ -313,7 +318,7 @@ export function ProductDetailClient({
             <div className="key-benefits compact tighter">
               <Link href="/bilgi/sikca-sorulan-sorular"><Check size={14} /> Ücretsiz teslimat</Link>
               <Link href="/bilgi/iletisim"><Check size={14} /> Teknik servis desteği</Link>
-              <Link href="/bilgi/nasil-calisir"><Check size={14} /> Esnek kiralama süresi</Link>
+              <Link href="/bilgi/sikca-sorulan-sorular"><Check size={14} /> Esnek kiralama süresi</Link>
             </div>
 
             {/* Total / Monthly Installment Box */}
@@ -543,7 +548,7 @@ export function ProductDetailClient({
                 </div>
               </form>
               <div className="qa-list">
-                {qaItems.map((item, idx) => (
+                {(showAllQa ? qaItems : qaItems.slice(0, QA_INITIAL_VISIBLE)).map((item, idx) => (
                   <article key={idx}>
                     <b>Alper A.</b>
                     <p>{item.q}</p>
@@ -554,6 +559,12 @@ export function ProductDetailClient({
                   </article>
                 ))}
               </div>
+              {!showAllQa && qaItems.length > QA_INITIAL_VISIBLE && (
+                <button type="button" className="qa-show-more" onClick={() => setShowAllQa(true)}>
+                  Daha Fazla Gör ({qaItems.length - QA_INITIAL_VISIBLE} soru daha)
+                  <ChevronDown size={16} />
+                </button>
+              )}
             </section>
 
             {/* Return Policy Panel */}

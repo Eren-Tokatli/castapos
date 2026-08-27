@@ -121,7 +121,7 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-6xl">
       <div>
         <h2 className="text-2xl font-bold text-slate-800">
           {mode === "create" ? "Yeni Ürün Ekle" : "Ürünü Düzenle"}
@@ -130,6 +130,10 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
           {mode === "create" ? "Kataloğa yeni bir cihaz ekleyin." : form.name}
         </p>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      {/* Sol sütun — ana içerik: temel bilgiler, teknik özellikler, fiyatlandırma, seçenekler. */}
+      <div className="lg:col-span-2 space-y-6">
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
         <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Temel Bilgiler</h3>
@@ -204,10 +208,10 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
         <div>
           <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Açıklama</label>
           <textarea
-            rows={4}
+            rows={9}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none resize-none overflow-y-auto"
           />
         </div>
 
@@ -230,58 +234,6 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
                 </button>
               ))}
             </div>
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
-        <div>
-          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">SEO (Google Görünümü)</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Boş bırakılırsa ürün adı ve açıklamasından otomatik oluşturulur.</p>
-        </div>
-
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Başlığı</label>
-            <span className={`text-[11px] font-semibold ${form.metaTitle.length > 60 ? "text-red-500" : "text-slate-400"}`}>
-              {form.metaTitle.length}/60
-            </span>
-          </div>
-          <input
-            type="text"
-            placeholder={form.name ? `${form.name} | Castapos` : "Otomatik oluşturulacak"}
-            value={form.metaTitle}
-            onChange={(e) => setForm({ ...form, metaTitle: e.target.value })}
-            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-          />
-        </div>
-
-        <div>
-          <div className="flex justify-between items-center mb-1">
-            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Açıklaması</label>
-            <span className={`text-[11px] font-semibold ${form.metaDescription.length > 160 ? "text-red-500" : "text-slate-400"}`}>
-              {form.metaDescription.length}/160
-            </span>
-          </div>
-          <textarea
-            rows={2}
-            placeholder="Otomatik oluşturulacak (açıklamanın ilk 160 karakteri)"
-            value={form.metaDescription}
-            onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
-            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-          />
-        </div>
-
-        {(form.metaTitle || form.name) && (
-          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Google önizlemesi</p>
-            <p className="text-[13px] text-[#1a0dab] leading-tight truncate">
-              {form.metaTitle || (form.name ? `${form.name} | Castapos` : "Ürün Adı | Castapos")}
-            </p>
-            <p className="text-[11px] text-[#006621] leading-tight mt-0.5">castapos.com/urun/{form.slug || "urun-slug"}</p>
-            <p className="text-xs text-slate-600 leading-snug mt-0.5 line-clamp-2">
-              {form.metaDescription || "Ürün açıklamasından otomatik özetlenecek."}
-            </p>
           </div>
         )}
       </div>
@@ -454,83 +406,6 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
-        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Stok</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Stok Miktarı</label>
-            <input
-              type="number"
-              required
-              value={form.quantity}
-              onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Stok Durumu</label>
-            <select
-              value={form.stockStatus}
-              onChange={(e) => setForm({ ...form, stockStatus: e.target.value as ProductFormData["stockStatus"] })}
-              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none bg-white"
-            >
-              <option value="IN_STOCK">Stokta Var</option>
-              <option value="OUT_OF_STOCK">Tükendi</option>
-              <option value="PREORDER">Ön Sipariş</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Görseller</h3>
-          <button
-            type="button"
-            onClick={() => setForm((f) => ({ ...f, images: [...f.images, { url: "", alt: "" }] }))}
-            className="text-xs font-bold text-orange-600 hover:text-orange-700"
-          >
-            + Görsel Ekle
-          </button>
-        </div>
-        <div className="space-y-2">
-          {form.images.map((img, i) => (
-            <div key={i} className="grid grid-cols-[40px_2fr_1fr_auto] gap-2 items-center">
-              <ImagePreviewThumb url={img.url} />
-              <input
-                placeholder="Görsel URL"
-                value={img.url}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    images: f.images.map((im, idx) => (idx === i ? { ...im, url: e.target.value } : im)),
-                  }))
-                }
-                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-              />
-              <input
-                placeholder="Alt metin"
-                value={img.alt}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    images: f.images.map((im, idx) => (idx === i ? { ...im, alt: e.target.value } : im)),
-                  }))
-                }
-                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-              />
-              <button
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }))}
-                className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
-              >
-                ×
-              </button>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -709,6 +584,142 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
             </div>
           ))}
         </div>
+      </div>
+
+      </div>
+      {/* Sağ sütun — yan panel: SEO, stok, görseller. */}
+      <div className="lg:col-span-1 space-y-6">
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <div>
+          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">SEO (Google Görünümü)</h3>
+          <p className="text-xs text-slate-500 mt-0.5">Boş bırakılırsa ürün adı ve açıklamasından otomatik oluşturulur.</p>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Başlığı</label>
+            <span className={`text-[11px] font-semibold ${form.metaTitle.length > 60 ? "text-red-500" : "text-slate-400"}`}>
+              {form.metaTitle.length}/60
+            </span>
+          </div>
+          <input
+            type="text"
+            placeholder={form.name ? `${form.name} | Castapos` : "Otomatik oluşturulacak"}
+            value={form.metaTitle}
+            onChange={(e) => setForm({ ...form, metaTitle: e.target.value })}
+            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-bold text-slate-500 uppercase">Meta Açıklaması</label>
+            <span className={`text-[11px] font-semibold ${form.metaDescription.length > 160 ? "text-red-500" : "text-slate-400"}`}>
+              {form.metaDescription.length}/160
+            </span>
+          </div>
+          <textarea
+            rows={2}
+            placeholder="Otomatik oluşturulacak (açıklamanın ilk 160 karakteri)"
+            value={form.metaDescription}
+            onChange={(e) => setForm({ ...form, metaDescription: e.target.value })}
+            className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none resize-none overflow-y-auto"
+          />
+        </div>
+
+        {(form.metaTitle || form.name) && (
+          <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Google önizlemesi</p>
+            <p className="text-[13px] text-[#1a0dab] leading-tight truncate">
+              {form.metaTitle || (form.name ? `${form.name} | Castapos` : "Ürün Adı | Castapos")}
+            </p>
+            <p className="text-[11px] text-[#006621] leading-tight mt-0.5">castapos.com/urun/{form.slug || "urun-slug"}</p>
+            <p className="text-xs text-slate-600 leading-snug mt-0.5 line-clamp-2">
+              {form.metaDescription || "Ürün açıklamasından otomatik özetlenecek."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Stok</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Stok Miktarı</label>
+            <input
+              type="number"
+              required
+              value={form.quantity}
+              onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Stok Durumu</label>
+            <select
+              value={form.stockStatus}
+              onChange={(e) => setForm({ ...form, stockStatus: e.target.value as ProductFormData["stockStatus"] })}
+              className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none bg-white"
+            >
+              <option value="IN_STOCK">Stokta Var</option>
+              <option value="OUT_OF_STOCK">Tükendi</option>
+              <option value="PREORDER">Ön Sipariş</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wide">Görseller</h3>
+          <button
+            type="button"
+            onClick={() => setForm((f) => ({ ...f, images: [...f.images, { url: "", alt: "" }] }))}
+            className="text-xs font-bold text-orange-600 hover:text-orange-700"
+          >
+            + Görsel Ekle
+          </button>
+        </div>
+        <div className="space-y-2">
+          {form.images.map((img, i) => (
+            <div key={i} className="grid grid-cols-[40px_2fr_1fr_auto] gap-2 items-center">
+              <ImagePreviewThumb url={img.url} />
+              <input
+                placeholder="Görsel URL"
+                value={img.url}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    images: f.images.map((im, idx) => (idx === i ? { ...im, url: e.target.value } : im)),
+                  }))
+                }
+                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+              />
+              <input
+                placeholder="Alt metin"
+                value={img.alt}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    images: f.images.map((im, idx) => (idx === i ? { ...im, alt: e.target.value } : im)),
+                  }))
+                }
+                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+              />
+              <button
+                type="button"
+                onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }))}
+                className="text-red-400 hover:text-red-600 text-lg leading-none px-1"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      </div>
       </div>
 
       {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">{error}</div>}

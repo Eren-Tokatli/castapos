@@ -217,6 +217,8 @@ body{font-weight:400}
 .review-filter-bar{display:flex;flex-wrap:wrap;gap:10px}
 .qa-list{display:grid;gap:14px}
 .qa-list article{background:#fff;border:1px solid #e5e7ee;border-radius:14px;padding:16px 18px}
+.qa-show-more{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:14px;padding:12px;border:1px solid #e5e7ee;border-radius:14px;background:#fff;color:var(--brand);font-weight:700;font-size:14px;transition:background .15s ease}
+.qa-show-more:hover{background:#fff1ec}
 .review-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
 .qa-answer{margin-top:10px;padding:12px 14px;background:#f8fafc;border-radius:12px}
 .question-actions{display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:12px}
