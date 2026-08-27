@@ -1,7 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Clock, Activity, TrendingUp, Package, PieChart } from "lucide-react";
+import { Clock, Activity, TrendingUp, Package, PieChart, Undo2 } from "lucide-react";
 import { CartesianBarChart } from "./_components/CartesianBarChart";
 import { CartesianLineChart } from "./_components/CartesianLineChart";
 import { bucketByDay, bucketByMonth, daysAgo, monthsAgoStart } from "./_components/chart-data";
@@ -17,6 +17,12 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
+  // İadesi yaklaşan sözleşmeler için pencere — süresi geçmişler dahil
+  // (henüz iade edilmemişse en acil olanlar onlar), en yakın bitiş en üstte.
+  const now = new Date();
+  const upcomingReturnCutoff = new Date(now);
+  upcomingReturnCutoff.setDate(upcomingReturnCutoff.getDate() + 7);
+
   // Bu sayfadaki ~13 sorgunun hiçbiri birbirinin sonucuna bağlı değil, ama
   // hepsi ayrı ayrı `await` ediliyordu — yani her biri bir öncekinin bitmesini
   // bekliyordu (Mongo Atlas'a gidip gelen her istek üst üste toplanıyordu,
@@ -35,6 +41,7 @@ export default async function AdminDashboard() {
     paidOrdersForProducts,
     orderStatusCounts,
     paidOrdersLast14Days,
+    upcomingReturns,
   ] = await Promise.all([
     prisma.rentalAgreement.count(),
     prisma.rentalAgreement.aggregate({
@@ -67,6 +74,19 @@ export default async function AdminDashboard() {
     prisma.order.findMany({
       where: { status: "PAID", createdAt: { gte: daysAgo(14) } },
       select: { items: true, createdAt: true },
+    }),
+    // İadesi yaklaşan (veya süresi çoktan geçmiş) kiralamalar — satın
+    // alınmış (boughtOut) veya erken iade edilmiş (earlyReturn) ya da zaten
+    // teslim alınmış (RETURNED) sözleşmeler burada anlamsız, hariç tutulur.
+    prisma.rentalAgreement.findMany({
+      where: {
+        rentalEnd: { lte: upcomingReturnCutoff },
+        deliveryStatus: { not: "RETURNED" },
+        boughtOut: false,
+        earlyReturn: false,
+      },
+      orderBy: { rentalEnd: "asc" },
+      take: 8,
     }),
   ]);
 
@@ -196,6 +216,66 @@ export default async function AdminDashboard() {
             <span className="text-3xl font-black text-emerald-600">₺{totalReceivedFunds.toLocaleString("tr-TR")}</span>
             <span className="text-xs text-slate-400">Kasa Toplam</span>
           </div>
+        </div>
+      </div>
+
+      {/* İadesi yaklaşan/gecikmiş kiralamalar — kurye/lojistik ekibinin
+          "bugün kimden ürün almam lazım" sorusuna hızlı cevap. KPI'ların
+          hemen altında, grafiklerden önce — günlük operasyon, analitikten
+          öncelikli. */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Undo2 size={18} className="text-slate-500" />
+            <h3 className="font-bold text-slate-800 text-sm">İadesi Yaklaşan Ürünler</h3>
+          </div>
+          <Link href="/admin/agreements" className="text-xs text-orange-500 font-bold hover:underline">
+            Tümünü Gör →
+          </Link>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {upcomingReturns.length === 0 ? (
+            <p className="text-sm text-slate-400 py-6 text-center">Önümüzdeki 7 gün içinde iadesi gelen ürün yok.</p>
+          ) : (
+            upcomingReturns.map((a) => {
+              const daysLeft = a.rentalEnd
+                ? Math.ceil((a.rentalEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                : null;
+              const overdue = daysLeft !== null && daysLeft < 0;
+
+              return (
+                <div key={a.id} className="p-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-semibold text-slate-800 truncate">{a.assetName}</h4>
+                    <p className="text-xs text-slate-500 truncate">
+                      {a.tenantName} · T.C. {a.taxOrNationalId}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-xs font-bold text-slate-700 block">
+                      {a.rentalEnd?.toLocaleDateString("tr-TR")}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${
+                        overdue
+                          ? "bg-red-50 text-red-700 border-red-100"
+                          : "bg-orange-50 text-orange-700 border-orange-100"
+                      }`}
+                    >
+                      {daysLeft === null
+                        ? "-"
+                        : overdue
+                        ? `${Math.abs(daysLeft)} gün gecikti`
+                        : daysLeft === 0
+                        ? "Bugün"
+                        : `${daysLeft} gün kaldı`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
