@@ -505,7 +505,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px;font-size:10px;letter-spacing:-.02em;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .modern-rental-card .daily-secondary{border-bottom:1px solid #e7eaf0;padding-bottom:8px;margin-bottom:1px}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
-.modern-rental-card .old-monthly-price{grid-column:1/-1;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
+.modern-rental-card .old-monthly-price{grid-column:1/-1;text-align:center;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
 .compact-price-only{
   /* İndirimli üründe eski fiyat (üstü çizili) satırı eklenince kutu ~11px
      daha uzuyordu, indirimsiz kartlar aynı gride yan yana geldiğinde fiyat
@@ -1316,13 +1316,51 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .card-periods .extra-periods{display:none;gap:8px;flex-wrap:wrap}
 .card-periods.expanded .extra-periods{display:flex}
 .card-periods.expanded .period-toggle-btn{background:#fff0ea;border-style:solid;border-color:#ffd1c1;color:var(--brand)}
-.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:wrap;row-gap:0}
+/* flex-wrap:nowrap (WRAP DEĞİL) — bazı telefonlarda (6.2" gibi dar
+   ekranlarda) "1.600 ₺ / Aylık" tek satıra sığmayıp 2. satıra taşıyordu,
+   bu da kutuyu büyütüp kartlar arası fiyat hizasını (bkz. yukarıdaki
+   align-content:start düzeltmesi) bozuyordu. Artık hiçbir telefon
+   boyutunda taşmıyor, gerekirse font clamp() ile küçülüyor (aşağıda). */
+.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:nowrap;row-gap:0}
 .compact-price-only span{white-space:nowrap}
 .compact-price-only strong{font-size:21px}
+/* "/" işareti Gün ve Aylık satırlarında hizalı dursun diye: fiyat rakamı
+   (strong) sağa yaslı SABİT genişlikte (en uzun olası fiyata göre, ör.
+   "4.000 ₺"), etiket (span, "/ Gün" / "/ Aylık") sola yaslı SABİT
+   genişlikte. İkisi de sabit olunca iki satırın toplam genişliği eşitleniyor,
+   satır bazında justify-content:center hizayı bozmuyor — "/" her zaman aynı
+   X'te. */
+.compact-price-only .daily-secondary strong,
+.compact-price-only .monthly-primary strong{
+  display:inline-block;
+  min-width:64px;
+  text-align:right;
+}
+.compact-price-only .daily-secondary span,
+.compact-price-only .monthly-primary span{
+  display:inline-block;
+  min-width:44px;
+  text-align:left;
+}
 /* İndirimli üründe eski fiyat (üstü çizili) satıra sığmazsa taşmak yerine
    kendi satırına düşer — sabit dar kart genişliklerinde (rail, mobil vb.)
    taşmayı önler. */
-.compact-price-only .old-monthly-price{flex-basis:100%}
+/* Artık .monthly-primary'nin İÇİNDE değil, ayrı bir grid satırı (bkz.
+   ProductCard.tsx) — flex-basis burada işe yaramıyor, gerek kalmadı.
+   Kendi satırında sabit duruyor, ne olursa olsun fiyat/"Aylık" satırını
+   aşağı itmiyor ya da onunla aynı satıra sıkışıp taşmıyor. Font boyutu
+   üstündeki fiyatla (.compact-price-only strong) aynı olsun diye
+   eşitlendi. */
+/* 16px: .modern-rental-card .monthly-primary strong (3 class, daha
+   spesifik) yüzünden fiyat rakamının GERÇEKTE gösterildiği boyut budur —
+   .compact-price-only strong'daki 21px/clamp hiç kazanmıyor. Aynı boyutta
+   görünsün diye üstü çizili fiyat da doğrudan 16px'e sabitlendi. */
+.compact-price-only .old-monthly-price{margin-top:1px;font-size:16px}
+/* Aylık fiyat satırı, Gün/Aylık arasındaki çizgiye çok yakın duruyordu —
+   biraz aşağı, çizgiden ayrılsın diye üstten boşluk eklendi. Sadece bu
+   kompakt kart varyantına özel (diğer .monthly-primary kullanımlarına
+   dokunulmadı). */
+.compact-price-only .monthly-primary{padding-top:6px}
 .filter-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .filter-title .filter-reset-btn{width:auto;height:34px;padding:0 12px;font-size:13px;font-weight:800}
 .legal-copy-card section h2,.detailed-legal-copy section h2{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:linear-gradient(180deg,#fff8f5,#fff);border:1px solid #ffe0d5;font-size:21px}
@@ -1381,7 +1419,14 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
   .compact-detail-grid{grid-template-columns:1fr}
   .detail-fav-btn{height:42px}
   .compact-price-only .monthly-primary,.compact-price-only .daily-secondary{font-size:13px}
-  .compact-price-only strong{font-size:18px}
+  /* Sabit 18px yerine clamp() — 6.2" gibi dar telefonlarda "1.600 ₺ / Aylık"
+     nowrap ile taşmasın diye viewport'a göre otomatik küçülüyor (min 15px),
+     6.3"+ gibi geniş telefonlarda 18px'te kalıyor. */
+  .compact-price-only strong{font-size:clamp(15px, 4.4vw, 18px)}
+  /* old-monthly-price'a burada clamp uygulanmıyor — yukarıdaki (satır ~1340)
+     düz 16px kuralı zaten .modern-rental-card .monthly-primary strong'un
+     GERÇEKTE kazanan boyutuyla (16px) eşleşiyor, burada override edilirse
+     ikisi tekrar farklı boyuta düşer. */
   .favorite-price{grid-template-columns:auto auto 1fr auto auto;font-size:14px}
   .favorite-price b,.favorite-price strong{min-width:72px}
   .checkout-grid{grid-template-columns:1fr}

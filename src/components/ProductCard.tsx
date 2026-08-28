@@ -103,10 +103,10 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
           <div className="monthly-primary">
             <strong>{formatPrice(currentMonthly).replace(" TL", " ₺")}</strong>
             <span>/ Aylık</span>
-            {oldMonthly && (
-              <s className="old-monthly-price">{formatPrice(oldMonthly).replace(" TL", " ₺")}</s>
-            )}
           </div>
+          {oldMonthly && (
+            <s className="old-monthly-price">{formatPrice(oldMonthly).replace(" TL", " ₺")}</s>
+          )}
         </div>
 
         <button
