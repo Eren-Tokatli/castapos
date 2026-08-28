@@ -95,7 +95,7 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
           ))}
         </div>
 
-        <div className="price-block rental-card-block compact-price-only">
+        <div className={`price-block rental-card-block compact-price-only ${!oldMonthly ? "price-no-discount" : ""}`}>
           <div className="daily-secondary">
             <strong>{formatPrice(currentDaily).replace(" TL", " ₺")}</strong>
             <span>/ Gün</span>
