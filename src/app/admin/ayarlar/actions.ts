@@ -9,6 +9,8 @@ export interface HomeBannerFormData {
   url: string;
   alt: string;
   href: string;
+  // Opsiyonel — doluysa mobilde url yerine bu gösterilir (bkz. SettingsClient.tsx).
+  mobileUrl: string;
 }
 
 export interface CampaignTileFormData {
@@ -54,7 +56,7 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
       return { success: false, error: "Adres alanları boş bırakılamaz." };
     }
     const cleanBanners = data.banners
-      .map((b) => ({ url: b.url.trim(), alt: b.alt.trim(), href: b.href.trim() || null }))
+      .map((b) => ({ url: b.url.trim(), alt: b.alt.trim(), href: b.href.trim() || null, mobileUrl: b.mobileUrl.trim() || null }))
       .filter((b) => b.url);
     if (cleanBanners.some((b) => !b.alt)) {
       return { success: false, error: "Her banner için bir alt metin (erişilebilirlik açıklaması) girilmeli." };

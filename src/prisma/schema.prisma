@@ -607,6 +607,10 @@ type HomeBanner {
   // Boşsa banner tıklanamaz (sade görsel), doluysa tıklanınca bu adrese gider.
   href      String?
   sortOrder Int      @default(0)
+  // Opsiyonel — dolu olursa mobilde (≤760px) url yerine bu gösterilir.
+  // Mobil banner kutusu masaüstünden daha dikey olduğu için ayrı kırpılmış
+  // bir görsel gerekir; boşsa mobilde de url kullanılır (kenarlardan kırpılır).
+  mobileUrl String?
 }
 
 type CampaignTile {

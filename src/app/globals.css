@@ -7249,7 +7249,7 @@ body.page-urun-detay .review-form-box .btn {
   background: transparent !important;
 }
 
-.home-shell .promo-slider .promo-track .promo-slide > img {
+.home-shell .promo-slider .promo-track .promo-slide img {
   position: absolute !important;
   inset: 0 !important;
   display: block !important;
@@ -7401,7 +7401,7 @@ body.page-urun-detay .review-form-box .btn {
     max-height: none !important;
   }
 
-  .home-shell .promo-slider .promo-track .promo-slide > img {
+  .home-shell .promo-slider .promo-track .promo-slide img {
     object-fit: contain !important;
     object-position: center center !important;
     background: #f7f2ea !important;
@@ -13329,6 +13329,23 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 .home-shell .promo-slide img {
   object-fit: cover !important;
   object-position: center center !important;
+}
+
+/* Mobilde banner 2x büyütüldü (kullanıcı isteği 2026-08-28) — SADECE mobil,
+   masaüstüne dokunulmadı. Görsel de kutuyla birlikte büyüyüp boşluk
+   kalmadan alanı doldursun diye object-fit:cover korunuyor (kenarlardan
+   hafif kırpılma pahasına, tıpkı diğer mobil banner varyantlarında olduğu
+   gibi). */
+@media (max-width: 760px) {
+  .home-shell .promo-track {
+    aspect-ratio: 2322 / 1354 !important;
+  }
+
+  .home-shell .promo-slide img,
+  .home-shell .promo-slider .promo-track .promo-slide img {
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
 }
 
 /* Sepetim sayfası — dark mode (bkz. sohbet: "sepetim komple beyaz") */

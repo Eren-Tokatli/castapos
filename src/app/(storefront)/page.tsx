@@ -61,7 +61,7 @@ export default async function HomePage() {
 
   const banners = [...settings.banners]
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((b) => ({ url: b.url, alt: b.alt, href: b.href || undefined }));
+    .map((b) => ({ url: b.url, alt: b.alt, href: b.href || undefined, mobileUrl: b.mobileUrl || undefined }));
 
   // Sabit 3 slot — admin panelden doldurulmamış bir pozisyon null olarak
   // geçer, HomeClient kendi varsayılan (gradient) görseline döner.

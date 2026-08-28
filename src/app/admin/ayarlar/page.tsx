@@ -20,7 +20,7 @@ export default async function AdminSettingsPage() {
         linkedinUrl: settings.linkedinUrl,
         banners: [...settings.banners]
           .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map((b) => ({ url: b.url, alt: b.alt, href: b.href || "" })),
+          .map((b) => ({ url: b.url, alt: b.alt, href: b.href || "", mobileUrl: b.mobileUrl || "" })),
         bannerIntervalSeconds: settings.bannerIntervalSeconds,
         // Sabit 3 slot — kayıtlı olan kadarı kullanılır, kalanı boş form
         // alanı olarak gösterilir (henüz doldurulmamış demektir).

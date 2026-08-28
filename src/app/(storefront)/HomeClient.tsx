@@ -55,6 +55,8 @@ export interface HomeBanner {
   url: string;
   alt: string;
   href?: string;
+  // Doluysa mobilde (≤760px) url yerine bu gösterilir (bkz. admin/ayarlar).
+  mobileUrl?: string;
 }
 
 export interface CampaignTile {
@@ -95,7 +97,7 @@ export function HomeClient({
   // Slider State — anasayfa banner'ları ve geçiş süresi admin panelden
   // (Site Ayarları) yönetiliyor, bkz. lib/site-settings.ts.
   const [activeSlide, setActiveSlide] = useState(0);
-  const slides = banners.map((b) => ({ href: b.href || undefined, img: b.url, alt: b.alt }));
+  const slides = banners.map((b) => ({ href: b.href || undefined, img: b.url, mobileImg: b.mobileUrl, alt: b.alt }));
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -124,21 +126,31 @@ export function HomeClient({
       <section className="home-hero">
         <div className="promo-slider">
           <div className="promo-track">
-            {slides.map((slide, idx) =>
-              slide.href ? (
+            {slides.map((slide, idx) => {
+              // mobileImg tanımlıysa mobilde (≤760px) onu, masaüstünde her
+              // zaman orijinal img'i göster — <picture>/<source> ile, JS'siz.
+              const picture = slide.mobileImg ? (
+                <picture>
+                  <source media="(max-width: 760px)" srcSet={slide.mobileImg} />
+                  <img src={slide.img} alt={slide.alt} />
+                </picture>
+              ) : (
+                <img src={slide.img} alt={slide.alt} />
+              );
+              return slide.href ? (
                 <Link
                   key={idx}
                   className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
                   href={slide.href}
                 >
-                  <img src={slide.img} alt={slide.alt} />
+                  {picture}
                 </Link>
               ) : (
                 <div key={idx} className={`promo-slide ${idx === activeSlide ? "active" : ""}`}>
-                  <img src={slide.img} alt={slide.alt} />
+                  {picture}
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
 
           {slides.length > 1 && (

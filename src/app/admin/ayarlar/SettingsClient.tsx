@@ -5,7 +5,7 @@ import { Mail, MapPin, Save, MessageCircle, Link2, Image as ImageIcon, Plus, Tra
 import { updateSiteSettings, type SiteSettingsFormData, type HomeBannerFormData, type CampaignTileFormData } from "./actions";
 import { useAdminToast } from "../_components/ToastProvider";
 
-const EMPTY_BANNER: HomeBannerFormData = { url: "", alt: "", href: "" };
+const EMPTY_BANNER: HomeBannerFormData = { url: "", alt: "", href: "", mobileUrl: "" };
 
 export function SettingsClient({ settings }: { settings: SiteSettingsFormData }) {
   const toast = useAdminToast();
@@ -274,6 +274,31 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
                       onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                     />
                   )}
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
+                      Mobil Görsel URL (opsiyonel)
+                    </label>
+                    <input
+                      type="text"
+                      value={banner.mobileUrl}
+                      onChange={(e) => updateBannerField(idx, "mobileUrl", e.target.value)}
+                      placeholder="https://.../banner-mobil.png"
+                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none font-mono"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">
+                      Boş bırakılırsa mobilde yukarıdaki görsel kenarlardan kırpılarak kullanılır.
+                      Kırpmasız görünmesi için ~2322×1354 oranında (dikeye yakın) bir görsel yükle.
+                    </p>
+                    {banner.mobileUrl && (
+                      <img
+                        src={banner.mobileUrl}
+                        alt=""
+                        className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-white mt-2"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
