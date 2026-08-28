@@ -526,6 +526,17 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   gap:0;
   align-content:start;
 }
+/* İndirim YOKSA (üstü çizili fiyat yok, sadece 2 satır): Gün satırı kendi
+   doğal boyunda kalsın, Aylık satırı kutunun kalan tüm boşluğunu doldurup
+   fiyat+"/Aylık"ı enden VE boydan tam ortalasın. İndirimliyse (3 satır)
+   yukarıdaki align-content:start ile eskisi gibi üstte sabit kalmaya
+   devam eder — bu kural hiç devreye girmez. */
+.compact-price-only:not(:has(.old-monthly-price)){
+  grid-template-rows:auto 1fr;
+}
+.compact-price-only:not(:has(.old-monthly-price)) .monthly-primary{
+  align-items:center;
+}
 .monthly-primary,.daily-secondary{
   display:flex;
   align-items:center;
