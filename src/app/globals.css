@@ -2609,8 +2609,27 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
   --border-color: rgba(255,255,255,.12);
 }
 
+/* Hesap paneli sol menü — aktif satır + çıkış ikonu (bkz. sohbet: menüdeki beyazlık) */
+:root[data-theme="dark"] .account-side-nav a.is-active {
+  background: rgba(243, 95, 54, .16) !important;
+  border-color: rgba(243, 95, 54, .35) !important;
+}
+:root[data-theme="dark"] .account-side-nav button.is-danger .account-side-icon {
+  background: rgba(180, 35, 24, .22) !important;
+  color: #ff9c8e !important;
+}
+:root[data-theme="dark"] .account-side-nav button.is-danger:hover {
+  background: rgba(180, 35, 24, .12) !important;
+  border-color: rgba(180, 35, 24, .3) !important;
+}
+
 :root[data-theme="dark"] body {
-  background-color: var(--bg);
+  /* Light moddaki gradient (satır ~362) sadece background-color değil
+     background-image de tanımlıyor — üzerine sadece background-color
+     yazmak gradient'i ezmiyordu, sayfa her yerde açık renk gradient
+     görünmeye devam ediyordu (bkz. sohbet: "sepetim/sözleşmeler hala
+     beyaz"). background shorthand ile ikisini birden sıfırlıyoruz. */
+  background: var(--bg) !important;
   color: var(--ink);
 }
 
@@ -5221,9 +5240,26 @@ body.page-urun-detay .similar-products-section .section-title-row h2 {
   color: #f8fafc !important;
 }
 
-:root[data-theme="dark"] body.page-urun-detay .similar-products-section .modern-rental-card .product-img,
-:root[data-theme="dark"] body.page-urun-detay .similar-products-section .modern-rental-card .rental-card-block {
+/* Ürün kartı üstündeki 1/3/6/9 Ay pill butonları — seçili olmayanlar (bkz. sohbet: "içindeki ay ve çerçeve renkleri beyaz") */
+:root[data-theme="dark"] .card-period-btn {
+  background: var(--surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] .card-period-btn.active {
+  background: rgba(243, 95, 54, .16) !important;
+  border-color: rgba(243, 95, 54, .4) !important;
+  color: #ff9d7a !important;
+}
+
+/* .product-img BİLEREK açık bırakılıyor — içindeki .jpg resimler
+   mix-blend-mode:multiply kullanıyor, koyu arka plan resmi karartır
+   (bkz. sohbet: "görselleri karartmışsın"). */
+:root[data-theme="dark"] body.page-urun-detay .similar-products-section .modern-rental-card .product-img {
   background: #f8fafc !important;
+}
+:root[data-theme="dark"] body.page-urun-detay .similar-products-section .modern-rental-card .rental-card-block {
+  background: var(--surface) !important;
 }
 
 :root[data-theme="dark"] body.page-urun-detay .official-footer {
@@ -6896,9 +6932,156 @@ body.page-urun-detay .review-form-box .btn {
 :root[data-theme="dark"] .empty-mini-picks a,
 :root[data-theme="dark"] .empty-cart-copy,
 :root[data-theme="dark"] .empty-cart-panel,
-:root[data-theme="dark"] .empty-cart-benefit-grid article {
+:root[data-theme="dark"] .empty-cart-benefit-grid article,
+:root[data-theme="dark"] .side-cart-body,
+:root[data-theme="dark"] .drawer-item,
+:root[data-theme="dark"] .empty-mini-cart,
+:root[data-theme="dark"] .empty-cart-page {
   background: rgba(17, 24, 39, .9) !important;
   border-color: rgba(243, 95, 54, .2) !important;
+}
+
+:root[data-theme="dark"] .side-cart-head button,
+:root[data-theme="dark"] .side-cart .btn-soft {
+  background: rgba(255, 255, 255, .06) !important;
+  border-color: rgba(255, 255, 255, .14) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .drawer-item b,
+:root[data-theme="dark"] .drawer-item strong,
+:root[data-theme="dark"] .drawer-summary b,
+:root[data-theme="dark"] .drawer-summary .grand {
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .drawer-item small,
+:root[data-theme="dark"] .drawer-item span {
+  color: #98a2bd !important;
+}
+
+:root[data-theme="dark"] .drawer-item span.drawer-period-meta {
+  color: var(--brand) !important;
+}
+
+/* Ürün sayfası — zarar/taksit/garanti accordion + Soru&Cevap "Daha Fazla Gör" (bkz. sohbet: genel tarama) */
+:root[data-theme="dark"] .info-teaser-item {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .info-teaser-text {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .info-teaser-body p {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] .info-teaser-icon {
+  background-color: rgba(243, 95, 54, .16) !important;
+}
+:root[data-theme="dark"] .qa-show-more {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Ürün kartı — fiyat bloğu (bkz. sohbet: genel tarama). .product-img'ı
+   BİLEREK koyulaştırmıyoruz: içindeki .jpg resimler mix-blend-mode:multiply
+   kullanıyor (arka planı beyaz sayıp "yok" gösteren bir teknik) — arka planı
+   koyu yapınca resmin kendisi de kararıyordu (bkz. sohbet: "görselleri
+   karartmışsın"). Açık arka plan burada estetik değil işlevsel bir zorunluluk. */
+:root[data-theme="dark"] .rental-card-block {
+  background-color: var(--surface) !important;
+}
+:root[data-theme="dark"] .rental-card-block span {
+  color: var(--text-primary) !important;
+}
+/* .rental-card-block strong'a BİLEREK dokunmuyoruz — kendi anlamlı rengini
+   koruyor (.daily-secondary strong turuncu, .monthly-primary strong yeşil,
+   bkz. aşağıdaki "Fiyat rakamları" bloğu). Genel text-primary ile ezmek bu
+   ayrımı kaybettiriyordu (bkz. sohbet: "fiyat rakamlarını turuncu ve yeşil
+   yapalım"). */
+
+/* Fiyat rakamları — turuncu (marka fiyatı) ve yeşil (tasarruf/aylık avantaj)
+   rengini dark modda da koru (bkz. sohbet: "fiyat rakamlarını turuncu ve
+   yeşil yapalım"). Sitenin normal yeşili (#0b6b50) kullanılıyor — kullanıcı
+   "normal sitedeki olsun" dedi, ayrı bir açık yeşil icat etmiyoruz. Turuncu
+   (var(--brand)) zaten koyu zeminde okunaklı, dokunmuyoruz. */
+:root[data-theme="dark"] .monthly-primary strong,
+:root[data-theme="dark"] .price-block em,
+:root[data-theme="dark"] .price-block .monthly-note strong,
+:root[data-theme="dark"] .installment-box em strong,
+:root[data-theme="dark"] .compact-buy-meta.active b,
+:root[data-theme="dark"] .summary-saving b,
+:root[data-theme="dark"] .rental-plan-summary .summary-saving b,
+:root[data-theme="dark"] .applied-coupon {
+  color: #0b6b50 !important;
+}
+:root[data-theme="dark"] .summary-saving,
+:root[data-theme="dark"] .applied-coupon {
+  background: rgba(11, 107, 80, .18) !important;
+  border-color: rgba(11, 107, 80, .4) !important;
+}
+
+/* Sepet checkout modalı — dark mode (bkz. sohbet: "sepetim komple beyaz", checkout akışı dahil) */
+:root[data-theme="dark"] .checkout-flow-modal,
+:root[data-theme="dark"] .checkout-flow-head,
+:root[data-theme="dark"] .checkout-card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .checkout-card input,
+:root[data-theme="dark"] .checkout-card textarea,
+:root[data-theme="dark"] .checkout-card select,
+:root[data-theme="dark"] .country-code-select {
+  background-color: var(--surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .checkout-step-pill {
+  background-color: var(--surface) !important;
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] .checkout-step-pill.active {
+  background-color: rgba(243, 95, 54, .18) !important;
+  color: var(--brand) !important;
+}
+:root[data-theme="dark"] .checkout-flow-head h2,
+:root[data-theme="dark"] .checkout-card h3,
+:root[data-theme="dark"] .checkout-card label,
+:root[data-theme="dark"] .checkout-summary-list strong {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .checkout-flow-head p,
+:root[data-theme="dark"] .checkout-note,
+:root[data-theme="dark"] .checkout-summary-list span,
+:root[data-theme="dark"] .checkout-card .agreement-check-row {
+  color: var(--text-secondary) !important;
+}
+
+/* Kullanıcı Bilgilerim / giriş / iletişim formları — dark mode (bkz. sohbet: "Ad soyad e posta arka planı beyaz") */
+:root[data-theme="dark"] .profile-form,
+:root[data-theme="dark"] .auth-form,
+:root[data-theme="dark"] .contact-grid {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .profile-form input,
+:root[data-theme="dark"] .profile-form select,
+:root[data-theme="dark"] .auth-form input,
+:root[data-theme="dark"] .contact-grid input,
+:root[data-theme="dark"] .contact-grid textarea {
+  background-color: var(--surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .profile-form label,
+:root[data-theme="dark"] .auth-form label,
+:root[data-theme="dark"] .contact-grid label {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .profile-form .phone-field span,
+:root[data-theme="dark"] .profile-form input::placeholder,
+:root[data-theme="dark"] .contact-grid textarea::placeholder {
+  color: var(--text-secondary) !important;
 }
 
 :root[data-theme="dark"] .side-cart-head strong,
@@ -7648,6 +7831,11 @@ body.page-urun-detay .review-form-box .btn {
 }
 .filter-apply-btn:hover {
   background: #d84b28;
+}
+
+:root[data-theme="dark"] .filter-apply-sticky {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
 }
 
 .active-filter-chips {
@@ -12095,7 +12283,8 @@ body.page-canli-destek .live-support-page-note div {
 :root[data-theme="dark"] .ai-chat-form,
 :root[data-theme="dark"] .ai-chat-prompt-list button,
 :root[data-theme="dark"] .ai-chat-side-note,
-:root[data-theme="dark"] .ai-chat-message p {
+:root[data-theme="dark"] .ai-chat-message p,
+:root[data-theme="dark"] .ai-chat-messages {
   border-color: rgba(255, 255, 255, .1);
   background: rgba(16, 26, 43, .94);
 }
@@ -13146,5 +13335,58 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 .home-shell .promo-slide img {
   object-fit: cover !important;
   object-position: center center !important;
+}
+
+/* Sepetim sayfası — dark mode (bkz. sohbet: "sepetim komple beyaz") */
+:root[data-theme="dark"] .rental-plan-item,
+:root[data-theme="dark"] .rental-plan-summary,
+:root[data-theme="dark"] .rental-coupon {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .cart-product-image,
+:root[data-theme="dark"] .selected-plan-tag,
+:root[data-theme="dark"] .delivery-estimate,
+:root[data-theme="dark"] .qty-control,
+:root[data-theme="dark"] .rental-plan-summary > p {
+  background-color: var(--surface) !important;
+  border-color: var(--border-color) !important;
+}
+:root[data-theme="dark"] .qty-control button {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .rental-plan-item h2 a,
+:root[data-theme="dark"] .qty-control input,
+:root[data-theme="dark"] .rental-plan-summary h2,
+:root[data-theme="dark"] .rental-plan-summary b,
+:root[data-theme="dark"] .selected-plan-tag b,
+:root[data-theme="dark"] .delivery-estimate b,
+:root[data-theme="dark"] .plan-price-summary b {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="dark"] .rental-plan-summary span,
+:root[data-theme="dark"] .rental-plan-summary p,
+:root[data-theme="dark"] .summary-kicker,
+:root[data-theme="dark"] .selected-plan-tag span,
+:root[data-theme="dark"] .delivery-estimate span,
+:root[data-theme="dark"] .selected-plan-tag i,
+:root[data-theme="dark"] .delivery-estimate i,
+:root[data-theme="dark"] .plan-price-summary span,
+:root[data-theme="dark"] .plan-price-summary small,
+:root[data-theme="dark"] .rental-coupon > span {
+  color: var(--text-secondary) !important;
+}
+:root[data-theme="dark"] .cart-product-brand {
+  color: var(--brand) !important;
+}
+:root[data-theme="dark"] .rental-plan-summary .first-payment,
+:root[data-theme="dark"] .summary-saving {
+  background: rgba(243, 95, 54, .12) !important;
+  border-color: rgba(243, 95, 54, .3) !important;
+}
+:root[data-theme="dark"] .rental-plan-summary .first-payment span,
+:root[data-theme="dark"] .daily-cart-value {
+  color: var(--text-primary) !important;
 }
 
