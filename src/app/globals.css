@@ -488,7 +488,12 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .modern-rental-card .product-info{
   display:grid;
   grid-template-columns:minmax(0,1fr);
-  grid-template-rows:42px 18px 34px 72px 40px;
+  /* 4. satır (fiyat kutusu) sabit 72px'ti — indirimli üründe üstü çizili
+     fiyat ayrı satıra çıkınca (bkz. .compact-price-only) bu sabit alana
+     sığmıyor, "Hemen kirala" butonu üstüne biniyordu. auto yapılınca
+     kutu ne kadar içerik varsa o kadar yer kaplıyor, diğer satırlar
+     (isim/puan/süre/buton) hâlâ sabit — kartlar arası hizası bozulmuyor. */
+  grid-template-rows:42px 18px 34px auto 40px;
   row-gap:8px;
   min-height:auto;
   padding:12px 12px 14px;
