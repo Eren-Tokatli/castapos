@@ -370,7 +370,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
    kenarlar) ve Gün/Aylık arasındaki iç ayraç (.daily-secondary) korunuyor. */
 .home-shell .monthly-primary{border-bottom:0!important}
 .home-shell .monthly-primary::after{content:none!important}
-.monthly-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding-bottom:9px;border-bottom:1px solid #e7eaf0}
+.monthly-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding-bottom:9px}
 .monthly-primary>div{display:grid;gap:1px}
 .monthly-primary small{font-size:11px;color:#98a2b3;font-weight:700}
 .modern-rental-card .card-wide-btn.standalone{margin-top:auto;height:43px;font-size:13px;box-shadow:0 9px 18px rgba(243,95,54,.18)}
@@ -531,13 +531,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   border:0;
 }
 .monthly-primary::after{
-  content:'';
-  position:absolute;
-  left:12%;
-  right:12%;
-  bottom:0;
-  height:1px;
-  background:#dde3ea;
+  content:none;
 }
 .daily-secondary{padding-top:5px}
 .monthly-primary strong{font-size:19px;color:#0b6b50;font-weight:800}
@@ -8353,7 +8347,7 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 .sports-category-page .rental-card-block {
-  border: 1px solid rgba(16, 24, 40, .06) !important;
+  border: 0 !important;
   border-radius: 14px !important;
   background: linear-gradient(180deg, #f8fafc, #eef3f8) !important;
 }
@@ -9350,7 +9344,7 @@ body.page-urun-detay .breadcrumb a:hover,
 }
 
 .premium-category-page:not(.sports-category-page) .rental-card-block {
-  border: 1px solid rgba(16, 24, 40, .06) !important;
+  border: 0 !important;
   border-radius: 14px !important;
   background: linear-gradient(180deg, #f8fafc, #eef3f8) !important;
 }
