@@ -17,6 +17,8 @@ export interface CampaignTileFormData {
   url: string;
   alt: string;
   href: string;
+  // Opsiyonel — doluysa mobilde url yerine bu gösterilir (bkz. SettingsClient.tsx).
+  mobileUrl: string;
 }
 
 export interface SiteSettingsFormData {
@@ -68,7 +70,12 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
     const bannersWithOrder = cleanBanners.map((b, i) => ({ ...b, sortOrder: i }));
 
     const cleanCampaignTiles = data.campaignTiles
-      .map((t, i) => ({ url: t.url.trim(), alt: t.alt.trim() || `Kampanya kutucuğu ${i + 1}`, href: t.href.trim() || null }))
+      .map((t, i) => ({
+        url: t.url.trim(),
+        alt: t.alt.trim() || `Kampanya kutucuğu ${i + 1}`,
+        href: t.href.trim() || null,
+        mobileUrl: t.mobileUrl.trim() || null,
+      }))
       .filter((t) => t.url);
 
     await prisma.siteSettings.upsert({

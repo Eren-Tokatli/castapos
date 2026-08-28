@@ -26,7 +26,7 @@ export default async function AdminSettingsPage() {
         // alanı olarak gösterilir (henüz doldurulmamış demektir).
         campaignTiles: Array.from({ length: 3 }, (_, i) => {
           const t = settings.campaignTiles[i];
-          return { url: t?.url || "", alt: t?.alt || "", href: t?.href || "" };
+          return { url: t?.url || "", alt: t?.alt || "", href: t?.href || "", mobileUrl: t?.mobileUrl || "" };
         }),
       }}
     />

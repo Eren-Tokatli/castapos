@@ -314,6 +314,19 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
                 />
 
                 <div>
+                  <ImageUploadField
+                    label="Mobil Görsel (opsiyonel)"
+                    folder="campaigns"
+                    value={tile.mobileUrl}
+                    onChange={(url) => updateCampaignTileField(idx, "mobileUrl", url)}
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    Boş bırakılırsa mobilde yukarıdaki görsel kenarlardan kırpılarak kullanılır. Mobil kutucuk
+                    geniş/kısa bir oranda (~330×160) — kırpmasız görünmesi için buna yakın bir görsel yükle.
+                  </p>
+                </div>
+
+                <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Tıklanınca gidilecek link</label>
                   <input
                     type="text"

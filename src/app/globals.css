@@ -507,7 +507,15 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
 .modern-rental-card .old-monthly-price{grid-column:1/-1;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
 .compact-price-only{
-  min-height:72px;
+  /* İndirimli üründe eski fiyat (üstü çizili) satırı eklenince kutu ~11px
+     daha uzuyordu, indirimsiz kartlar aynı gride yan yana geldiğinde fiyat
+     kutuları farklı boyda görünüyordu. Sabit yükseklik ikisini eşitliyor.
+     align-content:start (center DEĞİL) — Gün/Aylık satırları ve aralarındaki
+     çizgi (.daily-secondary border-bottom) her kartta AYNI Y konumunda
+     kalsın diye üste sabitlendi; center olsaydı 3. satır (eski fiyat)
+     eklendiğinde üstteki iki satır yukarı kayıp kartlar arası hizası
+     bozuluyordu. */
+  min-height:100px;
   margin:0;
   padding:9px 10px;
   border:1px solid #e8edf3;
@@ -516,7 +524,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   display:grid;
   grid-template-rows:1fr 1fr;
   gap:0;
-  align-content:center;
+  align-content:start;
 }
 .monthly-primary,.daily-secondary{
   display:flex;
@@ -1240,7 +1248,8 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .drawer-summary{display:grid;gap:10px;margin-bottom:14px}
 .drawer-summary p{display:flex;justify-content:space-between;align-items:center;margin:0;color:#475467}
 .drawer-summary .grand{font-size:17px}
-.mobile-bottom-nav .cart-count-pill{height:20px;padding:0 8px;font-size:11px}
+.mobile-bottom-nav .mobile-nav-icon-wrap{position:relative;display:inline-flex}
+.mobile-bottom-nav .mobile-cart-badge{position:absolute;top:-6px;right:-9px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--brand);color:#fff;font-size:10px;font-weight:800;line-height:16px;text-align:center}
 .cart-item-count{display:flex;justify-content:flex-start;margin-bottom:18px}
 .cart-item-count span{font-weight:800;color:#344054}
 .rental-cart-main,.rental-plan-list{min-width:0}
@@ -7516,18 +7525,20 @@ body.page-urun-detay .review-form-box .btn {
     mask-image: none !important;
   }
 
+  /* Mobilde tüm ürün şeritleri (Popüler/Yeni Gelenler/Flaş İndirim) aynı
+     standart "1 tam kart + sonraki kartın ~%60'ı" görünümünü kullanıyor —
+     eskiden şeritler arasında farklı oranlar vardı (78vw / 48vw karışık),
+     tutarlı hale getirildi. */
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
-    grid-auto-columns: minmax(205px, 74vw) !important;
+    grid-auto-columns: minmax(205px, 60vw) !important;
     gap: 12px !important;
     padding: 2px 18px 12px 0 !important;
     scroll-padding-left: 0;
   }
 
-  /* Flaş İndirim burada da (rail-shell negatif margin bloğunda) ayrıca
-     tanımlıydı ve yukarıdaki 2-kart kuralını eziyordu. */
   .home-shell .flash-sale-rail {
-    grid-auto-columns: 48vw !important;
+    grid-auto-columns: 60vw !important;
     gap: 12px !important;
     padding: 2px 18px 12px 0 !important;
     scroll-padding-left: 0;
@@ -7729,11 +7740,11 @@ body.page-urun-detay .review-form-box .btn {
 
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
-    grid-auto-columns: 78vw !important;
+    grid-auto-columns: 60vw !important;
   }
 
   .home-shell .flash-sale-rail {
-    grid-auto-columns: 48vw !important;
+    grid-auto-columns: 60vw !important;
   }
 
   .home-shell .modern-rental-card .product-img {
@@ -13365,6 +13376,21 @@ body.page-urun-detay .detail-tabs button:not(.active) {
     display: none;
   }
   .home-shell .promo-slide-media:has(.promo-slide-img-mobile) .promo-slide-img-mobile {
+    display: block;
+  }
+}
+
+/* Kampanya kutucukları — aynı desen: mobileUrl varsa mobilde onu göster
+   (bkz. HomeClient.tsx). .campaign-visual-tile zaten position:relative
+   olduğu için banner'daki gibi ayrı bir wrapper gerekmiyor. */
+.home-shell .campaign-tile-img-mobile {
+  display: none;
+}
+@media (max-width: 760px) {
+  .home-shell .campaign-visual-tile:has(.campaign-tile-img-mobile) .campaign-tile-img-desktop {
+    display: none;
+  }
+  .home-shell .campaign-visual-tile:has(.campaign-tile-img-mobile) .campaign-tile-img-mobile {
     display: block;
   }
 }

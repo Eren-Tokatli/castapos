@@ -67,7 +67,7 @@ export default async function HomePage() {
   // geçer, HomeClient kendi varsayılan (gradient) görseline döner.
   const campaignTiles = Array.from({ length: 3 }, (_, i) => {
     const t = settings.campaignTiles[i];
-    return t?.url ? { url: t.url, alt: t.alt, href: t.href || undefined } : null;
+    return t?.url ? { url: t.url, alt: t.alt, href: t.href || undefined, mobileUrl: t.mobileUrl || undefined } : null;
   });
 
   return (

@@ -419,17 +419,20 @@ export default function StorefrontLayout({
           <span><Home size={20} /></span>
           <b>Ana Sayfa</b>
         </Link>
+        <Link href="/hesap/favorilerim">
+          <span><Heart size={20} /></span>
+          <b>Favoriler</b>
+        </Link>
         <button type="button" onClick={() => setMobileCategoriesOpen(true)}>
           <span><Menu size={20} /></span>
           <b>Kategoriler</b>
         </button>
         <Link href="/sepet">
-          <span><ShoppingCart size={20} /></span>
+          <span className="mobile-nav-icon-wrap">
+            <ShoppingCart size={20} />
+            {cartCount > 0 && <b className="mobile-cart-badge">{cartCount}</b>}
+          </span>
           <b>Sepetim</b>
-        </Link>
-        <Link href="/hesap/favorilerim">
-          <span><Heart size={20} /></span>
-          <b>Favoriler</b>
         </Link>
         <button type="button" onClick={() => setMobileAccountOpen(true)}>
           <span className="mobile-user-outline"></span>
@@ -498,6 +501,13 @@ export default function StorefrontLayout({
               </button>
             </div>
             <div className="mobile-category-list">
+              <article className="mobile-category-row">
+                <div className="mobile-category-main">
+                  <Link href="/kategori" onClick={() => setMobileCategoriesOpen(false)}>
+                    Tüm Ürünler
+                  </Link>
+                </div>
+              </article>
               {navCategories.map((cat, index) => (
                 <article key={index} className="mobile-category-row">
                   <div className="mobile-category-main">

@@ -65,6 +65,8 @@ export interface CampaignTile {
   url: string;
   alt: string;
   href?: string;
+  // Doluysa mobilde (≤760px) url yerine bu gösterilir (bkz. admin/ayarlar).
+  mobileUrl?: string;
 }
 
 export function HomeClient({
@@ -372,7 +374,18 @@ export function HomeClient({
                   fill
                   sizes="(max-width: 1060px) 100vw, 33vw"
                   unoptimized={tile ? !isR2Hosted(tile.url) : true}
+                  className="campaign-tile-img-desktop"
                 />
+                {tile?.mobileUrl && (
+                  <Image
+                    src={tile.mobileUrl}
+                    alt={tile.alt}
+                    fill
+                    sizes="100vw"
+                    unoptimized={!isR2Hosted(tile.mobileUrl)}
+                    className="campaign-tile-img-mobile"
+                  />
+                )}
               </Link>
             );
           })}

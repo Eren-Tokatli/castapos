@@ -617,6 +617,9 @@ type CampaignTile {
   url  String
   alt  String
   href String?
+  // Opsiyonel — dolu olursa mobilde (≤760px) url yerine bu gösterilir
+  // (bkz. HomeBanner.mobileUrl — aynı mantık, kutu oranı mobilde farklı).
+  mobileUrl String?
 }
 
 enum CouponDiscountType {
