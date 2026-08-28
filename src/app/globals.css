@@ -6250,10 +6250,16 @@ body.page-urun-detay .review-form-box .btn {
 
 @media (max-width: 760px) {
 
-  /* Flaş İndirim: ekranda 2 kart aynı anda görünsün. Bu selector .flash-sale-rail
-     kurallarından daha spesifik (3 class) olduğu için asıl kazanan buydu. */
+  /* Bu selector .flash-sale-rail kurallarından daha spesifik (3 class)
+     olduğu için asıl kazanan buydu — diğer rail'lerle aynı standart
+     "1 tam + %60 peek" oranına (60vw) çekildi, aksi halde bu satır tek
+     başına .flash-sale-rail'deki 60vw düzeltmesini eziyordu. padding-left:0
+     da aynı sebeple eklendi — sol boşluk (soldaki kart diğer şeritlerden
+     farklı hizadaydı) buradan geliyordu, .flash-sale-rail'deki 0 padding
+     bu daha spesifik kural tarafından eziliyordu. */
   .home-shell .flash-sale-section .product-rail {
-    grid-auto-columns: 48vw !important;
+    grid-auto-columns: 60vw !important;
+    padding-left: 0 !important;
   }
 }
 
@@ -6337,7 +6343,11 @@ body.page-urun-detay .review-form-box .btn {
   text-decoration: none;
 }
 
-.home-shell .flash-sale-rail-shell {
+/* DÜZELTME: bu seçici ".flash-sale-rail-shell" idi ama JSX'te böyle bir
+   class hiç yok (gerçek yapı: <section class="flash-sale-section"> içinde
+   <div class="container carousel-shell">) — bu yüzden kural hiç
+   uygulanmıyordu, kartlar solda diğer şeritlerden farklı hizalanıyordu. */
+.home-shell #flash-sale .carousel-shell {
   min-width: 0;
   overflow: hidden;
 }
@@ -6509,7 +6519,7 @@ body.page-urun-detay .review-form-box .btn {
     flex-direction: column !important;
   }
 
-  .home-shell .flash-sale-rail-shell {
+  .home-shell #flash-sale .carousel-shell {
     order: -1;
     width: calc(100% + 12px);
     margin-right: -12px;
@@ -7512,7 +7522,7 @@ body.page-urun-detay .review-form-box .btn {
     font-size: 13px !important;
   }
 
-  .home-shell .flash-sale-rail-shell,
+  .home-shell #flash-sale .carousel-shell,
   .home-shell #popular-products .carousel-shell,
   .home-shell #new-products .carousel-shell {
     width: calc(100% + 18px) !important;
@@ -7528,10 +7538,12 @@ body.page-urun-detay .review-form-box .btn {
   /* Mobilde tüm ürün şeritleri (Popüler/Yeni Gelenler/Flaş İndirim) aynı
      standart "1 tam kart + sonraki kartın ~%60'ı" görünümünü kullanıyor —
      eskiden şeritler arasında farklı oranlar vardı (78vw / 48vw karışık),
-     tutarlı hale getirildi. */
+     tutarlı hale getirildi. minmax(205px,60vw) YAZILMIYOR bilerek — flash
+     sale rail'i düz 60vw kullanıyor, minmax sarması grid auto-columns
+     hesabında min ucu (205px) seçiyor, kartlar farklı genişlikte kalıyordu. */
   .home-shell #popular-products .product-rail,
   .home-shell #new-products .product-rail {
-    grid-auto-columns: minmax(205px, 60vw) !important;
+    grid-auto-columns: 60vw !important;
     gap: 12px !important;
     padding: 2px 18px 12px 0 !important;
     scroll-padding-left: 0;
