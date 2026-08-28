@@ -13472,6 +13472,21 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   }
 }
 
+/* Banner sürükle/kaydır (swipe) — bkz. HomeClient.tsx pointer event'leri.
+   touch-action:pan-y: yatay hareketi JS'e bırakıyor (kaydırma bizim
+   kodumuzda), dikey sayfa scroll'unu engellemiyor. user-select/user-drag
+   none: sürüklerken görsel/metin seçilmesin ya da resim tarayıcının
+   kendi "resmi sürükle" ghost'unu göstermesin. */
+.home-shell .promo-track {
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+}
+.home-shell .promo-track img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
 /* Sepetim sayfası — dark mode (bkz. sohbet: "sepetim komple beyaz") */
 :root[data-theme="dark"] .rental-plan-item,
 :root[data-theme="dark"] .rental-plan-summary,

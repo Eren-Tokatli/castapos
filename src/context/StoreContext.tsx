@@ -107,10 +107,9 @@ export function StoreProvider({
       return updated;
     });
 
-    // Match static behavior: mobile just shows toast, desktop opens drawer
-    if (window.matchMedia("(max-width:760px)").matches) {
-      showToast("Ürün sepetine eklendi.");
-    } else {
+    // Masaüstünde sepet çekmecesi açılıyor zaten görsel geri bildirim veriyor;
+    // mobilde artık ayrıca toast gösterilmiyor (kullanıcı isteği).
+    if (!window.matchMedia("(max-width:760px)").matches) {
       setIsCartOpen(true);
     }
   };
@@ -150,7 +149,8 @@ export function StoreProvider({
 
       if (index < 0) {
         updated = [...prev, { id, period: selectedPeriod }];
-        showToast(`Ürün ${selectedPeriod} aylık planla favorilerine eklendi.`);
+        // "Favorilere eklendi" toast'ı kaldırıldı (kullanıcı isteği) — kalp
+        // ikonunun dolu göstermesi zaten yeterli görsel geri bildirim.
       } else if (prev[index].period !== selectedPeriod) {
         updated = prev.map((item, idx) =>
           idx === index ? { id, period: selectedPeriod } : item

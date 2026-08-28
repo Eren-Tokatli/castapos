@@ -111,6 +111,54 @@ export function HomeClient({
     return () => clearInterval(timer);
   }, [slides.length, bannerIntervalSeconds]);
 
+  // Banner sürükle/kaydır (swipe) — parmakla veya fareyle yatay sürükleyip
+  // sonraki/önceki slayta geçilebilsin. Kaydırma efekti mevcut opacity
+  // crossfade'i kullanıyor (gerçek zamanlı sürükleme takibi yok, sadece
+  // bırakınca yön belirleniyor) — CSS'e dokunmadan çalışır.
+  const dragStartX = useRef<number | null>(null);
+  const dragDeltaX = useRef(0);
+  const dragActive = useRef(false);
+  const SWIPE_THRESHOLD = 40;
+
+  const handlePromoPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (slides.length <= 1) return;
+    dragStartX.current = e.clientX;
+    dragDeltaX.current = 0;
+    dragActive.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePromoPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragActive.current || dragStartX.current === null) return;
+    dragDeltaX.current = e.clientX - dragStartX.current;
+  };
+
+  const handlePromoPointerUp = () => {
+    if (!dragActive.current) return;
+    dragActive.current = false;
+    dragStartX.current = null;
+    const delta = dragDeltaX.current;
+    if (delta <= -SWIPE_THRESHOLD) {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    } else if (delta >= SWIPE_THRESHOLD) {
+      setActiveSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    }
+    // dragDeltaX.current BİLEREK burada sıfırlanmıyor — pointerup'tan hemen
+    // sonra tarayıcı click event'ini fırlatır, aşağıdaki click handler'ın
+    // "sürüklendi mi" diye bakabilmesi için değeri okuyup KENDİSİ sıfırlıyor.
+  };
+
+  // Sürükleme bir tıklama/link gezintisi olarak algılanmasın diye — swipe
+  // eşiğini (10px, SWIPE_THRESHOLD'dan daha düşük bir "hareket oldu mu"
+  // eşiği) geçen bir hareketten hemen sonraki click iptal ediliyor.
+  const handlePromoSlideClick = (e: React.MouseEvent) => {
+    const wasDrag = Math.abs(dragDeltaX.current) > 10;
+    dragDeltaX.current = 0;
+    if (wasDrag) {
+      e.preventDefault();
+    }
+  };
+
   const popularRailRef = useRef<HTMLDivElement>(null);
   const newRailRef = useRef<HTMLDivElement>(null);
   const flashSaleRailRef = useRef<HTMLDivElement>(null);
@@ -129,7 +177,13 @@ export function HomeClient({
       {slides.length > 0 && (
       <section className="home-hero">
         <div className="promo-slider">
-          <div className="promo-track">
+          <div
+            className="promo-track"
+            onPointerDown={handlePromoPointerDown}
+            onPointerMove={handlePromoPointerMove}
+            onPointerUp={handlePromoPointerUp}
+            onPointerCancel={handlePromoPointerUp}
+          >
             {slides.map((slide, idx) => {
               // mobileImg tanımlıysa mobilde (≤760px) onu, masaüstünde her
               // zaman orijinal görseli göster — iki next/image, CSS
@@ -162,6 +216,8 @@ export function HomeClient({
                   key={idx}
                   className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
                   href={slide.href}
+                  onClick={handlePromoSlideClick}
+                  draggable={false}
                 >
                   {media}
                 </Link>
