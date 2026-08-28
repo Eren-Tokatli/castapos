@@ -2,7 +2,9 @@
 
 import { FormEvent, ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { BadgeCheck, Bot, Headphones, Loader2, Send, Sparkles, UserRound } from "lucide-react";
+import { isR2Hosted } from "@/lib/r2-client";
 
 type RecommendedProduct = {
   id: string;
@@ -206,7 +208,7 @@ export function AiChatClient() {
                 <div className="ai-chat-product-cards">
                   {message.products.map((product) => (
                     <Link key={product.id} href={product.url} className="ai-chat-product-card">
-                      <img src={product.image} alt={product.name} />
+                      <Image src={product.image} alt={product.name} width={44} height={44} unoptimized={!isR2Hosted(product.image)} />
                       <div>
                         <b>{product.name}</b>
                         <span>{product.monthly} / ay</span>

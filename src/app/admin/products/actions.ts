@@ -51,9 +51,11 @@ function buildProductData(data: ProductFormData) {
     stockStatus: data.stockStatus,
     status: data.status === "ACTIVE",
     categoryIds: data.categoryIds,
+    // Admin panelde artık alt metin girilmiyor (kaldırıldı) — erişilebilirlik
+    // için tamamen boş kalmasın diye ürün adıyla otomatik dolduruluyor.
     images: data.images
       .filter((img) => img.url.trim())
-      .map((img, i) => ({ url: img.url.trim(), alt: img.alt.trim() || undefined, sortOrder: i })),
+      .map((img, i) => ({ url: img.url.trim(), alt: img.alt.trim() || data.name.trim() || undefined, sortOrder: i })),
     specs: data.specs
       .filter((s) => s.label.trim())
       .map((s, i) => ({ label: s.label.trim(), value: s.value.trim(), sortOrder: i })),

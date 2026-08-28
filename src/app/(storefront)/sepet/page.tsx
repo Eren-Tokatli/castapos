@@ -2,11 +2,13 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { CalendarDays, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { monthlyPrice, dailyPrice, defaultPeriod, formatPrice } from "@/lib/catalog-shared";
+import { isR2Hosted } from "@/lib/r2-client";
 import { createStorefrontOrder } from "./actions";
 import { IyzicoCheckoutFrame } from "@/components/IyzicoCheckoutFrame";
 import { isValidTcKimlikNo } from "@/lib/tc-kimlik";
@@ -309,7 +311,7 @@ export default function SepetPage() {
                   return (
                     <article key={idx} className="rental-plan-item">
                       <Link className="cart-product-image" href={detailHref}>
-                        <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                        <Image src={p.image} alt={p.name} width={130} height={120} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                       </Link>
                       
                       <div className="plan-product-copy">

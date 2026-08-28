@@ -2,9 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { monthlyPrice, dailyPrice, formatPrice } from "@/lib/catalog-shared";
+import { isR2Hosted } from "@/lib/r2-client";
 
 export default function FavorilerimPage() {
   const { favorites, toggleFavorite, getProductById } = useStore();
@@ -48,7 +50,7 @@ export default function FavorilerimPage() {
                 return (
                   <article key={entry.id} className="favorite-product-card">
                     <Link className="favorite-image" href={detailHref}>
-                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                      <Image src={p.image} alt={p.name} width={140} height={140} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                     </Link>
                     
                     <button

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Mail, MapPin, Save, MessageCircle, Link2, Image as ImageIcon, Plus, Trash2, ArrowUp, ArrowDown, Timer, LayoutGrid } from "lucide-react";
 import { updateSiteSettings, type SiteSettingsFormData, type HomeBannerFormData, type CampaignTileFormData } from "./actions";
 import { useAdminToast } from "../_components/ToastProvider";
+import { ImageUploadField } from "@/components/ImageUploadField";
 
 const EMPTY_BANNER: HomeBannerFormData = { url: "", alt: "", href: "", mobileUrl: "" };
 
@@ -232,72 +233,35 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
                     </div>
                   </div>
 
+                  <ImageUploadField
+                    label="Görsel"
+                    folder="banners"
+                    value={banner.url}
+                    onChange={(url) => updateBannerField(idx, "url", url)}
+                  />
+
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Görsel URL</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Tıklanınca gidilecek link (opsiyonel)</label>
                     <input
                       type="text"
-                      value={banner.url}
-                      onChange={(e) => updateBannerField(idx, "url", e.target.value)}
-                      placeholder="https://.../banner.png"
-                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none font-mono"
+                      value={banner.href}
+                      onChange={(e) => updateBannerField(idx, "href", e.target.value)}
+                      placeholder="/kategori?cat=Fitness"
+                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
                     />
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Alt Metin</label>
-                      <input
-                        type="text"
-                        value={banner.alt}
-                        onChange={(e) => updateBannerField(idx, "alt", e.target.value)}
-                        placeholder="Görseli kısaca tarif et"
-                        className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Tıklanınca gidilecek link (opsiyonel)</label>
-                      <input
-                        type="text"
-                        value={banner.href}
-                        onChange={(e) => updateBannerField(idx, "href", e.target.value)}
-                        placeholder="/kategori?cat=Fitness"
-                        className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {banner.url && (
-                    <img
-                      src={banner.url}
-                      alt=""
-                      className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-white"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                    />
-                  )}
-
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">
-                      Mobil Görsel URL (opsiyonel)
-                    </label>
-                    <input
-                      type="text"
+                    <ImageUploadField
+                      label="Mobil Görsel (opsiyonel)"
+                      folder="banners"
                       value={banner.mobileUrl}
-                      onChange={(e) => updateBannerField(idx, "mobileUrl", e.target.value)}
-                      placeholder="https://.../banner-mobil.png"
-                      className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none font-mono"
+                      onChange={(url) => updateBannerField(idx, "mobileUrl", url)}
                     />
                     <p className="text-xs text-slate-400 mt-1">
                       Boş bırakılırsa mobilde yukarıdaki görsel kenarlardan kırpılarak kullanılır.
                       Kırpmasız görünmesi için ~2322×1354 oranında (dikeye yakın) bir görsel yükle.
                     </p>
-                    {banner.mobileUrl && (
-                      <img
-                        src={banner.mobileUrl}
-                        alt=""
-                        className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-white mt-2"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                    )}
                   </div>
                 </div>
               ))}
@@ -342,27 +306,12 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
               <div key={idx} className="border border-slate-200 rounded-xl p-4 space-y-3 bg-slate-50/60">
                 <span className="text-xs font-bold text-slate-500">Kutucuk {idx + 1}</span>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Görsel URL</label>
-                  <input
-                    type="text"
-                    value={tile.url}
-                    onChange={(e) => updateCampaignTileField(idx, "url", e.target.value)}
-                    placeholder="https://.../kutucuk.png"
-                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Alt Metin</label>
-                  <input
-                    type="text"
-                    value={tile.alt}
-                    onChange={(e) => updateCampaignTileField(idx, "alt", e.target.value)}
-                    placeholder="Görseli kısaca tarif et"
-                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm focus:border-orange-500 outline-none"
-                  />
-                </div>
+                <ImageUploadField
+                  label="Görsel"
+                  folder="campaigns"
+                  value={tile.url}
+                  onChange={(url) => updateCampaignTileField(idx, "url", url)}
+                />
 
                 <div>
                   <label className="block text-xs font-bold text-slate-500 mb-1 uppercase">Tıklanınca gidilecek link</label>
@@ -375,14 +324,6 @@ export function SettingsClient({ settings }: { settings: SiteSettingsFormData })
                   />
                 </div>
 
-                {tile.url && (
-                  <img
-                    src={tile.url}
-                    alt=""
-                    className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-white"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                )}
               </div>
             ))}
           </div>

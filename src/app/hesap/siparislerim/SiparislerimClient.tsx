@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChevronRight, RefreshCw, Search, ShoppingBag } from "lucide-react";
+import { isR2Hosted } from "@/lib/r2-client";
 
 export type OrderRow = {
   id: string;
@@ -105,7 +107,7 @@ export function SiparislerimClient({ orders }: { orders: OrderRow[] }) {
               <Link key={order.id} href={`/hesap/siparislerim/${order.id}`} className="order-row">
                 <div className="order-row-thumbs">
                   {order.thumbs.slice(0, 2).map((src, idx) => (
-                    <img key={idx} src={src} alt="" loading="lazy" decoding="async" />
+                    <Image key={idx} src={src} alt="" width={48} height={48} loading="lazy" unoptimized={!isR2Hosted(src)} />
                   ))}
                   {order.thumbs.length === 0 && (
                     <span className="order-row-thumb-fallback"><ShoppingBag size={20} /></span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { ImageOff } from "lucide-react";
 
 /**
@@ -23,9 +24,12 @@ export function ImagePreviewThumb({ url, size = 40 }: { url: string; size?: numb
       style={{ width: size, height: size }}
     >
       {trimmed && !broken ? (
-        <img
+        <Image
           src={trimmed}
           alt=""
+          width={size}
+          height={size}
+          unoptimized
           className="w-full h-full object-cover"
           onError={() => setBroken(true)}
         />

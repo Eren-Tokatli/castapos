@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { isR2Hosted } from "@/lib/r2-client";
 import { Star, Check, BadgeCheck, ChevronDown, ChevronLeft, ChevronRight, ShieldAlert, ShieldCheck, Truck, Wallet, X, ZoomIn } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import {
@@ -206,7 +208,16 @@ export function ProductDetailClient({
               onClick={() => setZoomOpen(true)}
               aria-label="Görseli büyüt"
             >
-              <img key={activeImageIndex} className="gallery-fade-img" src={images[activeImageIndex]} alt={p.name} />
+              <Image
+                key={activeImageIndex}
+                className="gallery-fade-img"
+                src={images[activeImageIndex]}
+                alt={p.name}
+                width={520}
+                height={390}
+                priority
+                unoptimized={!isR2Hosted(images[activeImageIndex])}
+              />
               <span className="gallery-zoom-hint">
                 <ZoomIn size={15} /> Büyüt
               </span>
@@ -228,7 +239,7 @@ export function ProductDetailClient({
                     }
                   }}
                 >
-                  <img src={img} alt="" loading="lazy" decoding="async" />
+                  <Image src={img} alt="" width={68} height={68} loading="lazy" unoptimized={!isR2Hosted(img)} />
                 </span>
               ))}
             </div>
@@ -635,11 +646,14 @@ export function ProductDetailClient({
               </button>
             )}
             <div className="image-zoom-stage">
-              <img
+              <Image
                 key={activeImageIndex}
                 className={`image-zoom-slide ${slideDir === "left" ? "from-left" : "from-right"}`}
                 src={images[activeImageIndex]}
                 alt={p.name}
+                width={900}
+                height={675}
+                unoptimized={!isR2Hosted(images[activeImageIndex])}
               />
             </div>
             {images.length > 1 && (

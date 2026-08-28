@@ -55,12 +55,12 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
     if (!data.addressTr.trim() || !data.addressUs.trim()) {
       return { success: false, error: "Adres alanları boş bırakılamaz." };
     }
+    // Admin panelde artık alt metin girilmiyor (kaldırıldı) — erişilebilirlik
+    // için tamamen boş kalmasın diye burada otomatik, jenerik bir metinle
+    // dolduruluyor.
     const cleanBanners = data.banners
-      .map((b) => ({ url: b.url.trim(), alt: b.alt.trim(), href: b.href.trim() || null, mobileUrl: b.mobileUrl.trim() || null }))
+      .map((b, i) => ({ url: b.url.trim(), alt: b.alt.trim() || `Anasayfa banner'ı ${i + 1}`, href: b.href.trim() || null, mobileUrl: b.mobileUrl.trim() || null }))
       .filter((b) => b.url);
-    if (cleanBanners.some((b) => !b.alt)) {
-      return { success: false, error: "Her banner için bir alt metin (erişilebilirlik açıklaması) girilmeli." };
-    }
     const bannerInterval = Math.round(data.bannerIntervalSeconds);
     if (!Number.isFinite(bannerInterval) || bannerInterval < 2 || bannerInterval > 60) {
       return { success: false, error: "Geçiş süresi 2 ile 60 saniye arasında olmalı." };
@@ -68,11 +68,8 @@ export async function updateSiteSettings(data: SiteSettingsFormData) {
     const bannersWithOrder = cleanBanners.map((b, i) => ({ ...b, sortOrder: i }));
 
     const cleanCampaignTiles = data.campaignTiles
-      .map((t) => ({ url: t.url.trim(), alt: t.alt.trim(), href: t.href.trim() || null }))
+      .map((t, i) => ({ url: t.url.trim(), alt: t.alt.trim() || `Kampanya kutucuğu ${i + 1}`, href: t.href.trim() || null }))
       .filter((t) => t.url);
-    if (cleanCampaignTiles.some((t) => !t.alt)) {
-      return { success: false, error: "Her kampanya kutucuğu için bir alt metin girilmeli." };
-    }
 
     await prisma.siteSettings.upsert({
       where: { id: SITE_SETTINGS_ID },

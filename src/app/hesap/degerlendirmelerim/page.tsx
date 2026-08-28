@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Star } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AccountShell } from "@/components/AccountShell";
+import { isR2Hosted } from "@/lib/r2-client";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +54,7 @@ export default async function DegerlendirmelerimPage() {
             <div key={review.id} className="order-row" style={{ cursor: "default" }}>
               <div className="order-row-thumbs">
                 {review.productImage ? (
-                  <img src={review.productImage} alt="" loading="lazy" decoding="async" />
+                  <Image src={review.productImage} alt="" width={48} height={48} loading="lazy" unoptimized={!isR2Hosted(review.productImage)} />
                 ) : (
                   <span className="order-row-thumb-fallback"><Star size={18} /></span>
                 )}

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { isR2Hosted } from "@/lib/r2-client";
 import { CalendarDays, MousePointerClick, Package, Repeat, Sparkles } from "lucide-react";
 import { CatalogProduct } from "@/lib/catalog-shared";
 import { ProductCard } from "@/components/ProductCard";
@@ -128,14 +130,30 @@ export function HomeClient({
           <div className="promo-track">
             {slides.map((slide, idx) => {
               // mobileImg tanımlıysa mobilde (≤760px) onu, masaüstünde her
-              // zaman orijinal img'i göster — <picture>/<source> ile, JS'siz.
-              const picture = slide.mobileImg ? (
-                <picture>
-                  <source media="(max-width: 760px)" srcSet={slide.mobileImg} />
-                  <img src={slide.img} alt={slide.alt} />
-                </picture>
-              ) : (
-                <img src={slide.img} alt={slide.alt} />
+              // zaman orijinal görseli göster — iki next/image, CSS
+              // ':has()' ile hangisinin görüneceğine karar veriyor (bkz.
+              // globals.css ".promo-slide-media"), JS'siz çalışır.
+              const media = (
+                <span className="promo-slide-media">
+                  <Image
+                    src={slide.img}
+                    alt={slide.alt}
+                    fill
+                    sizes="100vw"
+                    priority={idx === 0}
+                    className="promo-slide-img promo-slide-img-desktop"
+                  />
+                  {slide.mobileImg && (
+                    <Image
+                      src={slide.mobileImg}
+                      alt={slide.alt}
+                      fill
+                      sizes="100vw"
+                      priority={idx === 0}
+                      className="promo-slide-img promo-slide-img-mobile"
+                    />
+                  )}
+                </span>
               );
               return slide.href ? (
                 <Link
@@ -143,11 +161,11 @@ export function HomeClient({
                   className={`promo-slide ${idx === activeSlide ? "active" : ""}`}
                   href={slide.href}
                 >
-                  {picture}
+                  {media}
                 </Link>
               ) : (
                 <div key={idx} className={`promo-slide ${idx === activeSlide ? "active" : ""}`}>
-                  {picture}
+                  {media}
                 </div>
               );
             })}
@@ -260,7 +278,7 @@ export function HomeClient({
                   </button>
                   <div className="easy-step-accordion">
                     <div className="easy-step-accordion-inner">
-                      <img src={item.image} alt="" loading="lazy" decoding="async" />
+                      <Image src={item.image} alt="" width={300} height={150} loading="lazy" unoptimized />
                       <p>{item.text}</p>
                     </div>
                   </div>
@@ -281,7 +299,7 @@ export function HomeClient({
                   <h3>{EASY_STEPS[activeEasyStep].title}</h3>
                   <p>{EASY_STEPS[activeEasyStep].note}</p>
                 </div>
-                <img src={EASY_STEPS[activeEasyStep].image} alt="" loading="lazy" decoding="async" />
+                <Image src={EASY_STEPS[activeEasyStep].image} alt="" width={400} height={220} loading="lazy" unoptimized />
               </div>
             </div>
             <div className="easy-preview-badge">
@@ -348,7 +366,13 @@ export function HomeClient({
                 href={tile ? tile.href || "/" : fallback.fallbackHref}
                 aria-label={tile ? tile.alt : fallback.fallbackAlt}
               >
-                <img src={tile ? tile.url : fallback.fallbackImg} alt={tile ? tile.alt : fallback.fallbackAlt} />
+                <Image
+                  src={tile ? tile.url : fallback.fallbackImg}
+                  alt={tile ? tile.alt : fallback.fallbackAlt}
+                  fill
+                  sizes="(max-width: 1060px) 100vw, 33vw"
+                  unoptimized={tile ? !isR2Hosted(tile.url) : true}
+                />
               </Link>
             );
           })}
@@ -379,7 +403,7 @@ export function HomeClient({
                 href={`/urun/${p.id}`}
               >
                 <div className="testimonial-top">
-                  <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                  <Image src={p.image} alt={p.name} width={78} height={78} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                   <div>
                     <h3>{p.name}</h3>
                     <div className="gold-stars small">

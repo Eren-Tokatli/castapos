@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { createTicket } from "./actions";
 import { TICKET_REASONS } from "./reasons";
+import { isR2Hosted } from "@/lib/r2-client";
 
 export type WizardOrderItem = {
   productId: string;
@@ -134,7 +136,7 @@ export function NewTicketWizard({
                   >
                     <div className="order-row-thumbs">
                       {order.items.slice(0, 2).map((item, idx) =>
-                        item.image ? <img key={idx} src={item.image} alt="" /> : null
+                        item.image ? <Image key={idx} src={item.image} alt="" width={48} height={48} unoptimized={!isR2Hosted(item.image)} /> : null
                       )}
                     </div>
                     <div className="order-row-main">
@@ -164,7 +166,7 @@ export function NewTicketWizard({
                   onClick={() => pickItem(item)}
                 >
                   <div className="order-row-thumbs">
-                    {item.image ? <img src={item.image} alt="" /> : <span className="order-row-thumb-fallback" />}
+                    {item.image ? <Image src={item.image} alt="" width={48} height={48} unoptimized={!isR2Hosted(item.image)} /> : <span className="order-row-thumb-fallback" />}
                   </div>
                   <div className="order-row-main">
                     <span className="order-row-number"><b>{item.name}</b></span>
@@ -179,7 +181,7 @@ export function NewTicketWizard({
             <div>
               <div className="order-row" style={{ marginBottom: 18, cursor: "default" }}>
                 <div className="order-row-thumbs">
-                  {selectedItem.image ? <img src={selectedItem.image} alt="" /> : <span className="order-row-thumb-fallback" />}
+                  {selectedItem.image ? <Image src={selectedItem.image} alt="" width={48} height={48} unoptimized={!isR2Hosted(selectedItem.image)} /> : <span className="order-row-thumb-fallback" />}
                 </div>
                 <div className="order-row-main">
                   <span className="order-row-number"><b>{selectedItem.name}</b></span>
@@ -220,7 +222,7 @@ export function NewTicketWizard({
             <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
               <div className="order-row" style={{ cursor: "default" }}>
                 <div className="order-row-thumbs">
-                  {selectedItem?.image ? <img src={selectedItem.image} alt="" /> : <span className="order-row-thumb-fallback" />}
+                  {selectedItem?.image ? <Image src={selectedItem.image} alt="" width={48} height={48} unoptimized={!isR2Hosted(selectedItem.image)} /> : <span className="order-row-thumb-fallback" />}
                 </div>
                 <div className="order-row-main">
                   <span className="order-row-number"><b>{selectedReason.label}</b></span>

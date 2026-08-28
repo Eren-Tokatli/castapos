@@ -2,9 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Star } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 import { CatalogProduct, defaultPeriod, monthlyPrice, dailyPrice, discountLabel, originalMonthlyPrice, ratingCount, formatPrice } from "@/lib/catalog-shared";
+import { isR2Hosted } from "@/lib/r2-client";
 
 export function ProductCard({ p }: { p: CatalogProduct }) {
   const { addToCart, toggleFavorite, isFavorite } = useStore();
@@ -16,6 +18,12 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
   const favorited = isFavorite(p.id);
   const discount = discountLabel(p, selectedPeriod);
   const oldMonthly = originalMonthlyPrice(p, selectedPeriod);
+
+  // .jpg görsellerde arka planı "yok etmek" için mix-blend-mode kullanılıyor
+  // (bkz. globals.css .jpg-blend) — next/image optimize ederken src'yi
+  // /_next/image?... proxy'sine çevirdiği için artık URL uzantısına
+  // bakılamıyor, JS'de kontrol edip class olarak veriyoruz.
+  const isJpg = p.image.toLowerCase().endsWith(".jpg");
 
   const badge = discount ? (
     <span className="discount-badge accent-badge">{discount}</span>
@@ -39,7 +47,15 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
       <div className="product-img">
         <Link href={`/urun/${p.id}`} className="w-full h-full flex items-center justify-center">
           {badge}
-          <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+          <Image
+            src={p.image}
+            alt={p.name}
+            width={220}
+            height={155}
+            loading="lazy"
+            unoptimized={!isR2Hosted(p.image)}
+            className={isJpg ? "jpg-blend" : undefined}
+          />
         </Link>
         <button
           className={`fav-btn ${favorited ? "active" : ""}`}

@@ -2,10 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Star } from "lucide-react";
 import { createProduct, updateFullProduct, deleteProduct, type ProductFormData } from "./actions";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
 import { useAdminToast } from "../_components/ToastProvider";
 import { ImagePreviewThumb } from "../_components/ImagePreviewThumb";
+import { ImageUploadButton } from "@/components/ImageUploadField";
 
 interface Category {
   id: string;
@@ -480,7 +482,7 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
 
               <div className="pl-2 border-l-2 border-slate-200 space-y-2">
                 {opt.values.map((val, vi) => (
-                  <div key={vi} className="grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-2 items-center">
+                  <div key={vi} className="grid grid-cols-[1.5fr_1fr_1fr_36px_auto] gap-2 items-center">
                     <input
                       placeholder="Değer (ör. Kırmızı)"
                       value={val.label}
@@ -530,20 +532,19 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
                       }
                       className="h-8 px-2 border border-slate-200 rounded-lg text-xs bg-white"
                     />
-                    <input
-                      placeholder="Görsel URL"
-                      value={val.imageUrl}
-                      onChange={(e) =>
+                    <ImageUploadButton
+                      folder="products"
+                      onUploaded={(url) =>
                         setForm((f) => ({
                           ...f,
                           options: f.options.map((o, idx) =>
                             idx === oi
-                              ? { ...o, values: o.values.map((v, vidx) => (vidx === vi ? { ...v, imageUrl: e.target.value } : v)) }
+                              ? { ...o, values: o.values.map((v, vidx) => (vidx === vi ? { ...v, imageUrl: url } : v)) }
                               : o
                           ),
                         }))
                       }
-                      className="h-8 px-2 border border-slate-200 rounded-lg text-xs bg-white"
+                      onError={(message) => toast(message, "error")}
                     />
                     <button
                       type="button"
@@ -681,32 +682,47 @@ export function ProductFormClient({ mode, productId, categories, brands, initial
             + Görsel Ekle
           </button>
         </div>
+        <p className="text-xs text-slate-500 -mt-2">
+          İlk sıradaki görsel ürünün kapak fotoğrafıdır (listelerde, sepette, favorilerde görünen budur).
+          Başka bir görseli öne almak için yıldız butonuna bas.
+        </p>
         <div className="space-y-2">
           {form.images.map((img, i) => (
-            <div key={i} className="grid grid-cols-[40px_2fr_1fr_auto] gap-2 items-center">
+            <div key={i} className="flex items-center gap-2 border border-slate-200 rounded-xl p-2">
               <ImagePreviewThumb url={img.url} />
-              <input
-                placeholder="Görsel URL"
-                value={img.url}
-                onChange={(e) =>
+              <ImageUploadButton
+                folder="products"
+                onUploaded={(url) =>
                   setForm((f) => ({
                     ...f,
-                    images: f.images.map((im, idx) => (idx === i ? { ...im, url: e.target.value } : im)),
+                    images: f.images.map((im, idx) => (idx === i ? { ...im, url } : im)),
                   }))
                 }
-                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
+                onError={(message) => toast(message, "error")}
               />
-              <input
-                placeholder="Alt metin"
-                value={img.alt}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    images: f.images.map((im, idx) => (idx === i ? { ...im, alt: e.target.value } : im)),
-                  }))
-                }
-                className="h-9 px-2 border border-slate-200 rounded-lg text-xs"
-              />
+              <span className="flex-1 min-w-0 truncate text-xs text-slate-400">
+                {img.url ? decodeURIComponent(img.url.split("/").pop() || img.url) : "Henüz görsel yok"}
+              </span>
+              {i === 0 ? (
+                <span className="shrink-0 h-9 px-2 flex items-center justify-center gap-1 rounded-lg bg-orange-50 text-orange-600 text-[11px] font-bold">
+                  <Star size={11} fill="currentColor" /> Kapak
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setForm((f) => {
+                      const images = [...f.images];
+                      const [picked] = images.splice(i, 1);
+                      images.unshift(picked);
+                      return { ...f, images };
+                    })
+                  }
+                  className="shrink-0 h-9 px-2 flex items-center justify-center gap-1 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 text-[11px] font-bold"
+                >
+                  <Star size={11} /> Kapak yap
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setForm((f) => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }))}

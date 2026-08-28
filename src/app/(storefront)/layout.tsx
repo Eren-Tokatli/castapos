@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Heart, ShoppingCart, Menu, Home, Search, Sun, Moon, LogOut, ShieldCheck, Sparkles, Truck } from "lucide-react";
@@ -10,6 +11,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { formatPrice, defaultPeriod, monthlyPrice } from "@/lib/catalog-shared";
 import { ACCOUNT_MENU_LINKS } from "@/lib/account-menu";
+import { isR2Hosted } from "@/lib/r2-client";
 import { CookieConsent } from "@/components/CookieConsent";
 import { CookieScripts } from "@/components/CookieScripts";
 import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
@@ -149,7 +151,7 @@ export default function StorefrontLayout({
         <header className="resource-header">
           <div className="container resource-header-inner">
             <Link className="brand-logo" href="/" aria-label="Castapos ana sayfa">
-              <img src="/assets/castapos-real-logo.png" alt="Castapos" />
+              <Image src="/assets/castapos-real-logo.png" alt="Castapos" width={160} height={40} priority />
               <span>Tek tıkla kirala</span>
             </Link>
             <nav className="resource-nav" aria-label="Kaynaklar menüsü">
@@ -177,7 +179,7 @@ export default function StorefrontLayout({
       <header className="commerce-header">
         <div className="container commerce-top">
           <Link className="brand-logo" href="/" aria-label="Castapos ana sayfa">
-            <img src="/assets/castapos-real-logo.png" alt="Castapos" />
+            <Image src="/assets/castapos-real-logo.png" alt="Castapos" width={160} height={40} priority />
             <span>Tek tıkla kirala</span>
           </Link>
           
@@ -209,7 +211,7 @@ export default function StorefrontLayout({
                       setSearchQuery("");
                     }}
                   >
-                    <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                    <Image src={p.image} alt={p.name} width={52} height={52} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                     <span>{p.name}</span>
                   </Link>
                 ))}
@@ -537,7 +539,7 @@ export default function StorefrontLayout({
                 <div className="empty-mini-picks">
                   {drawerSuggestedProducts.map((p) => (
                     <Link key={p.id} href={`/urun/${p.id}`} onClick={() => setIsCartOpen(false)}>
-                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                      <Image src={p.image} alt={p.name} width={62} height={54} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                       <span>
                         <b>{p.name}</b>
                         <small>{formatPrice(monthlyPrice(p, defaultPeriod(p)))} / Aylık</small>
@@ -556,7 +558,7 @@ export default function StorefrontLayout({
 
                   return (
                     <article key={idx} className="drawer-item">
-                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                      <Image src={p.image} alt={p.name} width={72} height={72} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                       <div>
                         <b>{p.name}</b>
                         <span className="drawer-period-meta">
@@ -673,7 +675,7 @@ export default function StorefrontLayout({
 
                   return (
                     <article key={entry.id} className="drawer-item">
-                      <img src={p.image} alt={p.name} loading="lazy" decoding="async" />
+                      <Image src={p.image} alt={p.name} width={72} height={72} loading="lazy" unoptimized={!isR2Hosted(p.image)} />
                       <div>
                         <b>{p.name}</b>
                         <span className="drawer-period-meta">{period} aylık plan</span>

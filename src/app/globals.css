@@ -153,7 +153,7 @@ body{font-weight:400}
 .brand-logo{background:transparent !important;border-radius:0;padding:0;box-shadow:none;justify-content:flex-start}
 .brand-logo img{width:160px;height:40px;object-fit:contain}
 .product-img img{max-height:138px;width:88%;object-fit:contain}
-.product-img img[src$='.jpg']{max-height:150px;width:92%;mix-blend-mode:multiply}
+.product-img img.jpg-blend{max-height:150px;width:92%;mix-blend-mode:multiply}
 .cart-count-pill{display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;min-width:58px;height:22px;padding:0 9px;border-radius:999px;background:var(--brand);color:#fff !important;font-size:12px !important;font-weight:800;margin-top:2px;white-space:nowrap}
 .action-link.cart-action{align-items:center;justify-items:start;min-width:94px;column-gap:8px}
 .action-link.cart-action b{align-self:center}
@@ -13345,6 +13345,27 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   .home-shell .promo-slider .promo-track .promo-slide img {
     object-fit: cover !important;
     object-position: center center !important;
+  }
+}
+
+/* Banner görseli next/image ile render ediliyor (bkz. HomeClient.tsx) —
+   her slaytta iki <img> olabilir (masaüstü + opsiyonel mobil kırpma).
+   promo-slide-media, fill prop'u için pozisyonlanmış kapsayıcı; hangi
+   img'in görüneceğine :has() ile CSS karar veriyor, JS gerekmiyor. */
+.home-shell .promo-slide-media {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.home-shell .promo-slide-img-mobile {
+  display: none;
+}
+@media (max-width: 760px) {
+  .home-shell .promo-slide-media:has(.promo-slide-img-mobile) .promo-slide-img-desktop {
+    display: none;
+  }
+  .home-shell .promo-slide-media:has(.promo-slide-img-mobile) .promo-slide-img-mobile {
+    display: block;
   }
 }
 
