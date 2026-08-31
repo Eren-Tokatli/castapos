@@ -30,14 +30,14 @@ function getClient() {
 }
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"]);
-const MAX_SIZE_BYTES = 8 * 1024 * 1024; // 8MB
+const MAX_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
 
 export function validateUploadFile(file: File): string | null {
   if (!ALLOWED_TYPES.has(file.type)) {
     return "Sadece JPG, PNG, WEBP, GIF veya SVG yükleyebilirsin.";
   }
   if (file.size > MAX_SIZE_BYTES) {
-    return "Dosya çok büyük — en fazla 8MB olabilir.";
+    return "Dosya çok büyük — en fazla 20MB olabilir.";
   }
   return null;
 }

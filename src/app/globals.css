@@ -7811,7 +7811,10 @@ body.page-urun-detay .review-form-box .btn {
   .home-shell .campaign-strip-grid {
     display: grid !important;
     grid-auto-flow: column;
-    grid-auto-columns: minmax(250px, 86vw);
+    /* Alt sınır 336px = 177×1.9 — kutu hem oranı sabit (1.9:1) tutuyor
+       hem de asla eski 177px yükseklikten kısalmıyor; ekran 86vw ile
+       336px'i geçince büyümeye devam ediyor. */
+    grid-auto-columns: minmax(336px, 86vw);
     grid-template-columns: none !important;
     gap: 12px !important;
     overflow-x: auto;
@@ -7825,9 +7828,24 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .home-shell .campaign-visual-tile {
-    min-height: 177px !important;
+    /* aspect-ratio ile oran (1.9:1) SABİT — genişlik(336px alt sınır) ve
+       yükseklik (336/1.9=177px, eski değerle birebir) birlikte bunu
+       garanti ediyor, ekran ne olursa olsun asla değişmiyor. Bu sayede
+       1.9:1 hazırlanmış bir görsel HER telefonda kırpılmadan/boşluksuz
+       tam oturuyor. width:100% ve min-height:0 ŞART — yoksa aspect-ratio
+       genişliği ters yönden (yükseklikten) türetip taşmaya/çakışmaya
+       sebep oluyordu (bkz. .home-shell .campaign-visual-tile'ın
+       media-query'siz min-height:237px!important kuralı, ~6310'da —
+       onu da eziyoruz). */
+    width: 100%;
+    min-height: 0 !important;
+    aspect-ratio: 1.9;
     border-radius: 16px !important;
     scroll-snap-align: start;
+  }
+
+  .home-shell .campaign-visual-tile img {
+    min-height: 0 !important;
   }
 
   .home-shell .testimonial-card {
@@ -13541,12 +13559,12 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   }
   .home-shell .campaign-visual-tile.has-mobile-img .campaign-tile-img-mobile {
     display: block !important;
-    /* Kutu sabit yükseklikte (bkz. .campaign-visual-tile min-height),
-       yüklenen mobil görselin oranı bununla tam eşleşmeyebiliyor —
-       object-fit:cover görselin üst/alt kısmını (örn. başlık yazısını)
-       kırpıyordu. contain ile hiçbir şey kesilmiyor, sadece oran
-       uymadığında kutunun kendi arka planı (varsa) kenarlarda görünür. */
-    object-fit: contain !important;
+    /* cover'a geri dönüldü — contain ile görsel oranı kutuyla tam
+       eşleşmediğinde üstte/altta boşluk kalıyordu, bu da kutucuk diğer
+       ikisinden ("cover" ile her zaman kutuyu tam dolduran) daha kısa/
+       küçük görünmesine sebep oluyordu. Kullanıcı isteği: hepsi eşit
+       boyda görünsün — kenarlardan hafif kırpılma pahasına cover. */
+    object-fit: cover !important;
   }
 }
 
