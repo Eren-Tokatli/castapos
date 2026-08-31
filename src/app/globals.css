@@ -13496,7 +13496,11 @@ body.page-urun-detay .detail-tabs button:not(.active) {
 /* Banner görseli next/image ile render ediliyor (bkz. HomeClient.tsx) —
    her slaytta iki <img> olabilir (masaüstü + opsiyonel mobil kırpma).
    promo-slide-media, fill prop'u için pozisyonlanmış kapsayıcı; hangi
-   img'in görüneceğine :has() ile CSS karar veriyor, JS gerekmiyor. */
+   img'in görüneceğine artık React'te eklenen .has-mobile-img class'ı
+   karar veriyor. ÖNCEDEN :has() ile yapılıyordu — bazı Android
+   tarayıcılarında desteklenmiyor, sessizce hiç çalışmıyordu (mobile
+   görsel hiç görünmeyip masaüstü görseli yanlış oranda kırpılıyordu,
+   "kampanya kutucuğu tam oturmadı" şikayeti buradan geliyordu). */
 .home-shell .promo-slide-media {
   position: absolute;
   inset: 0;
@@ -13506,10 +13510,10 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   display: none;
 }
 @media (max-width: 760px) {
-  .home-shell .promo-slide-media:has(.promo-slide-img-mobile) .promo-slide-img-desktop {
+  .home-shell .promo-slide-media.has-mobile-img .promo-slide-img-desktop {
     display: none;
   }
-  .home-shell .promo-slide-media:has(.promo-slide-img-mobile) .promo-slide-img-mobile {
+  .home-shell .promo-slide-media.has-mobile-img .promo-slide-img-mobile {
     display: block;
   }
 }
@@ -13521,11 +13525,17 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   display: none;
 }
 @media (max-width: 760px) {
-  .home-shell .campaign-visual-tile:has(.campaign-tile-img-mobile) .campaign-tile-img-desktop {
+  .home-shell .campaign-visual-tile.has-mobile-img .campaign-tile-img-desktop {
     display: none;
   }
-  .home-shell .campaign-visual-tile:has(.campaign-tile-img-mobile) .campaign-tile-img-mobile {
+  .home-shell .campaign-visual-tile.has-mobile-img .campaign-tile-img-mobile {
     display: block;
+    /* Kutu sabit yükseklikte (bkz. .campaign-visual-tile min-height),
+       yüklenen mobil görselin oranı bununla tam eşleşmeyebiliyor —
+       object-fit:cover görselin üst/alt kısmını (örn. başlık yazısını)
+       kırpıyordu. contain ile hiçbir şey kesilmiyor, sadece oran
+       uymadığında kutunun kendi arka planı (varsa) kenarlarda görünür. */
+    object-fit: contain !important;
   }
 }
 

@@ -186,11 +186,13 @@ export function HomeClient({
           >
             {slides.map((slide, idx) => {
               // mobileImg tanımlıysa mobilde (≤760px) onu, masaüstünde her
-              // zaman orijinal görseli göster — iki next/image, CSS
-              // ':has()' ile hangisinin görüneceğine karar veriyor (bkz.
-              // globals.css ".promo-slide-media"), JS'siz çalışır.
+              // zaman orijinal görseli göster. Önceden CSS ':has()' ile
+              // karar veriliyordu — bazı Android tarayıcılarında ':has()'
+              // desteklenmiyor, sessizce hiç çalışmıyordu (kampanya
+              // kutucuğunda aynı desen aynı sebepten görsel oturmuyordu).
+              // Artık React'te class ekleniyor, tüm tarayıcılarda çalışır.
               const media = (
-                <span className="promo-slide-media">
+                <span className={`promo-slide-media ${slide.mobileImg ? "has-mobile-img" : ""}`}>
                   <Image
                     src={slide.img}
                     alt={slide.alt}
@@ -420,7 +422,7 @@ export function HomeClient({
             return (
               <Link
                 key={idx}
-                className={`campaign-tile campaign-visual-tile ${tile ? "campaign-tile-custom" : fallback.fallbackClass}`}
+                className={`campaign-tile campaign-visual-tile ${tile ? "campaign-tile-custom" : fallback.fallbackClass} ${tile?.mobileUrl ? "has-mobile-img" : ""}`}
                 href={tile ? tile.href || "/" : fallback.fallbackHref}
                 aria-label={tile ? tile.alt : fallback.fallbackAlt}
               >
