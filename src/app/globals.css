@@ -62,7 +62,7 @@
 .price-block .total-line{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
 .price-block .total-line span{font-size:12px;color:#667085;font-weight:700}
 .price-block em{display:block;line-height:1.35;color:#0b6b50;font-weight:700;margin-top:4px;font-size:14px}
-.side-cart-footer{padding:14px 18px 18px;border-top:1px solid #edf0f5;background:#fff;display:grid;gap:10px}
+.side-cart-footer{display:grid;gap:10px}
 .coupon-box.compact span{font-size:13px}
 .coupon-box.compact input{height:44px}
 .coupon-box.compact button{height:44px;padding:0 16px}
@@ -533,7 +533,6 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .site-toast{position:fixed;left:50%;bottom:26px;translate:-50% 20px;background:#111827;color:#fff;border-radius:999px;padding:12px 18px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:400}
 .site-toast.show{opacity:1;translate:-50% 0}
 .side-cart-footer .btn{margin-top:0}
-.side-cart-footer{gap:10px}
 .side-cart-footer .btn-soft{order:1}.side-cart-footer .btn-primary{order:2}
 .cart-page-head{padding:18px 0}.cart-page-head h1{margin-bottom:0;font-size:30px}
 .question-actions.single-action{grid-template-columns:auto;justify-content:end}
@@ -559,7 +558,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 
 .favorites-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .favorite-product-card{display:grid;grid-template-columns:170px minmax(0,1fr);gap:20px;background:#fff;border:1px solid #e3e8ef;border-radius:18px;padding:18px;box-shadow:0 10px 28px rgba(16,24,40,.055)}
-.favorite-copy>span{display:block;color:var(--brand);font-weight:900;font-size:12px;margin-bottom:5px}.favorite-price span{color:#667085;font-weight:700}.favorite-price small{color:#667085;font-weight:700}
+.favorite-price span{color:#667085;font-weight:700}.favorite-price small{color:#667085;font-weight:700}
 .favorite-actions .btn{padding:10px 17px}
 .favorites-empty{grid-column:1/-1}
 .fav-btn.active,.detail-fav-btn.active{color:var(--brand);border-color:#ffc6b6;background:#fff5f1}
@@ -676,7 +675,6 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 
 .favorites-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .favorite-product-card{grid-template-columns:126px minmax(0,1fr);gap:15px;padding:14px;border-radius:15px;align-items:center;min-height:154px}
-.favorite-copy>span{font-size:11px;margin-bottom:3px}
 .favorite-price{margin-bottom:10px;line-height:1.2}
 .favorite-price strong{margin-left:6px}
 .favorite-actions .btn{display:none!important}
@@ -723,9 +721,6 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .favorite-image{align-self:center}
 .favorite-copy{
   min-height:126px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
 }
 .favorite-copy h2{font-weight:700}
 .favorite-period{width:max-content}
@@ -892,7 +887,6 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .account-page .section,.content-page .section{padding-top:22px}
 .favorite-product-card{position:relative;grid-template-columns:140px minmax(0,1fr);gap:18px;align-items:center;min-height:172px;padding:18px 18px 16px 18px}
 .favorite-image{width:140px;height:140px;padding:12px}
-.favorite-copy>span{font-size:12px;font-weight:800;color:var(--brand-dark)}
 .favorite-period{display:inline-flex;align-items:center;min-height:30px;padding:5px 11px;border-radius:999px;border:1px solid #f4b9a7;background:#fff7f4;color:var(--brand-dark);font-size:12px;font-weight:700;margin-bottom:10px}
 .favorite-price{margin-bottom:0}
 .favorite-remove-btn{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:999px;border:1px solid #e4e7ec;background:#fff;color:#667085;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer}
@@ -1066,7 +1060,6 @@ body{padding-bottom:0}
   .plan-price-summary button{grid-column:1/-1;justify-self:end;margin-top:8px}
   .rental-plan-summary{position:static!important}
   .side-cart{width:100%}
-  .side-cart-body{padding:14px 16px}
   .drawer-item img{width:78px;height:78px}
   .drawer-item .remove-line{align-self:start}
 }
@@ -1125,7 +1118,7 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .cart-action{gap:6px;align-items:center}
 .side-cart-head [data-cart-close],.checkout-close-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;border:1px solid #fca89c;background:#fff5f4;color:#d92d20;font-size:22px;cursor:pointer}
 .side-cart{display:flex;flex-direction:column;max-height:100vh}
-.side-cart-body{flex:1;overflow:auto;padding:18px 18px 8px}
+.side-cart-body{flex:1;overflow:auto}
 .drawer-items{display:grid;gap:14px}
 .drawer-item{display:grid;grid-template-columns:72px 1fr auto;align-items:start;gap:12px;padding:12px;border:1px solid #edf1f5;border-radius:18px;background:#fff}
 .drawer-item img{width:72px;height:72px;object-fit:contain;border-radius:14px;background:#f8fafc}
@@ -1159,7 +1152,7 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .rental-cart-layout{align-items:start}
 .summary-kicker{color:var(--brand);font-weight:900;letter-spacing:.04em;text-transform:uppercase}
 .rental-plan-summary .btn.full{margin-top:14px}
-.checkout-flow-backdrop{position:fixed;inset:0;background:rgba(16,24,40,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:300}
+.checkout-flow-backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:300}
 .checkout-flow-backdrop.open{display:flex}
 .checkout-flow-modal{width:min(980px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:28px;box-shadow:0 40px 90px rgba(16,24,40,.24)}
 .checkout-flow-head{position:sticky;top:0;background:#fff;padding:22px 24px;border-bottom:1px solid #eef1f5;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;z-index:2}
@@ -1312,9 +1305,6 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
   .about-feature-grid article{min-width:82%!important;scroll-snap-align:start!important}
   .about-values-card{padding:22px!important}
   .about-values-card>div{padding:13px 0!important}
-  .checkout-flow-backdrop{padding:10px!important}
-  .checkout-flow-head{padding:18px!important}
-  .checkout-flow-body{padding:16px!important}
 }
 
 body.page-sepet .category-bar,
