@@ -329,7 +329,7 @@ body.cart-open .support-widget{display:none !important}
 .rental-plan-summary>div{display:flex;justify-content:space-between;gap:16px;color:#667085}
 .rental-plan-summary>div b{color:#101828}
 .rental-plan-summary .summary-saving b{color:#079455}
-.rental-plan-summary .first-payment{border-top:1px solid #edf0f5;padding-top:15px;font-size:19px;font-weight:900;color:#101828}
+.rental-plan-summary .first-payment{color:#101828}
 .rental-plan-summary p{margin:0;color:#667085;font-size:13px;line-height:1.5}
 
 @media(max-width:1060px){.rental-cart-layout{grid-template-columns:1fr}.rental-plan-summary{position:static}}
