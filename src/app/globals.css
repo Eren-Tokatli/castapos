@@ -4370,11 +4370,6 @@ body.page-product-detail .key-benefits.compact.tighter a {
 
 body.page-urun-detay .installment-box.refined.compact.cleaner.light,
 body.page-product-detail .installment-box.refined.compact.cleaner.light {
-  background:
-    radial-gradient(circle at 88% 18%, rgba(214, 155, 53, .28), transparent 26%),
-    linear-gradient(145deg, #111827, #1b2942) !important;
-  border-color: rgba(243, 95, 54, .34) !important;
-  color: #fff !important;
   box-shadow: 0 22px 52px rgba(17, 24, 39, .2) !important;
 }
 
