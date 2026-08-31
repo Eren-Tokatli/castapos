@@ -4616,28 +4616,21 @@ body.page-product-detail .main-gallery-image.clean.product-hero-image {
   overflow: hidden;
   border: 1px solid rgba(243, 95, 54, .16);
   border-radius: 20px !important;
-  background:
-    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, .94) 0 26%, rgba(255, 237, 213, .5) 27% 42%, transparent 43%),
-    linear-gradient(145deg, #f8fafc, #fff8f0) !important;
-}
-
-body.page-urun-detay .main-gallery-image.clean.product-hero-image:before,
-body.page-product-detail .main-gallery-image.clean.product-hero-image:before {
-  content: "";
-  position: absolute;
-  inset: 22px;
-  border-radius: 999px;
-  border: 1px solid rgba(243, 95, 54, .16);
-  pointer-events: none;
+  /* Radyal-gradyan "hedef" (dairesel) deseni kaldırıldı — görsel zoom
+     (scale) ile kırpılıp çerçeveyi tam doldururken bu desen görselin
+     ARKASINDA saklı kalıyordu; zoom kaldırılınca (yukarıda) görselin
+     etrafında beyaz boşluk açılıp deseni ortaya çıkardı, "arkadan yuvarlak
+     bir şey çıkıyor" şikayeti buradan geliyordu. */
+  background: linear-gradient(145deg, #f8fafc, #fff8f0) !important;
 }
 
 body.page-urun-detay .main-gallery-image.clean.product-hero-image img,
 body.page-product-detail .main-gallery-image.clean.product-hero-image img {
+  /* transform:scale(1.32) BİLEREK kaldırıldı — bu, buradaki asıl kazanan
+     kuraldı (daha düşük spesifiklikli scale(1.08)'i de eziyordu). Görsel
+     %32 büyütülüp taşan kısmı kırpılıyordu, 1:1 kare hazırlanan ürün
+     görseli tam görünmüyordu (kullanıcı isteği: zoom olmasın). */
   filter: drop-shadow(0 28px 32px rgba(17, 24, 39, .18));
-  /* Katalog fotoğrafları (800x800) etrafında boşluk bırakılarak çekilmiş —
-     çerçeveye tam otursun diye hafifçe yakınlaştırıp taşan kısmı kırpıyoruz
-     (üst kutuda overflow:hidden zaten var). */
-  transform: scale(1.32);
 }
 
 .detail-premium-strip {
@@ -4934,16 +4927,14 @@ body.page-urun-detay .qa-list article {
 }
 
 body.page-urun-detay .main-gallery-image.clean.product-hero-image {
-  background:
-    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, .54) 0 26%, rgba(243, 95, 54, .16) 27% 42%, transparent 43%),
-    linear-gradient(145deg, var(--pd-card), var(--pd-card-soft)) !important;
+  /* Dairesel radyal-gradyan deseni kaldırıldı — bkz. yukarıdaki not
+     (~4613 civarı), görsel zoom kaldırılınca arkada beliriyordu. */
+  background: linear-gradient(145deg, var(--pd-card), var(--pd-card-soft)) !important;
   border-color: var(--pd-line) !important;
 }
 
 :root[data-theme="dark"] body.page-urun-detay .main-gallery-image.clean.product-hero-image {
-  background:
-    radial-gradient(circle at 50% 44%, rgba(255, 255, 255, .08) 0 26%, rgba(243, 95, 54, .13) 27% 42%, transparent 43%),
-    linear-gradient(145deg, rgba(15, 23, 42, .98), rgba(8, 13, 23, .96)) !important;
+  background: linear-gradient(145deg, rgba(15, 23, 42, .98), rgba(8, 13, 23, .96)) !important;
 }
 
 body.page-urun-detay .thumb-row.clean span,
@@ -12917,13 +12908,9 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   font: inherit;
   width: 100%;
 }
-.main-gallery-image.clean.product-hero-image img {
-  transform: scale(1.08);
-  transition: transform .25s ease;
-}
-.main-gallery-image.clean.product-hero-image:hover img {
-  transform: scale(1.12);
-}
+/* Görsel her zaman scale(1.08) ile (hover'da 1.12) büyütülüyordu — normal
+   haldeyken bile görselin kenarları kutunun dışına taşıp kırpılıyordu,
+   1:1 kare olarak hazırlanan görsel tam görünmüyordu. Zoom kaldırıldı. */
 .gallery-zoom-hint {
   position: absolute;
   right: 16px;
