@@ -576,7 +576,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   .category-scroll{justify-content:flex-start;overflow-x:auto;scrollbar-width:none}.category-scroll::-webkit-scrollbar{display:none}.nav-category>a{padding:0 11px;font-size:12.5px}.enhanced-contact{grid-template-columns:1fr}
 }
 @media(max-width:760px){
-  .favorite-product-card{grid-template-columns:1fr}.favorite-image{height:190px}.form-grid.two{grid-template-columns:1fr}.form-grid .full{grid-column:auto}
+  .favorite-image{height:190px}.form-grid.two{grid-template-columns:1fr}.form-grid .full{grid-column:auto}
 }
 
 .commerce-actions{align-items:center}
@@ -940,7 +940,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .nav-category>a{padding:0 12px;font-size:12.3px;font-weight:700;color:#202939}
 .nav-category:not(:last-child)::after{height:17px;top:15px;background:#d7dbe3}
 .form-grid.two select,.form-grid.two input,.form-grid.two textarea{color:#273242}
-@media(max-width:1060px){.official-footer-grid,.faq-overview-grid,.about-feature-grid,.enhanced-about-grid{grid-template-columns:1fr}.favorite-product-card{grid-template-columns:126px minmax(0,1fr)}.favorite-image{width:126px;height:126px}.favorite-image img{max-height:104px}}
+@media(max-width:1060px){.official-footer-grid,.faq-overview-grid,.about-feature-grid,.enhanced-about-grid{grid-template-columns:1fr}.favorite-image{width:126px;height:126px}.favorite-image img{max-height:104px}}
 @media(max-width:760px){.main-gallery-image.clean{height:340px}.compact-panel h1{font-size:32px}}
 
 .account-link .action-icon::before{content:'◯';font-size:22px;color:#7a3f9d;display:block;line-height:1}
@@ -1003,7 +1003,6 @@ body{padding-bottom:0}
   .main-search{grid-column:1/-1;order:2}
   .product-detail-grid.refined.compact-detail-grid{grid-template-columns:minmax(0,1fr)}
   .main-gallery-image.clean.product-hero-image{height:380px}
-  .favorite-product-card{grid-template-columns:100px minmax(0,1fr);gap:12px;padding:14px;min-height:0}
   .favorite-brand-link{font-size:14px}
   .listing-layout{grid-template-columns:1fr!important}
 
