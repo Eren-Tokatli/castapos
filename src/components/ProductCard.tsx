@@ -98,10 +98,20 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
               onClick={() => setSelectedPeriod(m)}
             >
               {/* 4 seçenekli (1/3/6/9 Ay) kartlarda dar telefonlarda yazı
-                 kırpılıyordu — sadece BU kartlarda boşluksuz ("1Ay"),
-                 diğer kartlarda ("3 Ay" gibi tek/az seçenekli) normal
-                 boşluklu haliyle kalıyor. */}
-              {m}{p.periods.length === 4 ? "" : " "}Ay
+                 kırpılıyordu — SADECE mobilde boşluksuz ("1Ay") gösteriliyor,
+                 masaüstünde ("1 Ay") hiç değişmiyor. İki sürüm de basılıp
+                 CSS ile hangisinin görüneceğine karar veriliyor (bkz.
+                 globals.css .period-label-mobile/.period-label-desktop) —
+                 SSR'da ikisi de DOM'da olduğu için hydration uyuşmazlığı
+                 olmuyor, JS/viewport algılamaya gerek kalmıyor. */}
+              {p.periods.length === 4 ? (
+                <>
+                  <span className="period-label-mobile">{m}Ay</span>
+                  <span className="period-label-desktop">{m} Ay</span>
+                </>
+              ) : (
+                `${m} Ay`
+              )}
             </button>
           ))}
         </div>

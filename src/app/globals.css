@@ -532,6 +532,14 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
    genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
    kaymış gibi görünüyordu (özellikle Android'de fark ediliyordu). */
 .modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px!important;font-size:10px;overflow:hidden;text-overflow:clip;white-space:nowrap}
+/* 4 seçenekli kartlarda (ProductCard.tsx) iki etiket sürümü de basılıyor —
+   mobilde boşluksuz ("1Ay"), masaüstünde boşluklu ("1 Ay") görünsün diye
+   burada seçiliyor. */
+.period-label-desktop{display:none}
+@media(min-width:761px){
+  .period-label-mobile{display:none}
+  .period-label-desktop{display:inline}
+}
 .modern-rental-card .daily-secondary{border-bottom:1px solid #e7eaf0;padding-bottom:8px;margin-bottom:1px}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
 .modern-rental-card .old-monthly-price{grid-column:1/-1;text-align:center;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
