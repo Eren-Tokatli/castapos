@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import { notFound, useSearchParams } from "next/navigation";
 import { CatalogProduct, ratingCount, hasDiscount, startingPrice } from "@/lib/catalog-shared";
 import { ProductCard } from "@/components/ProductCard";
@@ -62,6 +62,16 @@ function KategoriPageContent({
     sortOptions.some((option) => option.value === urlSort) ? urlSort : "featured"
   );
 
+  // Mobilde filtre kutusu ayrı bir bottom sheet olarak açılıyor (bkz.
+  // globals.css body.mobile-filters-open .filter-sidebar). Masaüstünde bu
+  // state hiç kullanılmıyor, sidebar zaten sayfanın içinde görünür.
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.toggle("mobile-filters-open", mobileFiltersOpen);
+    return () => document.body.classList.remove("mobile-filters-open");
+  }, [mobileFiltersOpen]);
+
   // "Premium" artık geçerli bir kategori değil (ürünler taşındı); eski
   // linkler/bookmarklar boş bir liste yerine 404 görmeli.
   if (activeCategory === "Premium") {
@@ -96,6 +106,7 @@ function KategoriPageContent({
     setAppliedMaxPrice(draftMaxPrice);
     setAppliedPeriods(draftPeriods);
     setAppliedAdvantages(draftAdvantages);
+    setMobileFiltersOpen(false);
   };
 
   // Aktif filtre etiketindeki "x" butonuna basınca hem taslağı hem
@@ -236,6 +247,21 @@ function KategoriPageContent({
 
       <section className="listing-section">
         <div className="container listing-layout">
+          <button
+            type="button"
+            className="mobile-filter-trigger"
+            onClick={() => setMobileFiltersOpen(true)}
+          >
+            <SlidersHorizontal size={16} /> Filtrele
+            {activeFilterChips.length > 0 && <b>{activeFilterChips.length}</b>}
+          </button>
+
+          <div
+            className="mobile-filters-backdrop"
+            onClick={() => setMobileFiltersOpen(false)}
+            aria-hidden="true"
+          />
+
           <CategoryFilterSidebar
             categories={!activeCategory ? categories : undefined}
             selectedCategory={draftCategory}
@@ -252,6 +278,7 @@ function KategoriPageContent({
             advantages={draftAdvantages}
             onAdvantageToggle={handleAdvantageToggle}
             onApply={handleApplyFilters}
+            onClose={() => setMobileFiltersOpen(false)}
           />
 
           {/* LISTING CONTENT */}

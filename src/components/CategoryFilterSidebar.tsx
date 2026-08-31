@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { X } from "lucide-react";
 
 export interface RentalAdvantages {
   campaigned: boolean;
@@ -22,6 +23,9 @@ interface CategoryFilterSidebarProps {
   advantages: RentalAdvantages;
   onAdvantageToggle: (key: keyof RentalAdvantages) => void;
   onApply: () => void;
+  // Sadece mobilde (bkz. globals.css body.mobile-filters-open) kullanılıyor —
+  // filtre kutusu alt sayfada (bottom sheet) açılıyor, bu kapatma butonu.
+  onClose?: () => void;
 }
 
 const rentalPeriods = [1, 3, 6, 9];
@@ -46,11 +50,19 @@ export function CategoryFilterSidebar({
   advantages,
   onAdvantageToggle,
   onApply,
+  onClose,
 }: CategoryFilterSidebarProps) {
   return (
     <div className="filter-sidebar-wrap">
     <aside className="filter-sidebar">
-      <div className="filter-title">Filtrele</div>
+      <div className="filter-title">
+        <span>Filtrele</span>
+        {onClose && (
+          <button type="button" onClick={onClose} aria-label="Filtreyi kapat">
+            <X size={18} />
+          </button>
+        )}
+      </div>
 
       {categories && categories.length > 0 && onCategoryChange && (
         <div className="filter-block">

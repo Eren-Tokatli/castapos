@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
@@ -110,6 +110,24 @@ export default function StorefrontLayout({
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+  }, [pathname]);
+
+  // Ürün detay sayfası body class'ları (header'daki arama çubuğunun mobil
+  // görünümünü belirliyor — bkz. globals.css body.page-urun-detay
+  // .main-search) burada, layout hiç unmount olmadığı için senkron
+  // (useLayoutEffect) yönetiliyor. Önceden bu class'lar ProductDetailClient
+  // içinde adi bir useEffect ile ekleniyordu: iki ürün sayfası arasında
+  // geçişte eski sayfanın cleanup'ı ile yeninin effect'i arasında class'ın
+  // hiç olmadığı bir an oluşabiliyor, o anda header varsayılan (geniş)
+  // haliyle boyanıp hemen ardından zıplayarak düzeliyordu. NOT: page-kategori
+  // class'ı bilinçli olarak burada yönetilmiyor — daha önce hiç
+  // uygulanmıyordu, kategori sayfasının mevcut (geniş) arama görünümü
+  // buna bağlı değil; ekleyip kategori sayfasının davranışını
+  // değiştirmeyelim.
+  useLayoutEffect(() => {
+    const isProduct = pathname?.startsWith("/urun/") ?? false;
+    document.body.classList.toggle("page-urun-detay", isProduct);
+    document.body.classList.toggle("page-product-detail", isProduct);
   }, [pathname]);
 
   // Suggestions search list

@@ -131,10 +131,10 @@ export function ProductDetailClient({
   const selectedTotal = rentTotal;
   const favorited = isFavorite(p.id);
 
-  useEffect(() => {
-    document.body.classList.add("page-urun-detay", "page-product-detail");
-    return () => document.body.classList.remove("page-urun-detay", "page-product-detail");
-  }, []);
+  // page-urun-detay/page-product-detail body class'ları artık (storefront)/
+  // layout.tsx'te pathname'e göre merkezi ve senkron yönetiliyor — burada
+  // ayrıca eklemiyoruz (route geçişinde çift yönetim arama çubuğunun bir an
+  // yanlış halde görünmesine sebep oluyordu).
 
   const goPrevImage = () => {
     setSlideDir("left");
@@ -144,6 +144,35 @@ export function ProductDetailClient({
   const goNextImage = () => {
     setSlideDir("right");
     setActiveImageIndex((i) => (i + 1) % images.length);
+  };
+
+  // Zoom lightbox'ta elle kaydırma (swipe) — bkz. HomeClient.tsx promo
+  // banner'daki aynı pointer event deseni.
+  const zoomDragStartX = React.useRef<number | null>(null);
+  const zoomDragActive = React.useRef(false);
+  const ZOOM_SWIPE_THRESHOLD = 40;
+
+  const handleZoomPointerDown = (e: React.PointerEvent) => {
+    if (images.length <= 1) return;
+    zoomDragStartX.current = e.clientX;
+    zoomDragActive.current = true;
+  };
+
+  const handleZoomPointerMove = (e: React.PointerEvent) => {
+    if (!zoomDragActive.current || zoomDragStartX.current === null) return;
+    e.preventDefault();
+  };
+
+  const handleZoomPointerUp = (e: React.PointerEvent) => {
+    if (!zoomDragActive.current || zoomDragStartX.current === null) return;
+    const delta = e.clientX - zoomDragStartX.current;
+    zoomDragActive.current = false;
+    zoomDragStartX.current = null;
+    if (delta > ZOOM_SWIPE_THRESHOLD) {
+      goPrevImage();
+    } else if (delta < -ZOOM_SWIPE_THRESHOLD) {
+      goNextImage();
+    }
   };
 
   useEffect(() => {
@@ -644,14 +673,21 @@ export function ProductDetailClient({
                 <ChevronLeft size={22} />
               </button>
             )}
-            <div className="image-zoom-stage">
+            <div
+              className="image-zoom-stage"
+              onPointerDown={handleZoomPointerDown}
+              onPointerMove={handleZoomPointerMove}
+              onPointerUp={handleZoomPointerUp}
+              onPointerCancel={handleZoomPointerUp}
+            >
               <Image
                 key={activeImageIndex}
                 className={`image-zoom-slide ${slideDir === "left" ? "from-left" : "from-right"}`}
                 src={images[activeImageIndex]}
                 alt={p.name}
-                width={900}
-                height={675}
+                fill
+                sizes="(max-width: 760px) 100vw, 900px"
+                draggable={false}
                 unoptimized={!isR2Hosted(images[activeImageIndex])}
               />
             </div>
