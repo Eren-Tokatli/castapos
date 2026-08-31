@@ -3241,7 +3241,6 @@ body:has(.account-page) .category-bar {
 }
 .account-page .account-hero {
   position: relative;
-  background: linear-gradient(180deg, #fff7f4 0%, #fff 100%);
   border-bottom: 1px solid #ffd6c8;
 }
 .account-page .account-hero:after {
@@ -3254,7 +3253,6 @@ body:has(.account-page) .category-bar {
 .account-page .account-hero h1 {
   font-family: var(--font-display), Georgia, serif;
   letter-spacing: -0.01em;
-  color: #171f2e;
 }
 .account-page .breadcrumb {
   color: #475467;
