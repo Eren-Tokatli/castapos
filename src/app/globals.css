@@ -6274,13 +6274,13 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 .home-shell .campaign-visual-tile {
-  min-height: 158px !important;
+  min-height: 237px !important;
   border-radius: 18px !important;
   box-shadow: 0 22px 54px rgba(16, 24, 40, .12) !important;
 }
 
 .home-shell .campaign-visual-tile img {
-  min-height: 158px !important;
+  min-height: 237px !important;
 }
 
 .home-shell .testimonials-section {
@@ -7787,7 +7787,7 @@ body.page-urun-detay .review-form-box .btn {
   }
 
   .home-shell .campaign-visual-tile {
-    min-height: 118px !important;
+    min-height: 177px !important;
     border-radius: 16px !important;
     scroll-snap-align: start;
   }
