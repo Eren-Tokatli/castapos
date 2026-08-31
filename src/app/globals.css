@@ -1540,16 +1540,28 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .account-page{min-height:calc(100vh - 430px)}
 .about-feature-grid article{border-top:3px solid rgba(243,95,54,.22)}
 @media(max-width:760px){
-  body.page-urun-detay .commerce-top,body.page-kategori .commerce-top{grid-template-columns:1fr 48px!important;align-items:center!important}
-  body.page-urun-detay .brand-logo,body.page-kategori .brand-logo{grid-column:1!important}
-  body.page-urun-detay .main-search,body.page-kategori .main-search{grid-column:2!important;order:initial!important;width:46px!important;height:46px!important;border:0!important;background:transparent!important;overflow:visible!important;position:relative!important;justify-self:end!important}
-  body.page-urun-detay .main-search .search-icon,body.page-kategori .main-search .search-icon,body.page-urun-detay .main-search input,body.page-kategori .main-search input{display:none!important}
-  body.page-urun-detay .main-search button,body.page-kategori .main-search button{display:grid!important;place-items:center!important;width:46px!important;height:46px!important;margin:0!important;padding:0!important;border-radius:999px!important;font-size:0!important;background:var(--brand)!important}
-  body.page-urun-detay .main-search button:before,body.page-kategori .main-search button:before{content:'⌕';font-size:25px;color:#fff;line-height:1}
-  body.page-urun-detay.mobile-search-open .commerce-top,body.page-kategori.mobile-search-open .commerce-top{grid-template-columns:1fr!important}
-  body.page-urun-detay.mobile-search-open .brand-logo,body.page-kategori.mobile-search-open .brand-logo{display:none!important}
-  body.page-urun-detay.mobile-search-open .main-search,body.page-kategori.mobile-search-open .main-search{grid-column:1!important;width:100%!important;display:grid!important;grid-template-columns:42px 1fr 52px!important;border:1.5px solid rgba(243,95,54,.35)!important;background:#fff!important;overflow:hidden!important}
-  body.page-urun-detay.mobile-search-open .main-search .search-icon,body.page-kategori.mobile-search-open .main-search .search-icon,body.page-urun-detay.mobile-search-open .main-search input,body.page-kategori.mobile-search-open .main-search input{display:block!important}
+  /* .commerce-top ve .brand-logo satırları da kaldırıldı (2026-08-31, ayrı
+     incelemeyle): .page-kategori dalı zaten hep ölüydü (aşağıdaki notla
+     aynı sebep). .page-urun-detay dalı için: grid-template-columns zaten
+     ~5321'deki media'lı kural tarafından eziliyordu (getComputedStyle: 2
+     sütun "1fr auto" çıktı, buradaki "1fr 48px" hiç görünmüyordu);
+     align-items:center ve grid-column:1 ise gereksiz/redundant'tı — ikisi
+     de sırasıyla scope'suz temel .commerce-top kuralının varsayılanıyla
+     (align-items:center) ve grid'in doğal ilk-child yerleşimiyle
+     (brand-logo zaten DOM'da ilk child) zaten aynı sonucu veriyordu.
+     Silme öncesi/sonrası ölçüldü, fark yok.
+     Aşağıdaki 9 satır (.main-search + .mobile-search-open varyantları)
+     kaldırıldı — ikisi de her zaman ölüydü, iki ayrı sebepten:
+     1) .page-kategori class'ı kodda hiç uygulanmıyor (bkz. (storefront)/
+        layout.tsx'teki "page-kategori class'ı bilinçli olarak burada
+        yönetilmiyor" notu) — o dal hiç eşleşmiyor.
+     2) .page-urun-detay dalı, aşağıdaki (bkz. ~5214) media-sorgusuz
+        "body.page-urun-detay .main-search{...}" kuralı tarafından hep
+        eziliyordu (aynı specificity, o kural sonra geliyor) —
+        getComputedStyle ile ölçülüp doğrulandı.
+     3) .mobile-search-open class'ı da kodda (ProductDetailClient/layout)
+        hiç toggle edilmiyor — o class'a bağlı 4 satır zaten hiçbir zaman
+        eşleşemezdi. */
   .content-toolbar.category-listing-toolbar{grid-template-columns:1fr 1fr!important}
   .filter-title .filter-reset-btn{width:auto!important;min-width:72px!important;padding:0 10px!important;font-size:12px!important}
   .spec-table{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
@@ -1606,12 +1618,10 @@ body.mobile-account-open .mobile-account-backdrop{display:flex}
 .favorite-price b,.favorite-price strong{font-size:15px!important}
 .favorite-price span,.favorite-price small{font-size:12px!important}
 @media(max-width:760px){
-  body.page-urun-detay .main-search,body.page-kategori .main-search{width:auto!important;height:42px!important;border:1px solid rgba(243,95,54,.45)!important;background:#fff!important;border-radius:999px!important;overflow:visible!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 13px!important;gap:6px!important}
-  body.page-urun-detay .main-search button,body.page-kategori .main-search button{width:auto!important;height:auto!important;border-radius:0!important;background:transparent!important;color:var(--brand)!important;font-size:13px!important;font-weight:900!important;padding:0!important;display:inline-flex!important}
-  body.page-urun-detay .main-search button:before,body.page-kategori .main-search button:before{content:'⌕';font-size:20px;color:var(--brand);margin-right:5px}
-  body.page-urun-detay .main-search input,body.page-kategori .main-search input,body.page-urun-detay .main-search .search-icon,body.page-kategori .main-search .search-icon{display:none!important}
-  body.page-urun-detay.mobile-search-open .main-search,body.page-kategori.mobile-search-open .main-search{width:100%!important;height:46px!important;display:grid!important;grid-template-columns:38px 1fr 48px!important;padding:0!important;border-radius:999px!important}
-  body.page-urun-detay.mobile-search-open .main-search input,body.page-kategori.mobile-search-open .main-search input,body.page-urun-detay.mobile-search-open .main-search .search-icon,body.page-kategori.mobile-search-open .main-search .search-icon{display:block!important}
+  /* Bu 6 satır ("Ara" yazılı pill tasarımı) da kaldırıldı — aynı 3 sebepten
+     (bkz. ~1545'teki not) hep ölüydü: .page-kategori hiç uygulanmıyor,
+     .page-urun-detay dalı ~5218'deki media-sorgusuz kural tarafından
+     eziliyordu, .mobile-search-open hiç toggle edilmiyor. */
   .inline-gallery-arrow.prev{left:20px}
   .inline-gallery-arrow.next{right:20px}
 }
@@ -1670,7 +1680,8 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
   .detail-top-row .breadcrumb{max-width:calc(100% - 110px)}
   .detail-fav-btn{min-width:0!important}
   .detail-fav-btn{width:40px!important;height:40px!important;padding:0!important;border-radius:12px!important}
-  body.page-urun-detay.mobile-search-open .main-search button,body.page-kategori.mobile-search-open .main-search button{background:transparent!important;color:var(--brand)!important;margin-right:0!important;border-left:1px solid rgba(243,95,54,.22)!important;border-radius:0!important;font-weight:800!important}
+  /* .mobile-search-open .main-search button kuralı kaldırıldı — o class hiç
+     toggle edilmiyor (bkz. ~1548'deki not), hiç eşleşmiyordu. */
   .review-filter-bar.compact button{padding:7px 10px;font-size:12px}
 }
 
@@ -5315,15 +5326,41 @@ body.page-urun-detay .account-person-icon {
 }
 
 @media (max-width: 760px) {
+  /* 2026-08-31: arama çubuğu artık logonun altına düşmüyor — logoyla aynı
+     satırda, yanında (2. sütun) kompakt bir haliyle duruyor. Öncesinde
+     .main-search grid-column:1/-1 + order:2 ile tam genişlik alıp ayrı
+     bir satıra düşürülüyordu; kullanıcı isteğiyle yan yana getirildi. */
   body.page-urun-detay .commerce-top {
-    grid-template-columns: 1fr auto !important;
+    grid-template-columns: auto 1fr !important;
+    gap: 10px !important;
   }
 
   body.page-urun-detay .main-search {
-    grid-column: 1 / -1 !important;
-    order: 2 !important;
+    grid-column: 2 !important;
     width: 100% !important;
     max-width: none !important;
+    height: 42px !important;
+    grid-template-columns: 30px 1fr 36px !important;
+    padding: 0 2px 0 0 !important;
+  }
+
+  body.page-urun-detay .main-search input {
+    font-size: 13px !important;
+  }
+
+  body.page-urun-detay .main-search button {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    border-radius: 999px !important;
+  }
+
+  body.page-urun-detay .main-search button:before {
+    content: '⌕' !important;
+    font-size: 18px !important;
+    color: #fff !important;
+    line-height: 1 !important;
   }
 }
 
