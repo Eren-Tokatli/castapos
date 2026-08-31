@@ -506,7 +506,12 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
    "1 Ay" ile "12 Ay" aynı dar kutuya zorlanmadığı için "9 Ay" gibi
    etiketler artık taşıp kesilmiyor; kartlar arası yükseklik satır sayısı
    hep tek olduğundan (bkz. .product-info grid-template-rows) eşit kalır. */
-.modern-rental-card .card-periods{margin:0;display:flex!important;flex-wrap:nowrap;gap:3px;grid-template-columns:none!important;width:100%;min-width:0}
+/* justify-content:center — dar kartlarda (kategori grid'i gibi) 4 buton
+   tam sığdığında bile toplam genişlik piksel yuvarlamasıyla konteynerden
+   1-2px kısa kalabiliyordu; justify-content hiç belirtilmediği için bu
+   fark varsayılan (flex-start) davranışla hep SAĞDA birikip satırın sola
+   yaslı, sağda boşluklu görünmesine sebep oluyordu. */
+.modern-rental-card .card-periods{margin:0;display:flex!important;flex-wrap:nowrap;justify-content:center;gap:3px;grid-template-columns:none!important;width:100%;min-width:0}
 /* letter-spacing YOK bilerek: negatif letter-spacing + text-align:center
    birleşince tarayıcı son karakterden sonraki "hayalet" boşluğu da metnin
    genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
