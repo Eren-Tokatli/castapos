@@ -1111,6 +1111,13 @@ body{padding-bottom:0}
   .favorite-product-card{grid-template-columns:100px minmax(0,1fr);gap:12px;padding:14px;min-height:0}
   .favorite-brand-link{font-size:14px}
   .listing-layout{grid-template-columns:1fr!important}
+  /* .filter-sidebar-wrap (aside + Uygula butonu) hem-boş hem-görünür bir
+     grid satırı gibi davranıp .listing-layout'un gap'ini (24px) iki katına
+     çıkarıyordu — filtre kapalıyken içindeki her şey display:none olsa da
+     wrapper div'in kendisi hâlâ bir grid hücresi sayılıyordu. display:contents
+     ile wrapper artık kendi kutusunu oluşturmuyor, boşluk kayboluyor; açık/
+     kapalı içerideki position:fixed panel yine normal çalışıyor. */
+  .filter-sidebar-wrap{display:contents}
   .filter-sidebar{display:none}
   body.mobile-filters-open .filter-sidebar{display:block;position:fixed;inset:auto 12px 92px 12px;z-index:230;max-height:70vh;overflow:auto;background:#fff;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 20px 60px rgba(16,24,40,.18);padding:18px}
   .mobile-filter-trigger{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 18px;margin-bottom:14px;border:1px solid #e5e7eb;border-radius:999px;background:#fff;color:#1f2937;font-weight:800;font-size:14px;box-shadow:0 10px 24px rgba(16,24,40,.08)}
