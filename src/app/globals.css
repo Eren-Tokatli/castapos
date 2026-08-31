@@ -1418,8 +1418,10 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
   /* Mobilde filtre paneli tam ekran bir bottom-sheet — Uygula artık o
      panelin İÇİNDE değil, panelin üstünde sabit bir çubuk olarak duruyor,
      panel kapalıyken görünmüyor. */
-  .filter-apply-sticky{display:none;position:fixed;left:12px;right:12px;bottom:12px;margin-top:0;z-index:231}
-  body.mobile-filters-open .filter-apply-sticky{display:block}
+  /* Mobilde artık ayrı bir "Uygula" butonuna gerek yok — filtre penceresi
+     kapatılınca (çarpı veya arka plana dokununca) otomatik uygulanıyor,
+     bkz. KategoriClient.tsx onClose. */
+  .filter-apply-sticky{display:none!important}
   .mobile-sort-sheet button.active{border-color:rgba(243,95,54,.4);background:#fff0ea;color:var(--brand)}
   .rental-plan-item{grid-template-columns:84px 1fr;gap:12px}
   .cart-product-image{width:84px}
@@ -9069,7 +9071,10 @@ body.page-urun-detay .breadcrumb a:hover,
 .discount-badge,
 .discount-badge.accent-badge {
   background: linear-gradient(135deg, var(--brand), var(--brand-dark)) !important;
-  box-shadow: 0 12px 24px rgba(243, 95, 54, .22) !important;
+  /* Büyük/bulanık renkli gölge beyaz ürün görselinin üzerinde bir leke
+     gibi görünüyordu (bkz. .home-shell'de zaten box-shadow:none ile
+     kaldırılmıştı) — burada da kaldırıp tüm sayfalarda tutarlı yapıyoruz. */
+  box-shadow: none !important;
 }
 
 .tile-purple,
@@ -12983,6 +12988,7 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   position: absolute;
   top: 14px;
   right: 14px;
+  z-index: 2;
   width: 38px;
   height: 38px;
   border-radius: 12px;
@@ -13001,6 +13007,7 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  z-index: 2;
   width: 44px;
   height: 44px;
   border-radius: 999px;

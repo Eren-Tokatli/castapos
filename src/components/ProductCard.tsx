@@ -46,7 +46,13 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
     <article className="compact-product-card modern-rental-card">
       <div className="product-img">
         <Link href={`/urun/${p.id}`} className="w-full h-full flex items-center justify-center">
-          {badge}
+          {/* Rozet (badge) görselden SONRA render ediliyor bilerek — .jpg-blend
+             görsellerdeki mix-blend-mode:multiply, DOM'da kendisinden önce
+             gelen her şeyle (badge dahil) karışıyordu; ürünün koyu pikselleri
+             rozetin "içinden görünür" hale geliyordu. Sıra değişince blend
+             sadece görselin altındaki (beyaz) zeminle karışıyor, rozete hiç
+             dokunmuyor — position:absolute olduğu için görünürdeki yeri
+             (sol üst) değişmiyor. */}
           <Image
             src={p.image}
             alt={p.name}
@@ -56,6 +62,7 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
             unoptimized={!isR2Hosted(p.image)}
             className={isJpg ? "jpg-blend" : undefined}
           />
+          {badge}
         </Link>
         <button
           className={`fav-btn ${favorited ? "active" : ""}`}

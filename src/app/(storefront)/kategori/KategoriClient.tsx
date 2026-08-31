@@ -258,7 +258,7 @@ function KategoriPageContent({
 
           <div
             className="mobile-filters-backdrop"
-            onClick={() => setMobileFiltersOpen(false)}
+            onClick={handleApplyFilters}
             aria-hidden="true"
           />
 
@@ -278,7 +278,7 @@ function KategoriPageContent({
             advantages={draftAdvantages}
             onAdvantageToggle={handleAdvantageToggle}
             onApply={handleApplyFilters}
-            onClose={() => setMobileFiltersOpen(false)}
+            onClose={handleApplyFilters}
           />
 
           {/* LISTING CONTENT */}
