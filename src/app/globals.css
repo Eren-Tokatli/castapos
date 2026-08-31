@@ -1229,7 +1229,7 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .compact-price-only .monthly-primary{padding-top:6px}
 .filter-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .filter-title .filter-reset-btn{width:auto;height:34px;padding:0 12px;font-size:13px;font-weight:800}
-.legal-copy-card section h2,.detailed-legal-copy section h2{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:linear-gradient(180deg,#fff8f5,#fff);border:1px solid #ffe0d5;font-size:21px}
+.legal-copy-card section h2,.detailed-legal-copy section h2{display:flex;align-items:center;gap:10px;font-size:21px}
 .contact-form-card textarea,.profile-form textarea{font-family:inherit}
 .phone-field{display:grid;grid-template-columns:118px 1fr;gap:10px}
 .country-code-select{border:1px solid #d8dde7 !important;border-radius:14px !important;background:#fff;min-height:46px;padding:0 12px;font-weight:700}
