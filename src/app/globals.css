@@ -6924,12 +6924,6 @@ body.page-urun-detay .review-form-box .btn {
 
 @media (max-width: 760px) {
 
-  .home-shell .promo-slide img {
-    object-position: 56% center !important;
-    transform: none;
-    transform-origin: center center;
-  }
-
   .home-shell .promo-slide-cta {
     left: clamp(14px, 4.2vw, 20px);
     bottom: clamp(15px, 6.2vw, 28px);
