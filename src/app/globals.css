@@ -5910,13 +5910,6 @@ body.page-urun-detay .review-form-box .btn {
   padding: 2px 0 8px;
 }
 
-.home-shell #popular-products .product-rail,
-.home-shell #new-products .product-rail {
-  grid-auto-columns: 188px !important;
-  gap: 14px !important;
-  padding: 6px 2px 18px !important;
-}
-
 .home-shell #popular-products .modern-rental-card,
 .home-shell #new-products .modern-rental-card {
   border-color: rgba(16, 24, 40, .08) !important;
@@ -6097,17 +6090,6 @@ body.page-urun-detay .review-form-box .btn {
   padding-top: 64px !important;
 }
 
-.home-shell #popular-products .product-rail,
-.home-shell #new-products .product-rail {
-
-  mask-image: linear-gradient(90deg, #000 0%, #000 92%, transparent 100%);
-}
-
-.home-shell #popular-products .product-rail,
-.home-shell #new-products .product-rail {
-  grid-auto-columns: 190px !important;
-}
-
 :root[data-theme="dark"] .home-shell .flash-sale-feature {
   border-color: rgba(247, 213, 138, .24);
   background:
@@ -6256,13 +6238,6 @@ body.page-urun-detay .review-form-box .btn {
     width: calc(100% + 12px);
     margin-right: -12px;
     overflow: visible;
-  }
-
-  .home-shell #popular-products .product-rail,
-  .home-shell #new-products .product-rail {
-    grid-auto-columns: minmax(184px, 72vw) !important;
-    gap: 12px !important;
-    padding-bottom: 10px !important;
   }
 
   .home-shell .flash-sale-rail {
@@ -7456,11 +7431,6 @@ body.page-urun-detay .review-form-box .btn {
 
   .main-search {
     grid-template-columns: 38px 1fr 54px !important;
-  }
-
-  .home-shell #popular-products .product-rail,
-  .home-shell #new-products .product-rail {
-    grid-auto-columns: 60vw !important;
   }
 
   .home-shell .flash-sale-rail {
