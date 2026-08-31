@@ -516,6 +516,16 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
    birleşince tarayıcı son karakterden sonraki "hayalet" boşluğu da metnin
    genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
    kaymış gibi görünüyordu (özellikle Android'de fark ediliyordu). */
+/* 4 seçenekli (1/3/6/9 Ay) kartlarda "9 Ay" gibi etiketler ~200px altı
+   kart genişliğinde hiçbir font boyutunda/dolguda tek satıra sığmıyordu
+   (ölçüldü, video ile doğrulandı) — 2 satıra düşürmek yerine (istenmedi)
+   kaynağı çözdük: 440px altı ekranlarda .catalog-grid tek sütuna geçiyor
+   (bkz. yukarısı), kart hep konteyner genişliğinde oluyor, buraya hiç
+   gelmiyor. Tek satır garantisi (nowrap) korunuyor.
+   letter-spacing YOK bilerek: negatif letter-spacing + text-align:center
+   birleşince tarayıcı son karakterden sonraki "hayalet" boşluğu da metnin
+   genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
+   kaymış gibi görünüyordu (özellikle Android'de fark ediliyordu). */
 .modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px;font-size:10px;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .modern-rental-card .daily-secondary{border-bottom:1px solid #e7eaf0;padding-bottom:8px;margin-bottom:1px}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
@@ -8644,11 +8654,17 @@ body.page-urun-detay .review-form-box .btn {
   }
 }
 
-@media (max-width: 430px) {
-  /* İsteğe göre en dar telefonlarda da 2 ürün yan yana kalsın (1 sütuna
-     düşmesin), aşağı kaydırarak devam edilsin. */
+@media (max-width: 440px) {
+  /* ÖNCEDEN: en dar telefonlarda da bilerek 2 sütun korunuyordu ("2 ürün
+     yan yana kalsın" isteğiyle). Bu karar geri alındı — 2 sütunda kart
+     genişliği ~200px altına düşünce 4 seçenekli (1/3/6/9 Ay) kartlarda
+     etiketler hiçbir font boyutunda/dolguda tek satıra sığmıyordu, video
+     ile doğrulandı. Yazıyı kısaltmak ya da 2 satıra düşürmek yerine
+     (ikisi de istenmedi), kullanıcı bilerek bu genişlikte tek sütuna
+     geçilmesini tercih etti — kart tam konteyner genişliğini alınca
+     sorun kendiliğinden ortadan kalkıyor, yazı hiç değişmiyor. */
   .sports-category-page .catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr !important;
     gap: 10px !important;
   }
 
