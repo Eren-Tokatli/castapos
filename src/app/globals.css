@@ -510,23 +510,28 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
    tam sığdığında bile toplam genişlik piksel yuvarlamasıyla konteynerden
    1-2px kısa kalabiliyordu; justify-content hiç belirtilmediği için bu
    fark varsayılan (flex-start) davranışla hep SAĞDA birikip satırın sola
-   yaslı, sağda boşluklu görünmesine sebep oluyordu. */
-.modern-rental-card .card-periods{margin:0;display:flex!important;flex-wrap:nowrap;justify-content:center;gap:3px;grid-template-columns:none!important;width:100%;min-width:0}
-/* letter-spacing YOK bilerek: negatif letter-spacing + text-align:center
-   birleşince tarayıcı son karakterden sonraki "hayalet" boşluğu da metnin
-   genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
-   kaymış gibi görünüyordu (özellikle Android'de fark ediliyordu). */
-/* 4 seçenekli (1/3/6/9 Ay) kartlarda "9 Ay" gibi etiketler ~200px altı
-   kart genişliğinde hiçbir font boyutunda/dolguda tek satıra sığmıyordu
-   (ölçüldü, video ile doğrulandı) — 2 satıra düşürmek yerine (istenmedi)
-   kaynağı çözdük: 440px altı ekranlarda .catalog-grid tek sütuna geçiyor
-   (bkz. yukarısı), kart hep konteyner genişliğinde oluyor, buraya hiç
-   gelmiyor. Tek satır garantisi (nowrap) korunuyor.
+   yaslı, sağda boşluklu görünmesine sebep oluyordu.
+   gap:3px !important şart — aşağıdaki eski/ölü ".card-periods{gap:8px
+   !important}" kuralı (bkz. ~1490, farklı/artık kullanılmayan bir kart
+   tasarımı için yazılmış) specificity'si düşük olsa da !important
+   olmayan bir değeri her zaman eziyordu, satır göründüğünden 20px daha
+   geniş yer kaplayıp butonların gereğinden fazla sıkışmasına sebep
+   oluyordu. */
+.modern-rental-card .card-periods{margin:0;display:flex!important;flex-wrap:nowrap;justify-content:center;gap:3px!important;grid-template-columns:none!important;width:100%;min-width:0}
+/* 4 seçenekli (1/3/6/9 Ay) kartlarda "9 Ay" gibi etiketler dar kart
+   genişliğinde tek satıra sığmıyordu (ölçüldü, video ile doğrulandı).
+   İki değişiklik birlikte çözüyor:
+   1) "1 Ay" → "1Ay" (ProductCard.tsx) — rakamla etiket arası boşluk
+      kaldırıldı, en dar telefonda bile sığıyor.
+   2) padding:0 2px !important — aynı sebepten (yukarıdaki gap notu)
+      eski ölü kural ".card-period-btn{padding:0 6px!important}" (bkz.
+      ~1492) her buton başına 8px fazladan yer çalıyordu, !important
+      olmayan padding'i eziyordu.
    letter-spacing YOK bilerek: negatif letter-spacing + text-align:center
    birleşince tarayıcı son karakterden sonraki "hayalet" boşluğu da metnin
    genişliğine dahil ediyor, yazı kutucuğun tam ortasında değil de sola
    kaymış gibi görünüyordu (özellikle Android'de fark ediliyordu). */
-.modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px;font-size:10px;overflow:hidden;text-overflow:clip;white-space:nowrap}
+.modern-rental-card .card-period-btn{flex:1 1 0;min-width:0;padding:0 2px!important;font-size:10px;overflow:hidden;text-overflow:clip;white-space:nowrap}
 .modern-rental-card .daily-secondary{border-bottom:1px solid #e7eaf0;padding-bottom:8px;margin-bottom:1px}
 /* İndirimli üründe aylık fiyatın yanında üstü çizili eski fiyat */
 .modern-rental-card .old-monthly-price{grid-column:1/-1;text-align:center;font-size:12px;font-weight:700;color:#98a2b3;text-decoration:line-through}
@@ -8655,16 +8660,10 @@ body.page-urun-detay .review-form-box .btn {
 }
 
 @media (max-width: 440px) {
-  /* ÖNCEDEN: en dar telefonlarda da bilerek 2 sütun korunuyordu ("2 ürün
-     yan yana kalsın" isteğiyle). Bu karar geri alındı — 2 sütunda kart
-     genişliği ~200px altına düşünce 4 seçenekli (1/3/6/9 Ay) kartlarda
-     etiketler hiçbir font boyutunda/dolguda tek satıra sığmıyordu, video
-     ile doğrulandı. Yazıyı kısaltmak ya da 2 satıra düşürmek yerine
-     (ikisi de istenmedi), kullanıcı bilerek bu genişlikte tek sütuna
-     geçilmesini tercih etti — kart tam konteyner genişliğini alınca
-     sorun kendiliğinden ortadan kalkıyor, yazı hiç değişmiyor. */
+  /* En dar telefonlarda da 2 ürün yan yana kalsın ("2 kart olması şart"
+     kullanıcı isteği — tek sütun denemesi geri alındı). */
   .sports-category-page .catalog-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 10px !important;
   }
 

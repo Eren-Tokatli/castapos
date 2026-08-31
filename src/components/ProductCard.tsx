@@ -97,7 +97,11 @@ export function ProductCard({ p }: { p: CatalogProduct }) {
               className={`card-period-btn ${m === selectedPeriod ? "active" : ""}`}
               onClick={() => setSelectedPeriod(m)}
             >
-              {m} Ay
+              {/* 4 seçenekli (1/3/6/9 Ay) kartlarda dar telefonlarda yazı
+                 kırpılıyordu — sadece BU kartlarda boşluksuz ("1Ay"),
+                 diğer kartlarda ("3 Ay" gibi tek/az seçenekli) normal
+                 boşluklu haliyle kalıyor. */}
+              {m}{p.periods.length === 4 ? "" : " "}Ay
             </button>
           ))}
         </div>
