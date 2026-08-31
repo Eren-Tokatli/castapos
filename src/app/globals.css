@@ -1852,6 +1852,12 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
 
 /* V46 mobile refinement patch */
 .campaign-visual-tile{padding:0!important;display:block!important;overflow:hidden!important;min-height:132px!important}
+/* .campaign-tile:after (aşağıda) düz gradyan arka planlı eski tasarım için
+   dekoratif yarı saydam beyaz daireydi (sağ altta). Artık her kutucuk kendi
+   fotoğrafını/görselini tam kaplıyor (bkz. .campaign-visual-tile img) — o
+   daire artık fotoğrafın üzerinde asılı beyaz bir leke gibi kalıyor.
+   Görselli kutucuklarda tamamen kaldırıyoruz. */
+.campaign-visual-tile:after{content:none!important}
 .campaign-visual-tile img{display:block;width:100%;height:100%;min-height:132px;object-fit:cover}
 .compare-modal-head{background:#07111f!important;color:#fff!important}
 .compare-modal-head span,.compare-modal-head h2,.compare-modal-head button{color:#fff!important}
