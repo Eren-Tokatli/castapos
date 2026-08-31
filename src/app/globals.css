@@ -110,7 +110,7 @@ body{font-weight:400}
 .installment-box.compact em{font-size:14px;line-height:1.4}
 .compact-actions{gap:10px}.compact-actions .btn{height:48px;padding:0 20px;font-size:15px}
 .detail-tabs button{font-weight:700;font-size:14px;padding:14px 10px}
-.detail-tab-panel{padding:22px;border-radius:12px}.detail-tab-panel h3{font-size:22px}.qa-list b{font-size:15px}.drawer-item{grid-template-columns:60px 1fr;gap:10px;padding-bottom:10px}.drawer-item span,.drawer-item small{font-size:11px}.coupon-box.compact{padding:12px}.coupon-box.compact div{grid-template-columns:1fr 74px}.coupon-box.compact input,.coupon-box.compact button{height:38px}.drawer-summary p{margin:8px 0;font-size:14px}.drawer-summary .grand b{font-size:18px}.side-cart .btn{height:46px;font-size:15px}
+.detail-tab-panel{padding:22px;border-radius:12px}.detail-tab-panel h3{font-size:22px}.qa-list b{font-size:15px}.drawer-item span,.drawer-item small{font-size:11px}.coupon-box.compact{padding:12px}.coupon-box.compact div{grid-template-columns:1fr 74px}.coupon-box.compact input,.coupon-box.compact button{height:38px}.drawer-summary p{margin:8px 0;font-size:14px}.drawer-summary .grand b{font-size:18px}.side-cart .btn{height:46px;font-size:15px}
 @media(max-width:1280px){.container{width:min(1280px,calc(100% - 40px))}.compact-detail-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:1060px){.listing-layout{grid-template-columns:1fr}.filter-sidebar{width:auto;max-width:none}}
 @media(max-width:760px){}
@@ -239,7 +239,6 @@ body.cart-open .support-widget{display:none !important}
 .key-benefits.compact.tighter a svg{color:#079455;flex-shrink:0}
 .periods.top-periods.compact-pills{margin-bottom:14px}
 .side-cart-body{background:#fff;color:#101828;min-height:220px}
-.drawer-item{background:#fff;border-bottom:1px solid #edf0f5;align-items:start}
 .drawer-item>div{display:grid;gap:3px;color:#101828}
 .drawer-item b,.drawer-item strong{color:#101828}
 .drawer-item small,.drawer-item span{color:#667085}
@@ -1068,14 +1067,12 @@ body{padding-bottom:0}
   .rental-plan-summary{position:static!important}
   .side-cart{width:100%}
   .side-cart-body{padding:14px 16px}
-  .drawer-item{grid-template-columns:78px minmax(0,1fr) auto;align-items:start}
   .drawer-item img{width:78px;height:78px}
   .drawer-item .remove-line{align-self:start}
 }
 
 .country-code-select{background-color:#fff!important;color:#344054!important}
 
-.drawer-item{padding:10px 0 12px;column-gap:11px}
 .drawer-item span.drawer-period-meta{color:var(--brand);font-weight:700;margin-top:3px}
 .drawer-item .drawer-total-label{color:#101828;font-weight:700;margin-top:8px}
 .drawer-item strong{color:var(--price-green)!important;font-weight:800}
