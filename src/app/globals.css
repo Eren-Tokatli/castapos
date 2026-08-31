@@ -1027,7 +1027,6 @@ body{padding-bottom:0}
 .account-link .account-person-icon{width:25px;height:25px;display:block;background-color:#6f3b8f;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-5 0-8 2.6-8 6v1h16v-1c0-3.4-3-6-8-6Z'/%3E%3C/svg%3E") center/contain no-repeat;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2c-5 0-8 2.6-8 6v1h16v-1c0-3.4-3-6-8-6Z'/%3E%3C/svg%3E") center/contain no-repeat}
 .account-link .action-icon::before{content:none!important}
 .detailed-legal-copy{display:grid;gap:0}
-.legal-document-title{padding-bottom:18px;margin-bottom:4px;border-bottom:1px solid #e8ebf0}
 .legal-document-title span{display:block;color:var(--brand);font-size:12px;font-weight:800;letter-spacing:.08em;margin-bottom:5px}
 .legal-document-title h2{margin:0;font-size:26px}
 .detailed-legal-copy section{padding:22px 0;border-bottom:1px solid #edf0f4}
@@ -1231,7 +1230,6 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .filter-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .filter-title .filter-reset-btn{width:auto;height:34px;padding:0 12px;font-size:13px;font-weight:800}
 .legal-copy-card section h2,.detailed-legal-copy section h2{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;background:linear-gradient(180deg,#fff8f5,#fff);border:1px solid #ffe0d5;font-size:21px}
-.legal-document-title{padding:18px 20px;border-radius:20px;background:linear-gradient(180deg,#fff8f5,#fff);border:1px solid #ffe0d5}
 .contact-form-card textarea,.profile-form textarea{font-family:inherit}
 .phone-field{display:grid;grid-template-columns:118px 1fr;gap:10px}
 .country-code-select{border:1px solid #d8dde7 !important;border-radius:14px !important;background:#fff;min-height:46px;padding:0 12px;font-weight:700}
