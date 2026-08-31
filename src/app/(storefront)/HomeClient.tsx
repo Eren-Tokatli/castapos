@@ -10,6 +10,38 @@ import { ProductCard } from "@/components/ProductCard";
 import { StarRating } from "@/components/StarRating";
 import { CountdownTimer } from "@/components/CountdownTimer";
 
+// Kayan ürün şeritlerinde (İndirimli/Popüler/Yeni Gelenler) ok butonları
+// artık sabit durmuyor — başlangıçta sol ok hiç görünmüyor (kaydıracak
+// bir şey yok), sağa kaydırılınca beliriyor; en sona gelince de sağ ok
+// kayboluyor. Aynı mantık üç şeritte de kullanıldığı için tek bir hook'ta
+// topladık.
+function useRailEdges(ref: React.RefObject<HTMLDivElement | null>) {
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(true);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => {
+      // Küçük bir tolerans (8px) — scroll-snap/layout yuvarlaması yüzünden
+      // scrollLeft tam 0 değil de 1-2px gibi bir değerde kalabiliyordu,
+      // bu da başta olunmasına rağmen sol okun gereksiz yere görünmesine
+      // sebep oluyordu.
+      setAtStart(el.scrollLeft <= 8);
+      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 8);
+    };
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [ref]);
+
+  return { atStart, atEnd };
+}
+
 export interface HomeTestimonial {
   product: CatalogProduct;
   rating: number;
@@ -163,6 +195,10 @@ export function HomeClient({
   const newRailRef = useRef<HTMLDivElement>(null);
   const flashSaleRailRef = useRef<HTMLDivElement>(null);
 
+  const flashSaleEdges = useRailEdges(flashSaleRailRef);
+  const popularEdges = useRailEdges(popularRailRef);
+  const newEdges = useRailEdges(newRailRef);
+
   const scrollRail = (ref: React.RefObject<HTMLDivElement | null>, direction: "left" | "right") => {
     if (ref.current) {
       const scrollAmount = direction === "left" ? -620 : 620;
@@ -281,7 +317,7 @@ export function HomeClient({
           </div>
           <div className="container carousel-shell">
             <button
-              className="rail-btn left"
+              className={`rail-btn left ${flashSaleEdges.atStart ? "rail-btn-hidden" : ""}`}
               type="button"
               onClick={() => scrollRail(flashSaleRailRef, "left")}
               aria-label="Sola kaydır"
@@ -294,7 +330,7 @@ export function HomeClient({
               ))}
             </div>
             <button
-              className="rail-btn right"
+              className={`rail-btn right ${flashSaleEdges.atEnd ? "rail-btn-hidden" : ""}`}
               type="button"
               onClick={() => scrollRail(flashSaleRailRef, "right")}
               aria-label="Sağa kaydır"
@@ -386,7 +422,7 @@ export function HomeClient({
         </div>
         <div className="container carousel-shell">
           <button
-            className="rail-btn left"
+            className={`rail-btn left ${popularEdges.atStart ? "rail-btn-hidden" : ""}`}
             type="button"
             onClick={() => scrollRail(popularRailRef, "left")}
             aria-label="Sola kaydır"
@@ -399,7 +435,7 @@ export function HomeClient({
             ))}
           </div>
           <button
-            className="rail-btn right"
+            className={`rail-btn right ${popularEdges.atEnd ? "rail-btn-hidden" : ""}`}
             type="button"
             onClick={() => scrollRail(popularRailRef, "right")}
             aria-label="Sağa kaydır"
@@ -506,7 +542,7 @@ export function HomeClient({
         </div>
         <div className="container carousel-shell">
           <button
-            className="rail-btn left"
+            className={`rail-btn left ${newEdges.atStart ? "rail-btn-hidden" : ""}`}
             type="button"
             onClick={() => scrollRail(newRailRef, "left")}
             aria-label="Sola kaydır"
@@ -519,7 +555,7 @@ export function HomeClient({
             ))}
           </div>
           <button
-            className="rail-btn right"
+            className={`rail-btn right ${newEdges.atEnd ? "rail-btn-hidden" : ""}`}
             type="button"
             onClick={() => scrollRail(newRailRef, "right")}
             aria-label="Sağa kaydır"

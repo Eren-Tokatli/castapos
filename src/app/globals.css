@@ -6459,7 +6459,11 @@ body.page-urun-detay .review-form-box .btn {
    uygulanmıyordu, kartlar solda diğer şeritlerden farklı hizalanıyordu. */
 .home-shell #flash-sale .carousel-shell {
   min-width: 0;
-  overflow: hidden;
+  /* overflow:hidden BİLEREK yok — ID seçici (yüksek spesifiklik) yüzünden
+     az yukarıdaki ".flash-sale-section .carousel-shell" kuralında zaten
+     kaldırılmış olan overflow:hidden'ı geri getiriyordu. Ok butonu artık
+     kutunun dışına (-58px) konumlandığı için (kartın yanında duracak
+     şekilde) bu, oku tamamen görünmez yapıyordu. */
 }
 
 .home-shell .flash-sale-rail {
@@ -13379,43 +13383,30 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   pointer-events: none !important;
 }
 
-/* Ana sayfa ok butonları (İndirimli Ürünler / Popüler Ürünler / Yeni
-   gelenler): .carousel-shell'deki overflow:hidden kaldırıldı ama ok
-   butonları (-16px ile kutunun az dışına taşacak şekilde) hâlâ ilk/son
-   kartın üstüne biniyordu, çünkü rail konteynerle aynı hizada başlıyordu,
-   aralarında boşluk yoktu. Rail'e yatayda biraz boşluk vererek ok
-   butonlarının kart yazısının üstüne binmesini engelliyoruz. */
+/* Ana sayfa ürün şeritleri (İndirimli Ürünler / Popüler Ürünler / Yeni
+   gelenler): önceden rail'e 50px sol/sağ dolgu verilip kartlar başlığa
+   göre sağdan başlatılıyordu (buton için yer açmak amacıyla). Artık
+   oklar başta/sonda tamamen gizlendiği için (bkz. aşağısı ve
+   HomeClient.tsx useRailEdges) bu dolguya gerek yok — kartlar başlıkla
+   aynı hizada (sol kenardan) başlıyor. Ok, kartların ÜZERİNE değil
+   YANINA (konteynerin dışına, -58px) konumlanıyor — en soldaki/sağdaki
+   kartın hemen yanında duruyor, üstüne binmiyor. */
 @media (min-width: 761px) {
-  .home-shell #popular-products .product-rail,
-  .home-shell #new-products .product-rail,
-  .home-shell .flash-sale-section .product-rail {
-    padding-left: 50px !important;
-    padding-right: 50px !important;
-    /* scroll-snap, snap noktasını hesaplarken kendi padding'ini
-       "atlanacak boşluk" sayıp scrollLeft'i otomatik kaydırıyordu
-       (böylece boşluk hiç görünmüyordu) — scroll-padding ile bu
-       boşluğun snap sınırının BİR PARÇASI olduğunu belirtiyoruz. */
-    scroll-padding-left: 50px !important;
-    scroll-padding-right: 50px !important;
-  }
-
-  /* Butonları kutunun dışına (-16px) değil, artık boşluk açtığımız
-     rail'in İÇİNE alıyoruz. Dışarıda konumlandırmak, konteynerin
-     dışında ne kadar boşluk (viewport margin) olduğuna bağımlıydı —
-     pencere/viewport genişliğine göre bu boşluk yetersiz kalınca
-     buton ya kenardan kesiliyor ya da tamamen ekran dışına taşıp
-     görünmez oluyordu (görsel olarak yok ama tıklanabilir kalıyordu).
-     İçeride sabit bir konum bu bağımlılığı tamamen ortadan kaldırıyor. */
   .home-shell #popular-products .rail-btn.left,
   .home-shell #new-products .rail-btn.left,
   .home-shell .flash-sale-section .rail-btn.left {
-    left: 4px !important;
+    left: -58px !important;
   }
   .home-shell #popular-products .rail-btn.right,
   .home-shell #new-products .rail-btn.right,
   .home-shell .flash-sale-section .rail-btn.right {
-    right: -40px !important;
+    right: -58px !important;
   }
+}
+/* Ok, sadece o yönde kaydıracak bir şey kalmadığında (başta/sonda)
+   gizleniyor — bkz. HomeClient.tsx scrollRail/useRailEdges. */
+.home-shell .rail-btn.rail-btn-hidden {
+  display: none !important;
 }
 
 /* Ana sayfa "İndirimli Ürünler": ızgaraya sarmak (2 satıra bölünmek)
