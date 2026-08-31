@@ -9951,7 +9951,6 @@ body.page-musteri-urun-bilgilendirme {
 
 .info-doc-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -10047,12 +10046,6 @@ body.page-kiralama-kosullari .info-doc-layout {
 
 :root[data-theme="dark"] .info-doc-hero p,:root[data-theme="dark"] .info-doc-card p,:root[data-theme="dark"] .info-doc-note {
   color: #b6c0d3 !important;
-}
-
-@media (max-width: 1060px) {
-  .info-doc-layout {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 760px) {
