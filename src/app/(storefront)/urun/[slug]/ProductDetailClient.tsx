@@ -546,7 +546,6 @@ export function ProductDetailClient({
               </div>
               <form className="question-box" onSubmit={handleQuestionSubmit}>
                 <h4>Sorunu Sor</h4>
-                <p>Ürünle ilgili merak ettiğin konuyu yaz; destek ekibi en kısa sürede dönüş sağlar.</p>
                 <textarea
                   placeholder="Örn: Teslimat, kurulum veya kiralama uzatma süreci hakkında soru sorabilirsin."
                   value={questionText}

@@ -2711,8 +2711,9 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
   color: var(--text-primary) !important;
 }
 
+/* background-color kaldırıldı — span'e satırdan (.spec-table div) farklı
+   bir arka plan veriyordu, etiket kendi ayrı kutusu gibi görünüyordu. */
 :root[data-theme="dark"] .spec-table span {
-  background-color: var(--surface) !important;
 }
 
 :root[data-theme="dark"] .spec-table div {
@@ -5081,7 +5082,6 @@ body.page-urun-detay .qa-answer {
   border-color: var(--pd-line) !important;
 }
 
-body.page-urun-detay .spec-table span,
 body.page-urun-detay .qa-answer,
 body.page-urun-detay .review-filter-bar button,
 body.page-urun-detay .review-rating-pick button,
@@ -5092,7 +5092,26 @@ body.page-urun-detay .question-box textarea {
   color: var(--pd-ink) !important;
 }
 
-:root[data-theme="dark"] body.page-urun-detay .spec-table span,
+/* .spec-table span buradan çıkarıldı — bu !important arka plan (beyazımsı),
+   satırın kendi soluk turuncu tonunu (bkz. ~5555 body.page-urun-detay
+   .spec-table div) eziyordu, etiket metni kendi ayrı beyaz kutusunda gibi
+   duruyordu. Daha aşağıdaki (~5562) background:transparent kuralı zaten
+   doğru olanı — bunun kazanmasına izin veriyoruz. */
+body.page-urun-detay .spec-table span {
+  border-color: var(--pd-line) !important;
+  color: var(--pd-ink) !important;
+}
+
+/* .spec-table div{background:#fff} mobilde (bkz. globals.css ~1436)
+   dark modda hiç ezilmiyordu — tablo hücrelerinin (değer/"b") arkası
+   beyaz kalıyordu. .spec-table span'in dark arka planıyla (bir alt satır)
+   aynı renge sabitlendi. */
+:root[data-theme="dark"] body.page-urun-detay .spec-table div {
+  background: rgba(15, 23, 42, .72) !important;
+}
+/* span BİLEREK burada değil — satırla (div) aynı arka planı alırsa ışık
+   modundaki gibi "etiket kendi ayrı kutusunda" görünümü dark modda da
+   oluşuyordu. ~5604'teki (background yok, sadece color) kural kazansın. */
 :root[data-theme="dark"] body.page-urun-detay .qa-answer,
 :root[data-theme="dark"] body.page-urun-detay .review-filter-bar button,
 :root[data-theme="dark"] body.page-urun-detay .review-rating-pick button,
