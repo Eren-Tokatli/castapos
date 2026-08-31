@@ -1966,7 +1966,6 @@ body.page-giris .category-bar,body.page-uye-ol .category-bar{display:none!import
     box-sizing:border-box!important;
   }
   body.page-sepet .section>.container{width:calc(100% - 20px)!important}
-  body.page-sepet .rental-cart-layout{display:block!important;width:100%!important;overflow:visible!important}
   body.page-sepet .rental-plan-main{width:100%!important}
   body.page-sepet .rental-plan-item{
     width:100%!important;
