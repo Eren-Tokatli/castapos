@@ -1365,24 +1365,6 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;justify-content:center;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:nowrap;row-gap:0}
 .compact-price-only span{white-space:nowrap}
 .compact-price-only strong{font-size:21px}
-/* "/" işareti Gün ve Aylık satırlarında hizalı dursun diye: fiyat rakamı
-   (strong) sağa yaslı SABİT genişlikte (en uzun olası fiyata göre, ör.
-   "4.000 ₺"), etiket (span, "/ Gün" / "/ Aylık") sola yaslı SABİT
-   genişlikte. İkisi de sabit olunca iki satırın toplam genişliği eşitleniyor,
-   satır bazında justify-content:center hizayı bozmuyor — "/" her zaman aynı
-   X'te. */
-.compact-price-only .daily-secondary strong,
-.compact-price-only .monthly-primary strong{
-  display:inline-block;
-  min-width:64px;
-  text-align:right;
-}
-.compact-price-only .daily-secondary span,
-.compact-price-only .monthly-primary span{
-  display:inline-block;
-  min-width:44px;
-  text-align:left;
-}
 /* İndirimli üründe eski fiyat (üstü çizili) satıra sığmazsa taşmak yerine
    kendi satırına düşer — sabit dar kart genişliklerinde (rail, mobil vb.)
    taşmayı önler. */
