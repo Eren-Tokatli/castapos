@@ -233,7 +233,7 @@ function KategoriPageContent({
 
   return (
     <div
-      className={`kategori-shell premium-category-page sports-category-page ${
+      className={`kategori-shell sports-category-page ${
         isNewListing ? "new-category-page" : ""
       }`}
     >
