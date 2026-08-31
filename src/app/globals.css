@@ -216,7 +216,6 @@ body.cart-open .support-widget{display:none !important}
   .question-actions{grid-template-columns:1fr}
 }
 
-.campaign-tile{min-height:198px;padding:28px 26px}
 .campaign-tile b{font-size:28px;max-width:380px}
 .campaign-tile small{font-size:15px;max-width:380px}
 
@@ -236,7 +235,6 @@ body.cart-open .support-widget{display:none !important}
 .review-list article:last-child,.qa-list[data-qa-list] article:last-child{margin-bottom:0}
 
 @media (max-width:760px){
-  .campaign-tile{min-height:170px}
   .price-block.standalone{min-height:auto}
 }
 
