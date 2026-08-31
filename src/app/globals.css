@@ -681,10 +681,8 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .favorites-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .favorite-product-card{grid-template-columns:126px minmax(0,1fr);gap:15px;padding:14px;border-radius:15px;align-items:center;min-height:154px}
 .favorite-copy>span{font-size:11px;margin-bottom:3px}
-.favorite-price{gap:5px;margin-bottom:10px;line-height:1.2}
-.favorite-price span{font-size:12px}
-.favorite-price strong{font-size:14px;margin-left:6px}
-.favorite-price small{font-size:12px}
+.favorite-price{margin-bottom:10px;line-height:1.2}
+.favorite-price strong{margin-left:6px}
 .favorite-actions .btn{display:none!important}
 
 .cart-product-image{width:148px;height:142px;padding:10px;align-self:center}
@@ -905,7 +903,7 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .favorite-image{width:140px;height:140px;padding:12px}
 .favorite-copy>span{font-size:12px;font-weight:800;color:var(--brand-dark)}
 .favorite-period{display:inline-flex;align-items:center;min-height:30px;padding:5px 11px;border-radius:999px;border:1px solid #f4b9a7;background:#fff7f4;color:var(--brand-dark);font-size:12px;font-weight:700;margin-bottom:10px}
-.favorite-price{align-items:baseline;gap:6px;margin-bottom:0}
+.favorite-price{margin-bottom:0}
 .favorite-remove-btn{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:999px;border:1px solid #e4e7ec;background:#fff;color:#667085;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer}
 .rental-actions .btn{min-width:160px;justify-content:center}
 .detail-panel.refined.clean.compact-panel{display:flex;flex-direction:column;justify-content:flex-start;padding:28px 28px 24px}
@@ -957,9 +955,9 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .favorite-copy h2{margin:0;font-size:18px;line-height:1.2;max-width:420px}
 .favorite-copy h2 a{display:block}
 .favorite-period{display:inline-flex;align-self:flex-start;padding:8px 12px;border-radius:999px;border:1px solid #f6b29e;color:var(--brand);font-weight:700;font-size:14px;background:#fff7f4}
-.favorite-price b{font-size:17px;color:var(--price-green);font-weight:800}
-.favorite-price strong{font-size:17px;color:var(--brand);font-weight:800}
-.favorite-price span,.favorite-price small{color:#667085;font-size:14px;font-weight:600}
+.favorite-price b{color:var(--price-green);font-weight:800}
+.favorite-price strong{color:var(--brand);font-weight:800}
+.favorite-price span,.favorite-price small{color:#667085;font-weight:600}
 .favorite-remove-btn{top:16px;right:16px}
 .favorite-remove-btn:hover{background:#fff5f5;border-color:#fda29b;color:#d92d20}
 .modern-rental-card .monthly-primary span,.modern-rental-card .daily-secondary span{font-size:13px}
@@ -1217,8 +1215,6 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
 .product-lightbox-thumbs button.active{border-color:var(--brand)}
 .product-hero-image{cursor:pointer}
 .spec-table div{align-items:start}
-.favorite-price{display:grid;grid-template-columns:auto auto 1fr auto auto;gap:6px;align-items:baseline}
-.favorite-price b,.favorite-price strong{justify-self:start;min-width:82px}
 .favorite-remove-btn{border-color:#fda29b;background:#fff5f4}
 .favorite-image .fav-btn,.modern-rental-card .fav-btn{box-shadow:0 10px 22px rgba(16,24,40,.08)}
 
@@ -1287,8 +1283,6 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
   .detail-fav-btn{height:42px}
   .compact-price-only .monthly-primary,.compact-price-only .daily-secondary{font-size:13px}
 
-  .favorite-price{grid-template-columns:auto auto 1fr auto auto;font-size:14px}
-  .favorite-price b,.favorite-price strong{min-width:72px}
   .checkout-grid{grid-template-columns:1fr}
   .checkout-card .form-grid{grid-template-columns:1fr}
   .checkout-flow-head h2{font-size:22px}
