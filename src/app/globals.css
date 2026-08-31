@@ -272,7 +272,10 @@ body.cart-open .support-widget{display:none !important}
 .modern-rental-card .product-img{height:182px;background:#fbfbfe}
 .modern-rental-card .product-img img{max-height:138px;width:84%}
 .modern-rental-card .fav-btn.active{color:var(--brand);border-color:#ffd3c8;background:#fff7f4}
-.modern-rental-card .product-info{display:flex;flex-direction:column;flex:1;padding:12px}
+/* .product-info{display:flex;...;padding:12px} kaldırıldı — aşağıdaki V19
+   bloğu (bkz. ~491) aynı seçici için display:grid + padding:12px 12px 14px
+   yazıyor, bu satırın 4 özelliğinden hiçbiri (display/flex-direction/flex/
+   padding) hiç görünmüyordu; getComputedStyle ile doğrulandı. */
 .modern-rental-card .product-name{font-size:14px;line-height:1.35;min-height:2lh}
 /* .card-periods'un eski varsayılan (grid, 3 sütun) hali kaldırıldı — .card-periods
    markup'ta her zaman .modern-rental-card içinde render ediliyor (bkz. ProductCard.tsx),
@@ -376,7 +379,10 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .monthly-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding-bottom:9px}
 .monthly-primary>div{display:grid;gap:1px}
 .monthly-primary small{font-size:11px;color:#98a2b3;font-weight:700}
-.modern-rental-card .card-wide-btn.standalone{margin-top:auto;height:43px;font-size:13px;box-shadow:0 9px 18px rgba(243,95,54,.18)}
+/* margin-top:auto ve height:43px kaldırıldı — aşağıdaki .card-wide-btn.standalone
+   (bkz. ~615) margin:0/height:40px ile eziyordu; font-size ve box-shadow ise
+   orada hiç tanımlanmadığı için hâlâ buradan geliyor, doğrulanıp korundu. */
+.modern-rental-card .card-wide-btn.standalone{font-size:13px;box-shadow:0 9px 18px rgba(243,95,54,.18)}
 
 /* Comparison lives only on product detail */
 .detail-top-actions{display:flex;align-items:center;gap:8px;flex:none}
@@ -469,7 +475,8 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   border-radius:0;
   white-space:nowrap;
 }
-.modern-rental-card .card-wide-btn.standalone{margin-top:auto}
+/* margin-top:auto (tek başına) kaldırıldı — aşağıdaki .card-wide-btn.standalone
+   (bkz. ~615) margin:0 ile zaten eziyordu, hiç uygulanmıyordu. */
 .plan-product-copy p{margin-bottom:10px}
 .selected-plan-tag{margin-top:2px}
 
@@ -707,7 +714,11 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
 .centered-listing-toolbar .toolbar-actions{grid-column:3;justify-self:end}
 
 /* Product card badges */
-.discount-badge{left:11px;top:11px;display:inline-flex;align-items:center;min-height:29px;border-radius:9px;padding:6px 10px;font-size:11.5px;font-weight:800;letter-spacing:.015em;border:1px solid rgba(255,255,255,.32);box-shadow:0 9px 20px rgba(16,24,40,.18)}
+/* white-space:nowrap: rozet metni dar genişlikte (özellikle "-" varken) satır
+   sonu kırılma noktası bulup 2. satıra taşabiliyordu (ölçüldü: "-%11" içindeki
+   "-" ile "%11" ayrı satırlara düşüyordu). Artık "-" kaldırıldı (bkz.
+   catalog-shared.ts discountLabel) ama nowrap yine de garanti olsun diye kaldı. */
+.discount-badge{left:11px;top:11px;display:inline-flex;align-items:center;min-height:29px;border-radius:9px;padding:6px 10px;font-size:11.5px;font-weight:800;letter-spacing:.015em;border:1px solid rgba(255,255,255,.32);box-shadow:0 9px 20px rgba(16,24,40,.18);white-space:nowrap}
 .discount-badge.accent-badge{background:linear-gradient(135deg,#f35f36 0%,#ff2d73 100%);color:#fff;box-shadow:0 10px 22px rgba(243,95,54,.28)}
 .fav-btn,.detail-fav-btn{display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;line-height:1;padding:0}
 .fav-btn{width:32px;height:32px;font-size:19px}

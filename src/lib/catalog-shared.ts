@@ -69,13 +69,16 @@ export function dailyPrice(p: CatalogProduct, period: number): number {
   return Math.max(1, Math.round(total / (m * 30)));
 }
 
-// Seçili (veya varsayılan) süredeki gerçek indirim varsa "-%20" gibi bir
+// Seçili (veya varsayılan) süredeki gerçek indirim varsa "%20" gibi bir
 // etiket döner; yoksa null. Kartlardaki rozet için kullanılır.
+// NOT: başında "-" yoktu/vardı — kaldırıldı, çünkü dar rozet genişliğinde
+// "-" satır sonu kırılma noktası oluşturup "%NN" bir alt satıra düşüyordu
+// (bkz. globals.css .discount-badge white-space:nowrap notu).
 export function discountLabel(p: CatalogProduct, period?: number): string | null {
   const tier = findTier(p, period ?? defaultPeriod(p));
   if (!tier || !tier.originalPrice || tier.originalPrice <= tier.price) return null;
   const pct = Math.round((1 - tier.price / tier.originalPrice) * 100);
-  return pct > 0 ? `-%${pct}` : null;
+  return pct > 0 ? `%${pct}` : null;
 }
 
 export function hasDiscount(p: CatalogProduct): boolean {
