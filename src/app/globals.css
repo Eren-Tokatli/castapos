@@ -13513,15 +13513,21 @@ body.page-urun-detay .detail-tabs button:not(.active) {
   inset: 0;
   display: block;
 }
-.home-shell .promo-slide-img-mobile {
-  display: none;
+.home-shell .promo-slider .promo-track .promo-slide .promo-slide-img-mobile {
+  /* Uzun seçici + !important şart — ".home-shell .promo-slider .promo-track
+     .promo-slide img" kuralı da !important ve daha spesifik (4 class + tag),
+     kısa seçicili display:none'ı eziyordu; mobil görsel masaüstünde de
+     görünüp masaüstü görselinin üstüne biniyordu ("mobil için yüklediğim
+     görsel masaüstünü de güncellemiş" şikayeti buradan geliyordu). Aynı
+     uzunlukta (ya da daha uzun) bir seçiciyle eşitliyoruz/geçiyoruz. */
+  display: none !important;
 }
 @media (max-width: 760px) {
-  .home-shell .promo-slide-media.has-mobile-img .promo-slide-img-desktop {
-    display: none;
+  .home-shell .promo-slider .promo-track .promo-slide .promo-slide-media.has-mobile-img .promo-slide-img-desktop {
+    display: none !important;
   }
-  .home-shell .promo-slide-media.has-mobile-img .promo-slide-img-mobile {
-    display: block;
+  .home-shell .promo-slider .promo-track .promo-slide .promo-slide-media.has-mobile-img .promo-slide-img-mobile {
+    display: block !important;
   }
 }
 
@@ -13529,14 +13535,14 @@ body.page-urun-detay .detail-tabs button:not(.active) {
    (bkz. HomeClient.tsx). .campaign-visual-tile zaten position:relative
    olduğu için banner'daki gibi ayrı bir wrapper gerekmiyor. */
 .home-shell .campaign-tile-img-mobile {
-  display: none;
+  display: none !important;
 }
 @media (max-width: 760px) {
   .home-shell .campaign-visual-tile.has-mobile-img .campaign-tile-img-desktop {
-    display: none;
+    display: none !important;
   }
   .home-shell .campaign-visual-tile.has-mobile-img .campaign-tile-img-mobile {
-    display: block;
+    display: block !important;
     /* Kutu sabit yükseklikte (bkz. .campaign-visual-tile min-height),
        yüklenen mobil görselin oranı bununla tam eşleşmeyebiliyor —
        object-fit:cover görselin üst/alt kısmını (örn. başlık yazısını)
