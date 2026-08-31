@@ -527,6 +527,14 @@ body{background:linear-gradient(180deg,#f8f9fd 0%,#f5f7fb 52%,#f8f9fc 100%)}
   background:#f8fafc;
   border-radius:11px;
   display:grid;
+  /* Sütun tanımlanmamışsa grid'in tek örtük (implicit) sütunu konteyner
+     genişliği yerine İÇERİĞE göre boyutlanıyordu (en geniş satır neyse,
+     genelde "Aylık" satırı) — bu da satırların justify-content:center'ı
+     kutunun tam genişliği değil, kendi dar sütunu içinde ortalamasına
+     sebep oluyordu; sonuç olarak satır sola yaslanıp sağdan taşıyormuş
+     gibi görünüyordu (özellikle dar telefonlarda fark ediliyordu).
+     minmax(0,1fr) sütunu kutunun tam genişliğine geriyor. */
+  grid-template-columns:minmax(0,1fr);
   grid-template-rows:1fr 1fr;
   gap:0;
   align-content:start;
@@ -1347,7 +1355,7 @@ body.page-product-detail .main-search input::placeholder{color:#98a2b3}
    bu da kutuyu büyütüp kartlar arası fiyat hizasını (bkz. yukarıdaki
    align-content:start düzeltmesi) bozuyordu. Artık hiçbir telefon
    boyutunda taşmıyor, gerekirse font clamp() ile küçülüyor (aşağıda). */
-.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:nowrap;row-gap:0}
+.compact-price-only .monthly-primary,.compact-price-only .daily-secondary{display:flex;justify-content:center;align-items:baseline;gap:6px;white-space:nowrap;flex-wrap:nowrap;row-gap:0}
 .compact-price-only span{white-space:nowrap}
 .compact-price-only strong{font-size:21px}
 /* "/" işareti Gün ve Aylık satırlarında hizalı dursun diye: fiyat rakamı
