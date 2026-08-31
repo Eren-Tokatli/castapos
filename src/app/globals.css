@@ -1406,12 +1406,6 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 .review-filter-bar.compact::-webkit-scrollbar{display:none}
 .review-filter-bar.compact button{flex:0 0 auto;padding:8px 12px;font-size:13px}
 
-.installment-box .detail-monthly-cost,.installment-box .detail-daily-cost{display:block!important;font-style:normal!important;font-size:15px!important;font-weight:700!important;color:#475467!important}
-.installment-box .detail-monthly-cost strong{color:#067647!important;font-size:18px!important}
-.installment-box .detail-daily-cost strong{color:var(--brand)!important;font-size:17px!important}
-.installment-box .detail-monthly-cost,.installment-box .detail-daily-cost{margin-top:2px!important}
-.plan-price-summary .monthly-cart-value{color:#344054!important}
-.plan-price-summary .monthly-cart-value strong{color:#067647!important}
 .plan-price-summary small:not(.monthly-cart-value){color:#344054!important}
 .plan-price-summary .daily-cart-value{color:var(--brand)!important}
 .compare-modal-head{background:#07111f!important}
@@ -1434,11 +1428,8 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 
 .gallery-panel.detail-clean{height:auto!important;align-self:start!important;padding-bottom:20px!important}
 
-.installment-box .detail-monthly-cost,.installment-box .detail-daily-cost,.plan-price-summary .monthly-cart-value,.plan-price-summary .daily-cart-value{color:#344054!important}
-.installment-box .detail-monthly-cost strong,.plan-price-summary .monthly-cart-value strong{color:#067647!important}
-.installment-box .detail-daily-cost strong,.plan-price-summary .daily-cart-value strong{color:var(--brand)!important}
+.plan-price-summary .daily-cart-value{color:#344054!important}
 .plan-price-summary .daily-cart-value{font-size:14px!important}
-.plan-price-summary .monthly-cart-value{font-size:16px!important}
 .review-head>div{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important}
 .review-head .gold-stars.small{align-self:center!important}
 
@@ -1448,8 +1439,6 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 .main-gallery-image.clean{flex:1 1 auto!important;display:grid!important;place-items:center!important;min-height:540px!important;height:auto!important;padding:18px!important}
 .main-gallery-image.clean img{width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important}
 
-.installment-box .detail-monthly-cost,.installment-box .detail-daily-cost{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important;color:#475467!important}
-.installment-box .detail-monthly-cost .metric-label,.installment-box .detail-daily-cost .metric-label{color:#475467!important;font-weight:700!important}
 .review-head> b{font-weight:800!important;color:#1d2939!important;line-height:1.2!important;min-width:0!important}
 .review-list article{display:grid!important;gap:8px!important}
 
@@ -1461,11 +1450,6 @@ body.page-tacir-satis-sozlesmesi .category-bar{display:none!important}
 .thumb-row.clean{margin-top:14px!important}
 .compact-panel>.detail-actions.compact-actions.single:last-child{margin-bottom:0!important}
 
-.installment-box .detail-buy-note,.installment-box .detail-monthly-cost,.installment-box .detail-daily-cost{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important;font-style:normal!important}
-.installment-box .detail-buy-note .metric-label,.installment-box .detail-monthly-cost .metric-label,.installment-box .detail-daily-cost .metric-label{color:#475467!important;font-weight:700!important}
-.installment-box .detail-monthly-cost .metric-value{color:#067647!important;font-size:18px!important;font-weight:900!important}
-.installment-box .detail-daily-cost .metric-value{color:var(--brand)!important;font-size:16px!important;font-weight:900!important}
-.installment-box .detail-buy-note{color:#475467!important;font-size:14px!important;font-weight:700!important}
 .installment-box em:not(.detail-daily-cost):not(.detail-monthly-cost):not(.detail-buy-note){color:#475467!important;font-size:14px!important;font-weight:700!important}
 .installment-box em:not(.detail-daily-cost):not(.detail-monthly-cost):not(.detail-buy-note) strong{color:#067647!important}
 
