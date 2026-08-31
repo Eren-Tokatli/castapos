@@ -24,7 +24,6 @@
 .action-link.cart-action .action-icon{position:relative}
 .action-link.cart-action .action-icon::after{content:attr(data-badge);display:none}
 #new-products{padding-top:8px}
-.side-cart{display:grid;grid-template-rows:72px 1fr auto}
 .drawer-item small{display:block;color:#667085;font-size:12px;margin-top:3px}
 .coupon-box.compact{margin:0}
 .side-cart .btn{width:100%}
