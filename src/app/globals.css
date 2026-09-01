@@ -326,13 +326,13 @@ select{font:inherit;border:0;outline:0}.commerce-top{height:78px;display:grid;gr
 .selected-plan-tag i{font-style:normal;color:#667085;font-weight:800;font-size:12px}
 .favorites-empty{grid-column:1/-1}.fav-btn.active{color:var(--brand);border-color:#ffc6b6;background:#fff5f1}
 .detail-fav-btn.active{color:var(--brand);border-color:#ffc6b6;background:#fff5f1}
-.form-grid{display:grid;gap:14px}.form-grid.two{grid-template-columns:1fr 1fr}.form-grid .full{grid-column:1/-1}
+.form-grid{display:grid;gap:14px}.form-grid .full{grid-column:1/-1}
 .contact-form-card>div h2{margin:5px 0}
 
 @media(max-width:1060px){
   .category-scroll{justify-content:flex-start;overflow-x:auto;scrollbar-width:none}.category-scroll::-webkit-scrollbar{display:none}.nav-category>a{padding:0 11px;font-size:12.5px}.enhanced-contact{grid-template-columns:1fr}
 }
-@media(max-width:760px){.form-grid.two{grid-template-columns:1fr}.form-grid .full{grid-column:auto}
+@media(max-width:760px){.form-grid .full{grid-column:auto}
 }
 .commerce-actions{display:flex;align-items:center;gap:10px}.action-link.fav-action{display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;line-height:1}
 .action-link.account-link{display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;line-height:1;min-width:92px;text-align:center}
@@ -522,7 +522,6 @@ select{font:inherit;border:0;outline:0}.commerce-top{height:78px;display:grid;gr
 [data-result-count]{font-weight:800}
 .category-scroll{display:flex;height:47px;align-items:stretch;gap:0;overflow:visible;justify-content:center}
 .nav-category:not(:last-child)::after{content:"";position:absolute;right:0;top:15px;width:1px;height:17px;background:#d7dbe3;z-index:2}
-.form-grid.two select,.form-grid.two input,.form-grid.two textarea{color:#273242}
 @media(max-width:1060px){.official-footer-grid,.faq-overview-grid,.about-feature-grid,.enhanced-about-grid{grid-template-columns:1fr}.favorite-image{width:126px;height:126px}.favorite-image img{max-height:104px}}
 @media(max-width:760px){.compact-panel h1{font-size:32px}}
 .account-link .action-icon{font-size:0}
@@ -3550,40 +3549,6 @@ body.page-urun-detay .detail-tab-panel:before {
 
 .premium-copy-card strong {
   color: var(--pd-ink);
-}
-
-.premium-copy-card.side {
-  display: grid;
-  align-content: center;
-  gap: 10px;
-  padding: 20px;
-  background:
-    radial-gradient(circle at 92% 10%, rgba(243, 95, 54, .22), transparent 28%),
-    linear-gradient(145deg, #111827, #1b2942);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(17, 24, 39, .22);
-}
-
-.premium-copy-card.side span {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #ffb199;
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-}
-
-.premium-copy-card.side b {
-  color: #fff;
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.premium-copy-card.side p {
-  margin: 0;
-  color: #d4dceb !important;
 }
 body.page-urun-detay .spec-table{border-color:var(--pd-line) !important;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;border:0;border-radius:0;overflow:visible}
 body.page-urun-detay .spec-table div{border-color:var(--pd-line) !important;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:0;padding:14px 16px;border:0;border-radius:10px;background:rgba(243, 95, 54, .045)}
@@ -8131,7 +8096,6 @@ body.page-canli-destek .live-support-hero-top {
 }
 
 body.page-canli-destek .live-support-brand-mark {
-  margin-bottom: 14px;
   margin-bottom: 0;
   font-size: 17px;
 }
