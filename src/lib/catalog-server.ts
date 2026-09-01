@@ -145,21 +145,3 @@ export const getProductReviews = cache(async (productId: string): Promise<Produc
     createdAt: r.createdAt,
   }));
 });
-
-export interface NavCategoryEntry {
-  name: string;
-  href: string;
-}
-
-// Navigasyonda sadece içinde ürün olan gerçek kategoriler görünür — DB'deki
-// "Blog", "Hizmet", "Sigorta" gibi eski CMS'ten kalma ürün-dışı kategoriler
-// hiç ürün taşımadığı için burada kendiliğinden elenir.
-export function getNavCategories(products: CatalogProduct[]): NavCategoryEntry[] {
-  const counts = new Map<string, number>();
-  for (const p of products) {
-    counts.set(p.category, (counts.get(p.category) || 0) + 1);
-  }
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([name]) => ({ name, href: `/kategori?cat=${encodeURIComponent(name)}` }));
-}

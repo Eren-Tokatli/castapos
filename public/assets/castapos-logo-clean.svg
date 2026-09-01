@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="178" height="42" viewBox="0 0 178 42" role="img" aria-label="Castapos">
-  <rect width="178" height="42" rx="11" fill="#f35f36"/>
-  <path d="M23 9c-8 0-14 6-14 13s6 13 14 13c6 0 11-3 13-8h-9c-1 1-2 2-4 2-4 0-7-3-7-7s3-7 7-7c2 0 4 1 5 3h9C34 12 29 9 23 9z" fill="white"/>
-  <path d="M37 12h5l3 22h-7l-.5-4h-7l2-6h4l-.8-6-3 16h-7l5.5-22h5.8z" fill="white" opacity=".95"/>
-  <text x="50" y="27" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800" font-style="italic" fill="white">Castapos</text>
-</svg>

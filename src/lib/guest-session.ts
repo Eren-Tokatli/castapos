@@ -29,13 +29,3 @@ export async function getGuestSession() {
   const cookieStore = await cookies();
   return getIronSession<GuestSessionData>(cookieStore, sessionOptions);
 }
-
-/** Mevcut misafir kimliğini döner, yoksa yeni bir tane oluşturup kaydeder. */
-export async function getOrCreateGuestId(): Promise<string> {
-  const session = await getGuestSession();
-  if (!session.guestId) {
-    session.guestId = crypto.randomUUID();
-    await session.save();
-  }
-  return session.guestId;
-}
