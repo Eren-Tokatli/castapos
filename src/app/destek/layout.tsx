@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { LifeBuoy, Home } from "lucide-react";
+import { Home } from "lucide-react";
 
 export const metadata = {
   title: "Castapos Destek Portali",

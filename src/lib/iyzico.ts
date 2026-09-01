@@ -21,13 +21,6 @@ function generateIyzicoHeaders(path: string, body: any) {
     .update(rawData)
     .digest("hex");
 
-  // Auth params joined via & and base64 encoded
-  const authParams = [
-    `apiKey:`, apiKey,
-    `&randomKey:`, randomString,
-    `&signature:`, signature,
-  ].join("");
-
   const authorizationHash = Buffer.from(
     `apiKey:${apiKey}&randomKey:${randomString}&signature:${signature}`
   ).toString("base64");

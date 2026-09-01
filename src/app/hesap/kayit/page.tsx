@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Check, MailWarning, AlertCircle, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Check, MailWarning, ArrowLeft } from "lucide-react";
 import { registerCustomer, sendEmailOtp } from "./actions";
 
 export default function RegisterPage() {

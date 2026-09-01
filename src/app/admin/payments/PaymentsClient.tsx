@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Plus, Copy, Check, Trash2, Link as LinkIcon, FileText, X } from "lucide-react";
+import { Search, Plus, Copy, Check, Trash2, Link as LinkIcon, FileText } from "lucide-react";
 import { createPaymentLink, deletePaymentLink } from "./actions";
 import { ConfirmDialog } from "../_components/ConfirmDialog";
-import { useAdminToast } from "../_components/ToastProvider";
 
 interface PaymentRecord {
   id: string;
@@ -51,7 +50,6 @@ interface PaymentsClientProps {
 }
 
 export function PaymentsClient({ payments, paymentLinks }: PaymentsClientProps) {
-  const toast = useAdminToast();
   const [activeTab, setActiveTab] = useState<"logs" | "links">("logs");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRecord, setSelectedRecord] = useState<PaymentRecord | null>(null);

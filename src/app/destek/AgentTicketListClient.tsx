@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { MessageSquare, Send, CheckCircle2, Clock, Mail, Phone, User, Filter, ShieldAlert, UserRound } from "lucide-react";
+import { MessageSquare, Send, CheckCircle2, Mail, Phone, User, Filter, ShieldAlert, UserRound } from "lucide-react";
 import { addMessageToTicket } from "../hesap/destek/actions";
 import { closeTicket, getAllTickets } from "./actions";
 

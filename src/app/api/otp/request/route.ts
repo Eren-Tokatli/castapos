@@ -65,7 +65,6 @@ export async function POST(request: Request) {
     const netgsmHeader = process.env.CASTA_NETGSM_HEADER || "Castapos";
 
     const smsMessage = `Castapos dogrulama kodunuz: ${code}`;
-    let smsSent = false;
 
     if (netgsmUser && netgsmPass) {
       const xml = `<?xml version='1.0' encoding='UTF-8'?>
@@ -84,23 +83,18 @@ export async function POST(request: Request) {
 </mainbody>`;
 
       try {
-        const response = await fetch("https://api.netgsm.com.tr/sms/send/xml", {
+        await fetch("https://api.netgsm.com.tr/sms/send/xml", {
           method: "POST",
           headers: {
             "Content-Type": "text/xml",
           },
           body: xml,
         });
-        const responseText = await response.text();
-        if (responseText.startsWith("00") || responseText.startsWith("01")) {
-          smsSent = true;
-        }
       } catch (error) {
         console.error("NetGSM SMS Gönderim Hatası:", error);
       }
     } else {
       console.log(`[SMS MOCK] NetGSM Config Eksik. Kod: ${code} -> Tel: ${phone}`);
-      smsSent = true; // Simulating success in dev
     }
 
     return NextResponse.json({

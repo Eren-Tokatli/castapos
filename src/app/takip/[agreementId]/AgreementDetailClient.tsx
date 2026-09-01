@@ -40,8 +40,8 @@ export function AgreementDetailClient({ agreement, installments }: AgreementDeta
   const [selectedInstallment, setSelectedInstallment] = useState<Installment | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
-  const [iyzicoScript, setIyzicoScript] = useState("");
-  const [checkoutToken, setCheckoutToken] = useState("");
+  const [, setIyzicoScript] = useState("");
+  const [, setCheckoutToken] = useState("");
 
   const handlePay = async (installment: Installment) => {
     setSelectedInstallment(installment);
@@ -86,7 +86,7 @@ export function AgreementDetailClient({ agreement, installments }: AgreementDeta
           }
         }, 100);
       }
-    } catch (err) {
+    } catch {
       setCheckoutError("Bağlantı hatası oluştu.");
     } finally {
       setCheckoutLoading(false);

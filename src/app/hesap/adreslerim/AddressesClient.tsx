@@ -22,7 +22,7 @@ interface Address {
 }
 
 export function AddressesClient({ initialAddresses }: { initialAddresses: Address[] }) {
-  const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
+  const [addresses] = useState<Address[]>(initialAddresses);
   const [showAddForm, setShowAddForm] = useState(false);
 
   // Form states

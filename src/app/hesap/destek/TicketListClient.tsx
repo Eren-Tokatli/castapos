@@ -118,7 +118,7 @@ export function TicketListClient({
         <div className="empty-account-state">
           <span><MessageSquare size={30} /></span>
           <h2>Henüz bir talebin yok</h2>
-          <p>Bir sorun ya da sorun varsa "Yeni Soru ve Talep" ile hemen bize ulaşabilirsin.</p>
+          <p>Bir sorun ya da sorun varsa &quot;Yeni Soru ve Talep&quot; ile hemen bize ulaşabilirsin.</p>
         </div>
       ) : (
         <div style={{ display: "grid", gap: 22 }}>

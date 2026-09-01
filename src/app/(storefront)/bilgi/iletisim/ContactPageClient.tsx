@@ -64,7 +64,7 @@ export function ContactPageClient() {
       {error && <div className="contact-error-note">{error}</div>}
       {sent && (
         <div className="contact-success-note">
-          Mesajın iletildi. Destek ekibimiz "Soru ve Taleplerim" akışı üzerinden en kısa sürede sana dönecek.
+          Mesajın iletildi. Destek ekibimiz &quot;Soru ve Taleplerim&quot; akışı üzerinden en kısa sürede sana dönecek.
         </div>
       )}
       <button className="btn btn-primary" type="submit" disabled={loading}>

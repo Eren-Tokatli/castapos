@@ -39,3 +39,6 @@ pnpm-debug.log*
 *.dump
 .vercel
 .env*
+
+# Claude Code local tooling (worktrees, local settings) — makineye özel, repo'ya girmemeli
+.claude/

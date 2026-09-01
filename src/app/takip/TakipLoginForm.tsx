@@ -39,7 +39,7 @@ export function TakipLoginForm() {
           router.push(`/takip/dogrula?tc=${tc}`);
         }, 1000);
       }
-    } catch (err) {
+    } catch {
       setError("Bağlantı hatası oluştu.");
     } finally {
       setLoading(false);

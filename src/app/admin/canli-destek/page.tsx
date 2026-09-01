@@ -28,7 +28,7 @@ export default async function AdminCanliDestekPage() {
       <div>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Canlı Destek</h2>
         <p className="text-slate-500 dark:text-slate-400 text-sm">
-          Sitedeki canlı destek widget'ından ve müşteri destek taleplerinden gelen tüm görüşmeler.
+          Sitedeki canlı destek widget&apos;ından ve müşteri destek taleplerinden gelen tüm görüşmeler.
         </p>
       </div>
 

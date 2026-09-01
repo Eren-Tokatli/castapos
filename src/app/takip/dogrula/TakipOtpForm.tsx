@@ -44,7 +44,7 @@ export function TakipOtpForm({ tc }: TakipOtpFormProps) {
           router.refresh();
         }, 1000);
       }
-    } catch (err) {
+    } catch {
       setError("Bağlantı hatası oluştu.");
     } finally {
       setLoading(false);
